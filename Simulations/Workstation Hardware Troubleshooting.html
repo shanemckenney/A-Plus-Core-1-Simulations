@@ -30,10 +30,11 @@
     background: radial-gradient(1000px 600px at 10% 10%, rgba(31, 158, 93, 0.15), transparent 50%), var(--bg);
     color: var(--text);
     padding: 20px;
+    min-height: 100vh;
   }
 
   header {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto 20px;
     display: flex;
     justify-content: space-between;
@@ -76,15 +77,11 @@
   .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
 
   .workspace {
-    max-width: 1200px;
+    max-width: 800px; /* Narrowed for better reading focus */
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1.25fr;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
-  }
-
-  @media (max-width: 900px) {
-    .workspace { grid-template-columns: 1fr; }
   }
 
   .card {
@@ -107,69 +104,70 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .card-bd { padding: 20px; flex: 1; overflow-y: auto; max-height: 75vh; }
+  .card-bd { padding: 24px; flex: 1; }
 
   .prompt {
     background: rgba(0, 0, 0, 0.2);
     border-left: 4px solid var(--accent);
-    padding: 15px;
+    padding: 18px;
     border-radius: 4px;
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.6;
-    margin-bottom: 15px;
+    margin-bottom: 24px;
   }
 
   .scenario-card {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border);
-    padding: 14px;
+    padding: 18px;
     border-radius: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .scenario-title {
     font-weight: 600;
     color: var(--text);
     margin-bottom: 12px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .scenario-text {
-    color: var(--muted);
-    font-size: 12.5px;
-    line-height: 1.5;
-    margin-bottom: 12px;
+    color: #e5e7eb;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 16px;
   }
 
-  .form-group { margin-bottom: 12px; }
-  .form-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   
   select {
     width: 100%;
-    padding: 8px 10px;
+    padding: 10px 12px;
     border-radius: 6px;
     border: 1px solid #475569;
     background: #1e293b;
     color: var(--text);
-    font-size: 12px;
+    font-size: 13.5px;
     outline: none;
+    cursor: pointer;
   }
   select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(31, 158, 93, 0.1); }
 
   .scenario-actions {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 16px;
     flex-wrap: wrap;
   }
 
   .feedback {
     display: none;
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 14px;
+    padding: 12px;
     border-radius: 6px;
-    font-size: 12px;
-    border-left: 3px solid transparent;
+    font-size: 13px;
+    border-left: 4px solid transparent;
     line-height: 1.5;
   }
 
@@ -188,14 +186,16 @@
   }
 
   .feedback-details {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
-    margin-top: 5px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .results-box {
-    margin-top: 15px;
-    padding: 15px;
+    margin-top: 24px;
+    padding: 18px;
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border);
@@ -203,13 +203,13 @@
 
   .results-box h3 { 
     margin: 0 0 10px 0; 
-    font-size: 14px; 
+    font-size: 15px; 
     font-weight: 700;
     color: var(--text);
   }
 
   .score-display {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text);
   }
@@ -218,14 +218,10 @@
     color: var(--muted);
     font-weight: 400;
   }
-
-  @media (max-width: 900px) {
-    .card-bd { max-height: none; }
-  }
 </style>
 </head>
 <body>
-<nav style="padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);"><a href="../index.html" style="color: #93c5fd; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">← Back to Simulations</a></nav>
+<nav style="max-width: 800px; margin: 0 auto; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;"><a href="../index.html" style="color: #93c5fd; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">← Back to Simulations</a></nav>
   <header>
     <div>
       <h1>Workstation Hardware Troubleshooting</h1>
@@ -254,23 +250,6 @@
         <div class="results-box">
           <h3>Progress</h3>
           <div class="score-display" id="score-display">Score: 0/8 (<span class="answered">0 answered</span>)</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="card-hdr">
-        <span>Response Reference</span>
-      </div>
-      <div class="card-bd">
-        <div style="margin-bottom: 20px;">
-          <div style="font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Common Issues</div>
-          <div id="issues-list" style="display: grid; gap: 6px; font-size: 12px;"></div>
-        </div>
-
-        <div style="border-top: 1px solid var(--border); padding-top: 20px;">
-          <div style="font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Remediation Steps</div>
-          <div id="solutions-list" style="display: grid; gap: 6px; font-size: 12px;"></div>
         </div>
       </div>
     </section>
@@ -354,29 +333,6 @@
         explanation: "Docking stations can change display settings. Setting native resolution/refresh rate fixes distortion."
       }
     ];
-
-    // Populate reference lists
-    const issuesList = document.getElementById('issues-list');
-    issues.forEach(issue => {
-      const item = document.createElement('div');
-      item.style.padding = '6px 8px';
-      item.style.background = 'rgba(0, 0, 0, 0.3)';
-      item.style.borderRadius = '4px';
-      item.style.borderLeft = '2px solid var(--accent)';
-      item.textContent = issue;
-      issuesList.appendChild(item);
-    });
-
-    const solutionsList = document.getElementById('solutions-list');
-    solutions.forEach(solution => {
-      const item = document.createElement('div');
-      item.style.padding = '6px 8px';
-      item.style.background = 'rgba(0, 0, 0, 0.3)';
-      item.style.borderRadius = '4px';
-      item.style.borderLeft = '2px solid var(--good)';
-      item.textContent = solution;
-      solutionsList.appendChild(item);
-    });
 
     function createDropdown(options, placeholderText) {
       const select = document.createElement("select");
