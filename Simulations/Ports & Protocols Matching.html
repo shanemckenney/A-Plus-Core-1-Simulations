@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A+ Core 1 - Drag-and-Drop Port to Protocol Matrix</title>
+  <style>
+    :root {
+      --bg: #090d1a;
+      --panel: #111827;
+      --panel-hdr: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --good: #10b981;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 14px;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: radial-gradient(1200px 700px at 90% 10%, rgba(59, 130, 246, 0.12), transparent 50%), var(--bg);
+      color: var(--text);
+      padding: 30px;
+      font-size: 16px;
+    }
+
+    header {
+      max-width: 1400px;
+      margin: 0 auto 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 25px;
+    }
+
+    h1 { font-size: 26px; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+    .mode-ctrl { display: flex; align-items: center; gap: 15px; }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.secondary { background: rgba(239, 68, 68, 0.2); border-color: var(--bad); }
+
+    .badge {
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-family: var(--mono);
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .badge.info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+    .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+
+    .workspace {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 1000px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .card-hdr {
+      background: var(--panel-hdr);
+      padding: 18px 24px;
+      font-weight: 700;
+      font-size: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-bd { padding: 24px; }
+
+    .port-bank {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 1000px) {
+      .port-bank { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    }
+
+    .port-pill {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      padding: 16px 10px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: #93c5fd;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.15s, border-color 0.15s, opacity 0.2s;
+    }
+    .port-pill:active { cursor: grabbing; }
+    .port-pill:hover { border-color: var(--accent); background: #23324c; }
+    .port-pill.selected-click { border-color: var(--warn); background: #332511; color: #f59e0b; }
+
+    .matrix-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 24px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .drop-zone {
+      height: 56px;
+      border: 2.5px dashed #475569;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      font-family: var(--mono);
+      font-weight: bold;
+      font-size: 20px;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .drop-zone.filled {
+      border-style: solid;
+      border-color: #475569;
+      background: #1e293b;
+      color: #93c5fd;
+      cursor: pointer;
+    }
+    .drop-zone.filled:hover {
+      border-color: var(--bad);
+      background: #2a1b1f;
+    }
+
+    .protocol-desc {
+      font-size: 15.5px;
+      line-height: 1.6;
+    }
+    .protocol-desc strong {
+      color: #cbd5e1;
+    }
+
+    .results-box {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+    }
+    .results-box h3 { margin: 0 0 15px; font-size: 16px; }
+    
+    .feedback-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Network Infrastructure Ports &amp; Protocols Matrix</h1>
+    </div>
+    <div class="mode-ctrl">
+      <span class="badge info" id="mode-indicator">Mode: Training</span>
+      <button class="btn" id="toggle-mode-btn">Switch Mode</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    
+    <section class="card">
+      <div class="card-hdr">Available Ports Bank</div>
+      <div class="card-bd">
+        <p style="font-size:14px; color:var(--muted); margin: 0 0 20px 0; line-height: 1.5;">
+          Drag a port number onto its descriptive application match, or click a port and click a target drop-box to map it. Click a mapped target to clear it.
+        </p>
+        
+        <div class="port-bank" id="port-bank-container"></div>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:30px;">
+          <button class="btn primary" id="submit-btn">Evaluate Matrix</button>
+          <button class="btn secondary" id="reset-btn">Reset Workspace</button>
+        </div>
+
+        <div id="grading-output" style="display:none;">
+          <div class="results-box">
+            <h3 id="score-title">Evaluation Results</h3>
+            <div id="feedback-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-hdr">Protocol Mapping Targets</div>
+      <div class="card-bd">
+        <div class="matrix-container" id="matrix-rows-container"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Master Protocol Schema Definition Matrix
+    const PROTOCOL_DATABASE = [
+      { id: "target-ftp", expected: "21", name: "FTP Data Stream Channel Allocation", label: "File Transfer Protocol (FTP)", trap: null, desc: "Used for uploading and downloading bulk files over a network; handles basic data storage transmissions but passes credentials in raw plaintext." },
+      { id: "target-ssh", expected: "22", name: "SSH Secure Shell Administrative Mapping", label: "Secure Shell (SSH)", trap: "23", desc: "Establishes an **encrypted remote terminal access layer** over the network to allow secure command-line control of infrastructure hardware and Linux servers." },
+      { id: "target-telnet", expected: "23", name: "Telnet Plaintext Terminal Verification", label: "Telnet Terminal Protocol", trap: "22", desc: "An old, **unencrypted legacy terminal network tool** that passes remote administrative commands in cleartext, making sessions highly vulnerable to sniffing." },
+      { id: "target-smtp", expected: "25", name: "SMTP Outbound Mail Routing Route Assignment", label: "Simple Mail Transfer Protocol (SMTP)", trap: null, desc: "Responsible strictly for **sending/moving outbound email** payloads from email clients to email servers, or routing messages between relay hosts." },
+      { id: "target-dns", expected: "53", name: "DNS Operational Infrastructure Resolution Mapping", label: "Domain Name System (DNS)", trap: null, desc: "Operates as the central directory of the network by mapping human-readable host address strings into computer-routable IP addresses." },
+      { id: "target-http", expected: "80", name: "HTTP Unsecured Network Traffic Optimization", label: "Hypertext Transfer Protocol (HTTP)", trap: "443", desc: "Manages cleartext, **unsecured web traffic** to fetch and render simple internal intranet dashboard layout content without cryptographic calculation." },
+      { id: "target-pop3", expected: "110", name: "POP3 Legacy Inbox Download Optimization", label: "Post Office Protocol v3 (POP3)", trap: "143", desc: "An **inbound email retrieval protocol** that downloads inbox files down from a central server to a single storage client, typically deleting them from the host server." },
+      { id: "target-imap", expected: "143", name: "IMAP Enterprise Cloud Mail Sync Integration", label: "Internet Message Access Protocol (IMAP)", trap: "110", desc: "A advanced **inbound email management protocol** that syncs mail folders directly across multiple devices simultaneously, keeping the central master archive stored on the cloud server." },
+      { id: "target-https", expected: "443", name: "HTTPS Encrypted Transaction Path Optimization", label: "Hypertext Transfer Protocol Secure (HTTPS)", trap: "80", desc: "Transports web pages inside **secure, encrypted cryptographic tunnels** (TLS); absolutely mandatory for handling payment processing and patient files." },
+      { id: "target-smb", expected: "445", name: "SMB Network System Share Routing Configuration", label: "Server Message Block (SMB)", trap: null, desc: "Handles resource allocation across Windows enterprise networks by mapping shared folders, network folders, and internal office hardware printers." },
+      { id: "target-rdp", expected: "3389", name: "RDP Interactive Graphical Console Mapping", label: "Remote Desktop Protocol (RDP)", trap: null, desc: "Supplies an interactive graphical interface connection matrix to allow administrators to remotely log in and manage Windows client operating systems." }
+    ];
+
+    const MASTER_PORTS = ["21", "22", "23", "25", "53", "80", "110", "143", "443", "445", "3389"];
+
+    const state = {
+      mode: 'training',
+      selectedClickPort: null,
+      mappings: {}
+    };
+
+    // Fisher-Yates Dynamic Shuffle Engine
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // Dynamic Left Bank Rendering Logic
+    function renderPortBank() {
+      const container = document.getElementById('port-bank-container');
+      container.innerHTML = '';
+      const shuffled = shuffleArray(MASTER_PORTS);
+      
+      shuffled.forEach(port => {
+        const pill = document.createElement('div');
+        pill.className = 'port-pill';
+        pill.draggable = true;
+        pill.id = `port-${port}`;
+        pill.dataset.port = port;
+        pill.textContent = port;
+
+        pill.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', pill.dataset.port);
+          clearClickSelection();
+        });
+
+        pill.addEventListener('click', () => {
+          if (state.selectedClickPort === pill.dataset.port) {
+            clearClickSelection();
+          } else {
+            clearClickSelection();
+            state.selectedClickPort = pill.dataset.port;
+            pill.classList.add('selected-click');
+          }
+        });
+
+        if (Object.values(state.mappings).includes(port)) {
+          pill.style.opacity = '0.3';
+        }
+
+        container.appendChild(pill);
+      });
+    }
+
+    // Dynamic Right Target Container Shuffling & Rendering Logic
+    function renderMatrixRows() {
+      const container = document.getElementById('matrix-rows-container');
+      container.innerHTML = '';
+      const shuffledProtocols = shuffleArray(PROTOCOL_DATABASE);
+
+      shuffledProtocols.forEach(proto => {
+        // Initialize state mapping keys dynamically
+        if (state.mappings[proto.id] === undefined) {
+          state.mappings[proto.id] = null;
+        }
+
+        const row = document.createElement('div');
+        row.className = 'matrix-row';
+
+        const zone = document.createElement('div');
+        zone.className = 'drop-zone';
+        zone.id = proto.id;
+        zone.dataset.expected = proto.expected;
+
+        // Restore state formatting checks on shuffle re-render
+        if (state.mappings[proto.id]) {
+          zone.textContent = state.mappings[proto.id];
+          zone.classList.add('filled');
+        }
+
+        // Drag/Drop Event Logic Routing
+        zone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (!state.mappings[zone.id]) {
+            zone.classList.add('drag-over');
+          }
+        });
+
+        zone.addEventListener('dragleave', () => {
+          zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zone.classList.remove('drag-over');
+          const port = e.dataTransfer.getData('text/plain');
+          mapPortToZone(port, zone);
+        });
+
+        zone.addEventListener('click', () => {
+          if (state.mappings[zone.id]) {
+            unmapZone(zone);
+          } else if (state.selectedClickPort) {
+            mapPortToZone(state.selectedClickPort, zone);
+            clearClickSelection();
+          }
+        });
+
+        const desc = document.createElement('div');
+        desc.className = 'protocol-desc';
+        desc.innerHTML = `<strong>${proto.label}:</strong> ${proto.desc}`;
+
+        row.appendChild(zone);
+        row.appendChild(desc);
+        container.appendChild(row);
+      });
+    }
+
+    function clearClickSelection() {
+      state.selectedClickPort = null;
+      document.querySelectorAll('.port-pill').forEach(p => p.classList.remove('selected-click'));
+    }
+
+    function mapPortToZone(port, zone) {
+      for (const zoneId in state.mappings) {
+        if (state.mappings[zoneId] === port) {
+          const oldZone = document.getElementById(zoneId);
+          if (oldZone) {
+            state.mappings[zoneId] = null;
+            oldZone.textContent = '';
+            oldZone.classList.remove('filled');
+          } else {
+            state.mappings[zoneId] = null;
+          }
+        }
+      }
+
+      state.mappings[zone.id] = port;
+      zone.textContent = port;
+      zone.classList.add('filled');
+      
+      const targetPill = document.getElementById(`port-${port}`);
+      if (targetPill) targetPill.style.opacity = '0.3';
+    }
+
+    function unmapZone(zone) {
+      const port = state.mappings[zone.id];
+      if (!port) return;
+
+      state.mappings[zone.id] = null;
+      zone.textContent = '';
+      zone.classList.remove('filled');
+
+      const targetPill = document.getElementById(`port-${port}`);
+      if (targetPill) targetPill.style.opacity = '1';
+      document.getElementById('grading-output').style.display = 'none';
+    }
+
+    // Toggle Mode Handling
+    const modeIndicator = document.getElementById('mode-indicator');
+    const toggleModeBtn = document.getElementById('toggle-mode-btn');
+
+    toggleModeBtn.addEventListener('click', () => {
+      state.mode = state.mode === 'training' ? 'exam' : 'training';
+      modeIndicator.textContent = `Mode: ${state.mode === 'training' ? 'Training' : 'Exam'}`;
+      modeIndicator.className = `badge ${state.mode === 'training' ? 'info' : 'danger'}`;
+      document.getElementById('grading-output').style.display = 'none';
+    });
+
+    // Master Workspace Reset Layout Core Handler
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      for (const key in state.mappings) {
+        state.mappings[key] = null;
+      }
+      clearClickSelection();
+      renderPortBank();
+      renderMatrixRows();
+      document.getElementById('grading-output').style.display = 'none';
+    });
+
+    // Metric Evaluation Calculation
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const list = document.getElementById('feedback-list');
+      const outputDiv = document.getElementById('grading-output');
+      const title = document.getElementById('score-title');
+
+      list.innerHTML = '';
+      outputDiv.style.display = 'block';
+
+      if (state.mode === 'exam') {
+        title.textContent = "Submission Captured";
+        list.innerHTML = `<div class="feedback-item"><em>Exam feedback is minimized. Final system grading is processed post-submission.</em></div>`;
+        return;
+      }
+
+      let passCount = 0;
+
+      PROTOCOL_DATABASE.forEach(item => {
+        const mapped = state.mappings[item.id];
+        const expected = item.expected;
+        
+        let pass = mapped === expected;
+        let rationale = "";
+
+        if (!mapped) {
+          rationale = "Target drop-box parameter container left completely blank.";
+        } else if (pass) {
+          passCount++;
+        } else if (mapped === item.trap) {
+          if (expected === "23") rationale = "Crypto Confusion Trap: Port 22 runs encrypted SSH channels. Telnet operates on Port 23 and maps commands in plaintext packets.";
+          if (expected === "22") rationale = "Crypto Confusion Trap: Port 23 maps legacy Telnet traffic. Encrypted administration require Port 22 (SSH).";
+          if (expected === "80") rationale = "Web Cryptography Swap: Port 443 strictly handles secure, TLS web requests. Port 80 runs plaintext HTTP pathways.";
+          if (expected === "443") rationale = "Web Cryptography Swap: Port 80 tracks unencrypted HTTP networks. Compliance require Port 443 (HTTPS) for sensitive parameters.";
+          if (expected === "110") rationale = "Inbound Email Storage Swap: Port 143 links live IMAP folders to cloud caches. Port 110 runs POP3 scripts to download and clean server files.";
+          if (expected === "143") rationale = "Inbound Email Storage Swap: Port 110 drops mail archives local down to single clients via POP3. Port 143 syncs files cross-platform via IMAP configurations.";
+        } else {
+          rationale = `Incorrect mapping. Routed Port ${mapped} instead of required configuration standard Port ${expected}.`;
+        }
+
+        const fbItem = document.createElement('div');
+        fbItem.className = 'feedback-item';
+        fbItem.innerHTML = `
+          <span style="color:${pass ? 'var(--good)' : 'var(--bad)'}; font-weight:bold; margin-right:5px;">
+            ${pass ? '✓' : '✗'}
+          </span>
+          <div>
+            <strong>${item.name}</strong>
+            ${!pass ? `<div style="color:var(--muted); font-size:12.5px; margin-top:2px;">${rationale}</div>` : ''}
+          </div>
+        `;
+        list.appendChild(fbItem);
+      });
+
+      title.textContent = passCount === PROTOCOL_DATABASE.length ? "Matrix Verification Passed!" : `Review Needed (${passCount}/${PROTOCOL_DATABASE.length} Correct)`;
+    });
+
+    // Inception Execution Loops
+    renderPortBank();
+    renderMatrixRows();
+  </script>
+</body>
+</html>

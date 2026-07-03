@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>MFD Printer Deployment & Troubleshooting</title>
+
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#111a33;
+  --panel2:#16214a;
+  --text:#f2f6ff;
+  --muted:#c6d3ff;
+  --border:rgba(255,255,255,.18);
+  --accent:#7aa2ff;
+  --good:#2be4a7;
+  --radius:16px;
+  --radius2:12px;
+  --shadow:0 18px 40px rgba(0,0,0,.45);
+  --mono: ui-monospace, Consolas, monospace;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+header{
+  max-width:1150px;
+  margin:auto;
+  padding:28px 18px 14px;
+}
+
+h1{margin:0 0 6px;font-size:22px}
+.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.35}
+
+.disclaimer{
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,0,0,.28);
+  color:var(--muted);
+  font-size:13px;
+}
+.disclaimer strong{color:var(--text); font-weight:700}
+
+.controls{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.badge, select{
+  font-family:var(--mono);
+  font-size:13px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+}
+
+select option{background:#0f1736;color:#ffffff;}
+
+.toggle{
+  width:48px;height:26px;border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.15);
+  position:relative;cursor:pointer;
+}
+.toggle span{
+  width:22px;height:22px;background:var(--accent);
+  border-radius:50%;position:absolute;top:1px;left:1px;
+  transition:.2s;
+}
+.toggle.on span{left:24px;background:var(--good)}
+
+main{
+  max-width:1150px;
+  margin:auto;
+  padding:0 18px 36px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:16px;
+}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+.card{
+  background:linear-gradient(180deg,var(--panel),rgba(17,26,51,.85));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.cardHeader{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+
+.cardBody{
+  padding:16px;
+  background:rgba(0,0,0,.25);
+}
+
+.partGroup{
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  background:rgba(0,0,0,.35);
+  margin-bottom:14px;
+}
+
+.groupHead{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+
+.opt{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  align-items:flex-start;
+}
+.opt:last-child{border-bottom:none}
+.opt:hover{background:rgba(255,255,255,.06)}
+.opt input{margin-top:2px}
+
+.footer{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:1px solid var(--border);
+  background:rgba(122,162,255,.25);
+  color:var(--text);
+  padding:10px 16px;
+  border-radius:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+button.secondary{background:rgba(255,255,255,.12)}
+
+.results{
+  margin-top:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  background:rgba(0,0,0,.45);
+  padding:12px;
+  line-height:1.35;
+}
+.results.hidden{display:none}
+.results b{font-weight:800}
+
+.pill{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  margin-left:8px;
+  color:var(--muted);
+  background:rgba(255,255,255,.06);
+}
+
+.exam-mode .training-only{display:none}
+
+.kv{
+  margin:0;
+  color:var(--muted);
+  font-size:15.5px;
+  line-height:1.5;
+}
+.kv strong{color:var(--text)}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>MFD Printer Deployment & Troubleshooting</h1>
+  <p class="sub">Instructor-developed simulation focused on printer deployment, settings, maintenance, and troubleshooting aligned to publicly available CompTIA A+ Core 1 objectives.</p>
+
+  <div class="disclaimer">
+    <strong>Instructor Product Notice:</strong> Scenarios and answer choices are original and designed for skill-building. This activity is not a replica of any live certification exam question.
+  </div>
+
+  <div class="controls">
+    <span class="badge">Ticket</span>
+    <select id="scenarioSelect" aria-label="Ticket selector">
+      <option value="garbled">Scenario #1</option>
+      <option value="jam_a4">Scenario #2</option>
+      <option value="misfeed_legal">Scenario #3</option>
+      <option value="smudge_fuser">Scenario #4</option>
+      <option value="ghosting">Scenario #5</option>
+      <option value="tray_not_recognized">Scenario #6</option>
+      <option value="queue_frozen">Scenario #7</option>
+      <option value="wifi_intermittent">Scenario #8</option>
+    </select>
+
+    <span class="badge">Mode</span>
+    <div id="examToggle" class="toggle" role="switch" aria-checked="false" tabindex="0"><span></span></div>
+    <span id="modeLabel" class="badge">TRAINING</span>
+    <span class="pill training-only">Feedback On</span>
+    <span class="pill training-only">Explanations On</span>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+
+    <div class="card">
+      <div class="cardHeader">Ticket Details</div>
+      <div class="cardBody">
+        <p id="scenarioText" class="kv" style="margin:0;"></p>
+        <div id="contextBox" class="training-only" style="margin-top:12px;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.30);padding:10px 12px;">
+          <p class="kv" style="margin:0;">
+            <strong>Mindset:</strong> Prefer verify/configure/inspect before replacing parts. Use the scenario’s “recent change” and “scope” clues to eliminate distractors.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">Diagnosis & Action</div>
+      <div class="cardBody">
+
+        <div class="partGroup">
+          <div class="groupHead">Most Likely Cause</div>
+          <div id="causeOptions"></div>
+        </div>
+
+        <div class="partGroup">
+          <div class="groupHead">Best Next Step</div>
+          <div id="actionOptions"></div>
+        </div>
+
+        <div class="footer">
+          <button id="submitBtn">Submit</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+
+        <div id="results" class="results hidden" aria-live="polite"></div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+let examMode = false;
+let currentScenario = "garbled";
+
+function shuffleArray(array){
+  const arr = [...array]; // clone, do not mutate original
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/*
+  220-1201 alignment:
+  - 3.7 Deploy/configure printers and settings (drivers, PCL vs PostScript, connectivity, settings)
+  - 3.8 Maintenance by type
+  - 5.6 Troubleshoot printer issues (jams, misfeeds, ghosting/echo, garbled, frozen queue, tray issues, connectivity)
+*/
+
+const SCENARIOS = {
+  garbled: {
+    text:
+      "<strong>Reported issue:</strong> After installing a new network printer, documents print as random symbols and unreadable characters.<br>" +
+      "<strong>What changed:</strong> A new driver was installed yesterday for this model.<br>" +
+      "<strong>Scope:</strong> The issue occurs from multiple PCs; the printer is otherwise responsive.",
+    causes: [
+      { value:"driver_language", label:"Incorrect driver language/driver model selected (PCL vs PostScript mismatch)" },
+      { value:"bad_cable", label:"Faulty Ethernet cable at the printer" },
+      { value:"low_toner", label:"Toner is low and causing corrupted output" },
+      { value:"bad_fuser", label:"Fuser is failing to bond toner properly" }
+    ],
+    actions: [
+      { value:"install_correct_driver", label:"Install the correct driver for the printer model and correct language (PCL or PostScript)" },
+      { value:"replace_cable", label:"Replace the Ethernet cable and retest" },
+      { value:"replace_toner", label:"Replace toner cartridge and retest" },
+      { value:"replace_fuser", label:"Replace the fuser / maintenance kit" }
+    ],
+    correct:{ cause:"driver_language", action:"install_correct_driver" },
+    explain:"Garbled characters most commonly indicate an incorrect/corrupted driver or PCL vs PostScript mismatch. Fix the driver selection before replacing hardware."
+  },
+
+  jam_a4: {
+    text:
+      "<strong>Reported issue:</strong> Paper jam occurs only when printing from the <strong>A4</strong> tray. Other trays print normally.<br>" +
+      "<strong>What changed:</strong> A4 tray was refilled this morning with a new ream of paper.<br>" +
+      "<strong>Scope:</strong> All users see the same behavior.",
+    causes: [
+      { value:"worn_pickup", label:"Worn or dirty pickup roller for the A4 tray" },
+      { value:"wrong_paper_setting", label:"Tray paper size/type configured incorrectly for the loaded paper" },
+      { value:"overfilled", label:"Tray is overfilled or paper is not seated/stacked properly" },
+      { value:"bad_driver", label:"Incorrect printer driver installed on user PCs" }
+    ],
+    actions: [
+      { value:"verify_tray_paper", label:"Verify paper size/type settings match the A4 paper loaded; reseat paper stack" },
+      { value:"inspect_rollers", label:"Inspect/clean pickup roller and separation pad for A4 tray; replace if worn" },
+      { value:"reinstall_driver", label:"Reinstall the printer driver on affected PCs" },
+      { value:"replace_fuser", label:"Replace the fuser / maintenance kit" }
+    ],
+    // Best-next-step: verify tray config and paper seating before replacing rollers.
+    correct:{ cause:"wrong_paper_setting", action:"verify_tray_paper" },
+    explain:"Tray-specific jams often start with paper/setting mismatch or poor seating. Verify configuration and paper first, then move to rollers."
+  },
+
+  misfeed_legal: {
+    text:
+      "<strong>Reported issue:</strong> The printer frequently pulls <strong>two sheets</strong> at once from the <strong>Legal</strong> tray (multipage misfeed).<br>" +
+      "<strong>What changed:</strong> Legal tray is used infrequently and was loaded from an older stack of paper.<br>" +
+      "<strong>Scope:</strong> Happens for all print jobs that use the Legal tray.",
+    causes: [
+      { value:"separation_pad", label:"Worn separation pad/pickup mechanism in the Legal tray" },
+      { value:"paper_condition", label:"Paper is curled, damp, or stuck together (static/age) causing double-feeds" },
+      { value:"wrong_duplex", label:"Duplex setting is enabled and causing multiple feeds" },
+      { value:"network_issue", label:"Network latency causing the printer to pull multiple pages" }
+    ],
+    actions: [
+      { value:"fan_paper", label:"Replace with fresh paper; fan the stack and ensure correct loading guides" },
+      { value:"service_tray", label:"Inspect/clean/replace pickup roller and separation pad for the Legal tray" },
+      { value:"disable_duplex", label:"Disable duplex printing and retest" },
+      { value:"replace_nic", label:"Replace the printer’s network card" }
+    ],
+    correct:{ cause:"paper_condition", action:"fan_paper" },
+    explain:"Double-feeds are often caused by paper condition or loading before parts failure. Try fresh paper and proper loading first, then service rollers/pads."
+  },
+
+  smudge_fuser: {
+    text:
+      "<strong>Reported issue:</strong> Printed text smears when touched, and toner rubs off easily.<br>" +
+      "<strong>What changed:</strong> No driver or network changes; issue began mid-day.<br>" +
+      "<strong>Scope:</strong> Affects all print jobs from all users.",
+    causes: [
+      { value:"fuser", label:"Fuser is not properly bonding toner to paper" },
+      { value:"wrong_paper", label:"Incorrect paper type/weight configured for the job" },
+      { value:"low_toner", label:"Low toner causing light output and smearing" },
+      { value:"bad_driver", label:"Corrupted printer driver causing smudges" }
+    ],
+    actions: [
+      { value:"check_paper_type", label:"Verify paper type/weight settings match the paper loaded" },
+      { value:"replace_fuser", label:"Replace the fuser / apply maintenance kit per maintenance interval" },
+      { value:"replace_toner", label:"Replace toner cartridge and retest" },
+      { value:"reinstall_driver", label:"Reinstall the printer driver" }
+    ],
+    // CompTIA often wants the fuser when toner rubs off.
+    correct:{ cause:"fuser", action:"replace_fuser" },
+    explain:"If toner wipes off easily, the fuser isn’t bonding toner to paper. That points to fuser/maintenance kit rather than driver."
+  },
+
+  ghosting: {
+    text:
+      "<strong>Reported issue:</strong> Pages show faint repeated images or “echo” down the page (ghosting).<br>" +
+      "<strong>What changed:</strong> The printer has been producing high volume prints for several days.<br>" +
+      "<strong>Scope:</strong> Appears regardless of which PC prints.",
+    causes: [
+      { value:"drum", label:"Imaging drum or cartridge imaging unit is worn/contaminated" },
+      { value:"wiper", label:"Wiper blade is failing to clean the drum surface" },
+      { value:"wrong_driver", label:"Incorrect printer driver causing repeated images" },
+      { value:"bad_cable", label:"Loose USB/Ethernet cable causing echo output" }
+    ],
+    actions: [
+      { value:"replace_imaging", label:"Replace the imaging drum/imaging unit (or cartridge with integrated drum) and retest" },
+      { value:"clean_cycle", label:"Run the printer’s cleaning/calibration process, then retest" },
+      { value:"reinstall_driver", label:"Reinstall the printer driver and retest" },
+      { value:"replace_cable", label:"Replace the cable and retest" }
+    ],
+    // Best next step: cleaning/calibration before replacement is reasonable at Core 1, but ghosting often points to imaging unit.
+    correct:{ cause:"drum", action:"replace_imaging" },
+    explain:"Ghosting/echo images usually indicate a worn/contaminated imaging surface (drum/unit). Driver/cable issues rarely create repeating physical artifacts."
+  },
+
+  tray_not_recognized: {
+    text:
+      "<strong>Reported issue:</strong> Printer displays “Tray not recognized” or “Wrong paper size” even though the tray is loaded correctly.<br>" +
+      "<strong>What changed:</strong> The tray was removed to clear a jam earlier today.<br>" +
+      "<strong>Scope:</strong> Affects all users.",
+    causes: [
+      { value:"tray_not_seated", label:"Tray is not fully seated or guides are misaligned" },
+      { value:"tray_sensor", label:"Tray sensor/actuator is stuck or damaged" },
+      { value:"driver_setting", label:"Driver default paper size does not match tray configuration" },
+      { value:"bad_fuser", label:"Fuser failure is causing tray errors" }
+    ],
+    actions: [
+      { value:"reseat_tray", label:"Reseat the tray and verify paper guides and paper size settings on the printer" },
+      { value:"verify_defaults", label:"Verify driver and printer defaults match (paper size/tray selection)" },
+      { value:"replace_sensor", label:"Escalate for hardware service: tray sensor repair/replacement" },
+      { value:"replace_fuser", label:"Replace the fuser / maintenance kit" }
+    ],
+    correct:{ cause:"tray_not_seated", action:"reseat_tray" },
+    explain:"After a jam/clear event, the simplest and most common fix is reseating the tray and confirming guides/settings before hardware replacement."
+  },
+
+  queue_frozen: {
+    text:
+      "<strong>Reported issue:</strong> Multiple print jobs are stuck in the queue and never complete. The printer shows online/ready.<br>" +
+      "<strong>What changed:</strong> A large print job was sent earlier and then canceled.<br>" +
+      "<strong>Scope:</strong> Multiple users are impacted.",
+    causes: [
+      { value:"stuck_queue", label:"A stuck job is blocking the queue (spooler/queue jam)" },
+      { value:"low_toner", label:"Low toner is preventing jobs from printing" },
+      { value:"bad_pickup", label:"Pickup roller failure is freezing the queue" },
+      { value:"wrong_paper", label:"Incorrect paper type is causing the queue to freeze" }
+    ],
+    actions: [
+      { value:"clear_queue", label:"Clear stuck jobs and restart the print service/queue, then retest with a small job" },
+      { value:"replace_toner", label:"Replace toner cartridge and retest" },
+      { value:"replace_rollers", label:"Replace pickup rollers and retest" },
+      { value:"replace_printer", label:"Replace the entire printer" }
+    ],
+    correct:{ cause:"stuck_queue", action:"clear_queue" },
+    explain:"A single stuck job can block everything behind it. Clearing the queue and restarting print services is the most defensible first move."
+  },
+
+  wifi_intermittent: {
+    text:
+      "<strong>Reported issue:</strong> Wireless printing works for a while, then jobs fail until the printer is rebooted.<br>" +
+      "<strong>What changed:</strong> The office Wi-Fi SSID was updated last week and the printer was reconnected.<br>" +
+      "<strong>Scope:</strong> Intermittent for multiple users.",
+    causes: [
+      { value:"power_save", label:"Printer Wi-Fi power saving/sleep is dropping the connection" },
+      { value:"ssid_creds", label:"Wi-Fi credentials/SSID mismatch or network profile confusion" },
+      { value:"ip_change", label:"IP address changes causing clients to print to an old address" },
+      { value:"bad_fuser", label:"Fuser issue causing wireless disconnects" }
+    ],
+    actions: [
+      { value:"set_static", label:"Assign a static/reserved IP and update the printer port/queue to the correct address" },
+      { value:"disable_sleep", label:"Adjust power saving/sleep settings and retest printing after idle time" },
+      { value:"rejoin_wifi", label:"Forget/re-add the Wi-Fi network on the printer with correct SSID/credentials" },
+      { value:"replace_fuser", label:"Replace the fuser / maintenance kit" }
+    ],
+    // Best exam-style: IP stability is a very common “intermittent connectivity” fix.
+    correct:{ cause:"ip_change", action:"set_static" },
+    explain:"Intermittent connectivity often traces to IP changes. Stabilizing addressing (reservation/static) makes the printer reliably reachable."
+  }
+};
+
+function renderOptionsForScenario(s){
+  const causeDiv = document.getElementById("causeOptions");
+  const actionDiv = document.getElementById("actionOptions");
+
+  causeDiv.innerHTML = "";
+  actionDiv.innerHTML = "";
+
+  const shuffledCauses = shuffleArray(s.causes);
+  const shuffledActions = shuffleArray(s.actions);
+
+  shuffledCauses.forEach(c=>{
+    causeDiv.innerHTML += `
+      <label class="opt">
+        <input type="radio" name="cause" value="${c.value}">
+        <span>${c.label}</span>
+      </label>`;
+  });
+
+  shuffledActions.forEach(a=>{
+    actionDiv.innerHTML += `
+      <label class="opt">
+        <input type="radio" name="action" value="${a.value}">
+        <span>${a.label}</span>
+      </label>`;
+  });
+}
+
+function loadScenario(key){
+  currentScenario = key;
+  const s = SCENARIOS[key];
+  document.getElementById("scenarioText").innerHTML = s.text;
+  resetSelections();
+  renderOptionsForScenario(s);
+}
+
+function getSelected(name){
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || null;
+}
+
+function submit(){
+  const cause = getSelected("cause");
+  const action = getSelected("action");
+
+  const results = document.getElementById("results");
+  results.classList.remove("hidden");
+
+  if(!cause || !action){
+    results.textContent = "Please select both a cause and a best next step.";
+    return;
+  }
+
+  const s = SCENARIOS[currentScenario];
+  const correct = (cause === s.correct.cause && action === s.correct.action);
+
+  results.innerHTML = correct
+    ? "<b>Result: Correct</b>"
+    : "<b>Result: Needs Review</b>";
+
+  if(!examMode){
+    const p = document.createElement("p");
+    p.className = "training-only";
+    p.style.margin = "8px 0 0";
+    p.textContent = s.explain;
+    results.appendChild(p);
+  }
+}
+
+function resetSelections(){
+  document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+  const results = document.getElementById("results");
+  results.classList.add("hidden");
+  results.innerHTML = "";
+}
+
+function setExamMode(on){
+  examMode = on;
+  document.body.classList.toggle("exam-mode", examMode);
+  const toggle = document.getElementById("examToggle");
+  toggle.classList.toggle("on", examMode);
+  document.getElementById("modeLabel").textContent = examMode ? "EXAM" : "TRAINING";
+  toggle.setAttribute("aria-checked", String(examMode));
+  resetSelections();
+}
+
+document.getElementById("scenarioSelect").addEventListener("change", e => loadScenario(e.target.value));
+document.getElementById("submitBtn").addEventListener("click", submit);
+document.getElementById("resetBtn").addEventListener("click", resetSelections);
+
+const toggle = document.getElementById("examToggle");
+toggle.addEventListener("click", ()=> setExamMode(!examMode));
+toggle.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    setExamMode(!examMode);
+  }
+});
+
+loadScenario("garbled");
+</script>
+
+</body>
+</html>

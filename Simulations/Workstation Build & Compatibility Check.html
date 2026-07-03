@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A+ Core 1 – Dual Workstation Build (Gaming + Family)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --bg:#0b1220;
+  --panel:#111a2e;
+  --text:#e9eefc;
+  --muted:#9fb0d0;
+  --accent:#7aa7ff;
+  --good:#33d69f;
+  --warn:#ffcc66;
+  --bad:#ff6b6b;
+  --stroke:rgba(255,255,255,.18);
+  --radius:14px;
+  --sans:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:var(--sans);
+  background:radial-gradient(1000px 600px at 20% 10%, rgba(122,167,255,.18), transparent 60%),var(--bg);
+  color:var(--text);
+}
+header{
+  max-width:1050px;
+  margin:auto;
+  padding:22px 20px 10px;
+}
+h1{margin:0;font-size:22px}
+.sub{font-size:13px;color:var(--muted);margin:6px 0 0}
+.controls{
+  display:flex; gap:12px; flex-wrap:wrap;
+  margin-top:14px;
+}
+.ctrl{
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--stroke);
+  border-radius:999px;
+  padding:8px 12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+}
+select, button{
+  background:#0b1220;
+  color:#e9eefc;
+  border:1px solid var(--stroke);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:13px;
+}
+button{cursor:pointer;background:rgba(122,167,255,.18)}
+button:hover{background:rgba(122,167,255,.28)}
+.wrap{
+  max-width:1050px;
+  margin:auto;
+  padding:0 20px 30px;
+}
+.card{
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-top:16px;
+}
+.card h2{
+  font-size:15px;
+  margin:0 0 12px;
+}
+.block{
+  border:1px dashed var(--stroke);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.block b{
+  font-size:12px;
+  color:var(--muted);
+}
+.block p{
+  margin:6px 0 0;
+  font-size:13px;
+  line-height:1.5;
+}
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+@media (max-width: 900px){
+  .grid{grid-template-columns:1fr}
+}
+.panelTitle{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:10px;
+}
+.panelTitle h3{
+  margin:0;
+  font-size:14px;
+}
+.badge{
+  font-size:12px;
+  color:var(--muted);
+  border:1px solid var(--stroke);
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+}
+.field{
+  margin-bottom:12px;
+}
+.field label{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.status{
+  margin-top:12px;
+  font-size:13px;
+  line-height:1.5;
+}
+.good{color:var(--good)}
+.warn{color:var(--warn)}
+.bad{color:var(--bad)}
+hr.sep{
+  border:none;
+  border-top:1px solid rgba(255,255,255,.12);
+  margin:12px 0;
+}
+small.k{
+  color:var(--muted);
+}
+ul{margin:8px 0 0 18px}
+li{margin:4px 0}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>A+ Core 1 – Workstation Build (Gaming + Family) + Compatibility Check</h1>
+  <p class="sub">
+    Build two Windows desktops based on the customer requirements. Select appropriate components and peripherals for each workstation.
+  </p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <button id="newRun">New run</button>
+    </div>
+    <div class="ctrl">
+      <button id="check">Evaluate builds</button>
+    </div>
+    <div class="ctrl">
+      <button id="hint">Hint</button>
+    </div>
+    <div class="ctrl">
+      <button id="reset">Reset selections</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Scenario -->
+  <div class="card">
+    <h2>Scenario & Requirements</h2>
+
+    <div class="block">
+      <b>Customer request</b>
+      <p>
+        A customer wants <b>two new desktops</b>.
+        The first is a <b>gaming workstation</b>. The second is a <b>family workstation</b>.
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="block">
+        <b>Gaming workstation requirements</b>
+        <p>
+          • Play the newest games at a <b>high frame rate</b><br>
+          • <b>Fast</b> game load times<br>
+          • Enough storage for <b>several games</b> installed at once<br>
+          • <b>High-end audio</b><br>
+          • <b>No concern about cost</b><br>
+          • Run the <b>current Windows OS</b>
+        </p>
+      </div>
+
+      <div class="block">
+        <b>Family workstation requirements</b>
+        <p>
+          • Word processing, videoconferencing, basic web surfing<br>
+          • <b>Minimal cost</b> (as long as it meets the requirements)<br>
+          • Run the <b>current Windows OS</b>
+        </p>
+      </div>
+    </div>
+
+    <div class="block">
+      <b>What you are being tested on</b>
+      <p>
+        Choose parts that match the use case (performance vs cost), and identify compatibility issues that would prevent running the current Windows OS.
+        <br><small class="k">(Example: selecting an ARM CPU in a typical consumer Windows desktop scenario.)</small>
+      </p>
+    </div>
+  </div>
+
+  <!-- Builds -->
+  <div class="card">
+    <h2>Build Selection</h2>
+
+    <div class="grid">
+
+      <!-- Gaming -->
+      <div class="block" style="margin-bottom:0">
+        <div class="panelTitle">
+          <h3>Gaming Workstation</h3>
+          <span class="badge">Goal: max performance</span>
+        </div>
+
+        <div class="field"><label>Microprocessor (CPU)</label><select id="g_cpu"></select></div>
+        <div class="field"><label>RAM</label><select id="g_ram"></select></div>
+        <div class="field"><label>Video Card</label><select id="g_gpu"></select></div>
+        <div class="field"><label>Hard Drive / Storage</label><select id="g_storage"></select></div>
+        <div class="field"><label>Sound Card / Audio</label><select id="g_audio"></select></div>
+
+        <hr class="sep">
+
+        <div class="field"><label>Peripherals</label><select id="g_peripherals"></select></div>
+        <small class="k">Tip: gaming has “high-end audio” as an explicit requirement.</small>
+
+        <div class="status" id="g_status"></div>
+      </div>
+
+      <!-- Family -->
+      <div class="block" style="margin-bottom:0">
+        <div class="panelTitle">
+          <h3>Family Workstation</h3>
+          <span class="badge">Goal: meet needs cheaply</span>
+        </div>
+
+        <div class="field"><label>Microprocessor (CPU)</label><select id="f_cpu"></select></div>
+        <div class="field"><label>RAM</label><select id="f_ram"></select></div>
+        <div class="field"><label>Video Card</label><select id="f_gpu"></select></div>
+        <div class="field"><label>Hard Drive / Storage</label><select id="f_storage"></select></div>
+        <div class="field"><label>Sound Card / Audio</label><select id="f_audio"></select></div>
+
+        <hr class="sep">
+
+        <div class="field"><label>Peripherals</label><select id="f_peripherals"></select></div>
+        <small class="k">Tip: videoconferencing requires a microphone (and typically a webcam).</small>
+
+        <div class="status" id="f_status"></div>
+      </div>
+
+    </div>
+
+    <div class="status" id="overallStatus"></div>
+    <div class="status" id="hintStatus"></div>
+  </div>
+
+</div>
+
+<script>
+/* ========= DOM ========= */
+const newRunBtn = document.getElementById("newRun");
+const checkBtn = document.getElementById("check");
+const hintBtn = document.getElementById("hint");
+const resetBtn = document.getElementById("reset");
+
+const g_status = document.getElementById("g_status");
+const f_status = document.getElementById("f_status");
+const overallStatus = document.getElementById("overallStatus");
+const hintStatus = document.getElementById("hintStatus");
+
+/* ========= OPTIONS (aligned to the screenshot’s idea) ========= */
+const cpuOptions = [
+  { label:"Intel® Core™ i3", score:{perf:2,cost:1}, winOk:true, type:"x64" },
+  { label:"Intel® Core™ i7", score:{perf:5,cost:3}, winOk:true, type:"x64" },
+  { label:"Intel® Xeon®",      score:{perf:4,cost:4}, winOk:true, type:"x64" },
+  { label:"ARM Cortex",        score:{perf:3,cost:2}, winOk:false, type:"ARM" } // typical A+ compatibility trap
+];
+
+const ramOptions = [
+  { label:"4GB DDR4",  score:{perf:1,cost:1} },
+  { label:"8GB DDR4",  score:{perf:2,cost:2} },
+  { label:"16GB DDR4", score:{perf:3,cost:3} },
+  { label:"16GB DDR5", score:{perf:4,cost:4} },
+  { label:"32GB DDR5", score:{perf:5,cost:5} }
+];
+
+const gpuOptions = [
+  { label:"Onboard video", score:{perf:1,cost:1}, dedicated:false },
+  { label:"Discrete GPU",  score:{perf:5,cost:4}, dedicated:true }
+];
+
+const storageOptions = [
+  { label:"500GB HDD",  score:{perf:1,cost:1}, type:"HDD", size:500 },
+  { label:"500GB SSD",  score:{perf:4,cost:3}, type:"SSD", size:500 },
+  { label:"1TB SSD",    score:{perf:5,cost:4}, type:"SSD", size:1000 },
+  { label:"4TB HDD",    score:{perf:2,cost:2}, type:"HDD", size:4000 }
+];
+
+const audioOptions = [
+  { label:"Onboard sound",    score:{perf:1,cost:1}, highEnd:false },
+  { label:"7.1 surround card",score:{perf:4,cost:3}, highEnd:true }
+];
+
+const peripheralOptions = [
+  { label:"External microphone", flags:{mic:true,cam:false,headphones:false} },
+  { label:"Headset + microphone",flags:{mic:true,cam:false,headphones:true} },
+  { label:"Web camera",          flags:{mic:false,cam:true,headphones:false} },
+  { label:"Headset + mic + webcam bundle", flags:{mic:true,cam:true,headphones:true} }
+];
+
+/* ========= HELPERS ========= */
+function fillSelect(selId, opts){
+  const s = document.getElementById(selId);
+  s.innerHTML = "";
+  opts.forEach(o=>{
+    const opt = document.createElement("option");
+    opt.textContent = o.label;
+    s.appendChild(opt);
+  });
+}
+
+function pick(opts, label){
+  return opts.find(o=>o.label === label);
+}
+
+function resetAll(){
+  [
+    "g_cpu","g_ram","g_gpu","g_storage","g_audio","g_peripherals",
+    "f_cpu","f_ram","f_gpu","f_storage","f_audio","f_peripherals"
+  ].forEach(id=>{
+    const el = document.getElementById(id);
+    el.selectedIndex = 0;
+  });
+  g_status.innerHTML = "";
+  f_status.innerHTML = "";
+  overallStatus.innerHTML = "";
+  hintStatus.innerHTML = "";
+  hintIndex = 0;
+}
+
+function scoreBuild(build){
+  // higher perf is better for gaming; lower cost is better for family
+  let perf = 0;
+  let cost = 0;
+
+  perf += build.cpu.score.perf; cost += build.cpu.score.cost;
+  perf += build.ram.score.perf; cost += build.ram.score.cost;
+  perf += build.gpu.score.perf; cost += build.gpu.score.cost;
+  perf += build.storage.score.perf; cost += build.storage.score.cost;
+  perf += build.audio.score.perf; cost += build.audio.score.cost;
+
+  // peripherals: small “cost” impact; minimal performance
+  if(build.peripherals.flags.cam) cost += 1;
+  if(build.peripherals.flags.mic) cost += 1;
+  if(build.peripherals.flags.headphones) cost += 1;
+
+  return { perf, cost };
+}
+
+function summarize(build){
+  return `
+    CPU: ${build.cpu.label}<br>
+    RAM: ${build.ram.label}<br>
+    Video: ${build.gpu.label}<br>
+    Storage: ${build.storage.label}<br>
+    Audio: ${build.audio.label}<br>
+    Peripherals: ${build.peripherals.label}
+  `;
+}
+
+/* ========= SCORING RULES (exam-aligned logic) ========= */
+function evaluateGaming(build){
+  const issues = [];
+
+  // Windows compatibility
+  if(!build.cpu.winOk){
+    issues.push("CPU selection is not compatible with the expected current Windows desktop environment (ARM selection).");
+  }
+
+  // High frame rate gaming -> dedicated GPU
+  if(!build.gpu.dedicated){
+    issues.push("High frame rate gaming requires a discrete/dedicated GPU (onboard video is insufficient).");
+  }
+
+  // Fast load times -> SSD preferred
+  if(build.storage.type !== "SSD"){
+    issues.push("Fast game load times are best met with an SSD rather than an HDD.");
+  }
+
+  // Several games installed -> larger capacity preferred (1TB SSD or 4TB HDD; but still want SSD for speed)
+  // For gaming: ideal = 1TB SSD. Acceptable = 500GB SSD (warn) or 4TB HDD (warn for load times).
+  if(build.storage.label === "500GB SSD"){
+    issues.push("Storage may be tight for several modern games (500GB can fill quickly).");
+  }
+  if(build.storage.label === "500GB HDD"){
+    issues.push("Storage is both slow (HDD) and limited for modern games.");
+  }
+
+  // High-end audio -> 7.1 card
+  if(!build.audio.highEnd){
+    issues.push("High-end audio requirement is best met with a 7.1 surround sound card rather than onboard sound.");
+  }
+
+  // RAM guidance for modern gaming
+  if(build.ram.label.startsWith("4GB")){
+    issues.push("4GB RAM is insufficient for modern gaming and multitasking.");
+  }
+  if(build.ram.label.startsWith("8GB")){
+    issues.push("8GB RAM is likely to be limiting for modern gaming; 16GB+ is recommended.");
+  }
+
+  // Peripherals: not strictly required for gaming scenario, but common sense audio consideration
+  // No issue if none includes mic/cam; keep neutral.
+
+  const passed = issues.length === 0;
+  const warnOnly = !passed && issues.every(i => i.includes("may be") || i.includes("recommended") || i.includes("tight"));
+
+  return { passed, warnOnly, issues };
+}
+
+function evaluateFamily(build){
+  const issues = [];
+
+  // Windows compatibility
+  if(!build.cpu.winOk){
+    issues.push("CPU selection is not compatible with the expected current Windows desktop environment (ARM selection).");
+  }
+
+  // Needs: word processing + web + video conferencing
+  // Video conferencing needs mic; ideally webcam too.
+  if(!build.peripherals.flags.mic){
+    issues.push("Videoconferencing requires a microphone (select a mic or headset+mic option).");
+  }
+  if(!build.peripherals.flags.cam){
+    issues.push("Videoconferencing typically requires a webcam (select a webcam or bundle that includes it).");
+  }
+
+  // Integrated video is OK for family use; discrete GPU is unnecessary cost.
+  if(build.gpu.dedicated){
+    issues.push("A discrete GPU is unnecessary for this workload and increases cost.");
+  }
+
+  // Storage: HDD is acceptable; SSD is nicer but costs more.
+  // Minimal cost: prefer 500GB HDD or 4TB HDD (but 4TB might be overkill).
+  // If they pick 1TB SSD, call out as higher cost than required.
+  if(build.storage.label === "1TB SSD"){
+    issues.push("1TB SSD meets the requirement but is higher cost than necessary for a minimal-cost family workstation.");
+  }
+  if(build.storage.label === "500GB SSD"){
+    issues.push("SSD improves responsiveness but is not required for minimal-cost requirements.");
+  }
+
+  // RAM: 4GB is too low; 8GB is baseline; 16GB is comfortable but costlier.
+  if(build.ram.label.startsWith("4GB")){
+    issues.push("4GB RAM is insufficient for videoconferencing and modern browsing; 8GB+ is recommended.");
+  }
+  if(build.ram.label.includes("32GB")){
+    issues.push("32GB RAM exceeds the needs and increases cost.");
+  }
+
+  // Audio: onboard is fine; 7.1 is overkill cost.
+  if(build.audio.highEnd){
+    issues.push("7.1 surround audio is unnecessary for this workload and increases cost.");
+  }
+
+  // CPU: i3 is fine; i7/Xeon overkill for minimal cost.
+  if(build.cpu.label.includes("Core™ i7") || build.cpu.label.includes("Xeon")){
+    issues.push("CPU selection exceeds the needs and increases cost (Core i3 is sufficient for this workload).");
+  }
+
+  // Determine pass: for family, “pass” means meets functional requirements AND is reasonably cost-minimized.
+  // We'll treat “overkill cost” items as WARN (not fail) if core functional needs are met.
+  const functionalFails = issues.filter(i =>
+    i.includes("requires a microphone") ||
+    i.includes("requires a webcam") ||
+    i.includes("not compatible") ||
+    i.includes("insufficient")
+  );
+
+  const passed = functionalFails.length === 0;
+  const warnOnly = passed && issues.length > 0;
+
+  return { passed, warnOnly, issues };
+}
+
+/* ========= BUILD GETTERS ========= */
+function getBuild(prefix){
+  const cpu = pick(cpuOptions, document.getElementById(prefix+"_cpu").value);
+  const ram = pick(ramOptions, document.getElementById(prefix+"_ram").value);
+  const gpu = pick(gpuOptions, document.getElementById(prefix+"_gpu").value);
+  const storage = pick(storageOptions, document.getElementById(prefix+"_storage").value);
+  const audio = pick(audioOptions, document.getElementById(prefix+"_audio").value);
+  const peripherals = pick(peripheralOptions, document.getElementById(prefix+"_peripherals").value);
+  return { cpu, ram, gpu, storage, audio, peripherals };
+}
+
+/* ========= HINTS ========= */
+let hintIndex = 0;
+const hints = [
+  "Gaming: high frame rate usually means a discrete GPU. Fast load times usually means SSD.",
+  "Gaming: ‘high-end audio’ points to a dedicated sound card (e.g., 7.1 surround).",
+  "Family: videoconferencing requires a microphone (and usually a webcam).",
+  "Family: minimal cost means avoid overkill parts like i7/Xeon, discrete GPU, 7.1 audio, and huge SSDs.",
+  "Both: ensure the build is compatible with running the current Windows OS."
+];
+
+/* ========= INIT ========= */
+function init(){
+  // Fill selects (Gaming)
+  fillSelect("g_cpu", cpuOptions);
+  fillSelect("g_ram", ramOptions);
+  fillSelect("g_gpu", gpuOptions);
+  fillSelect("g_storage", storageOptions);
+  fillSelect("g_audio", audioOptions);
+  fillSelect("g_peripherals", peripheralOptions);
+
+  // Fill selects (Family)
+  fillSelect("f_cpu", cpuOptions);
+  fillSelect("f_ram", ramOptions);
+  fillSelect("f_gpu", gpuOptions);
+  fillSelect("f_storage", storageOptions);
+  fillSelect("f_audio", audioOptions);
+  fillSelect("f_peripherals", peripheralOptions);
+
+  // Start fresh
+  resetAll();
+}
+
+/* ========= EVENTS ========= */
+checkBtn.addEventListener("click", ()=>{
+  const gaming = getBuild("g");
+  const family = getBuild("f");
+
+  const gEval = evaluateGaming(gaming);
+  const fEval = evaluateFamily(family);
+
+  const gScore = scoreBuild(gaming);
+  const fScore = scoreBuild(family);
+
+  // Gaming feedback
+  const gHeader = `<div><b>Selected build:</b><br>${summarize(gaming)}</div>`;
+  const gIssues = gEval.issues.length
+    ? `<div style="margin-top:10px"><b>Findings:</b><ul>${gEval.issues.map(i=>`<li>${i}</li>`).join("")}</ul></div>`
+    : "";
+
+  if(gEval.passed){
+    g_status.innerHTML = `<span class="good">PASS</span> — Gaming workstation meets the stated requirements.<br><small class="k">Perf score: ${gScore.perf} (cost not a factor)</small><hr class="sep">${gHeader}`;
+  } else if(gEval.warnOnly){
+    g_status.innerHTML = `<span class="warn">PARTIAL</span> — Mostly meets gaming needs, but has performance/capacity concerns.<hr class="sep">${gHeader}${gIssues}`;
+  } else {
+    g_status.innerHTML = `<span class="bad">FAIL</span> — Gaming workstation does not meet all requirements.<hr class="sep">${gHeader}${gIssues}`;
+  }
+
+  // Family feedback
+  const fHeader = `<div><b>Selected build:</b><br>${summarize(family)}</div>`;
+  const fIssues = fEval.issues.length
+    ? `<div style="margin-top:10px"><b>Findings:</b><ul>${fEval.issues.map(i=>`<li>${i}</li>`).join("")}</ul></div>`
+    : "";
+
+  if(fEval.passed && !fEval.warnOnly){
+    f_status.innerHTML = `<span class="good">PASS</span> — Family workstation meets needs at a minimal-cost approach.<br><small class="k">Cost score: ${fScore.cost} (lower is better)</small><hr class="sep">${fHeader}`;
+  } else if(fEval.passed && fEval.warnOnly){
+    f_status.innerHTML = `<span class="warn">PASS (but not minimal cost)</span> — Meets the workload, but includes unnecessary cost/overkill parts.<br><small class="k">Cost score: ${fScore.cost} (lower is better)</small><hr class="sep">${fHeader}${fIssues}`;
+  } else {
+    f_status.innerHTML = `<span class="bad">FAIL</span> — Family workstation does not meet functional requirements.<hr class="sep">${fHeader}${fIssues}`;
+  }
+
+  // Overall summary
+  const overallPass = gEval.passed && fEval.passed;
+  const overall = overallPass
+    ? `<span class="good">Overall: PASS</span> — Both workstations meet the customer requirements.`
+    : `<span class="warn">Overall: Review needed</span> — One or both workstations have issues. Fix the failed items and re-evaluate.`;
+
+  overallStatus.innerHTML = `<hr class="sep">${overall}`;
+});
+
+hintBtn.addEventListener("click", ()=>{
+  hintStatus.innerHTML = hintIndex < hints.length
+    ? `<span class="warn">Hint:</span> ${hints[hintIndex++]}`
+    : `<span class="warn">No additional hints are available.</span>`;
+});
+
+resetBtn.addEventListener("click", resetAll);
+
+newRunBtn.addEventListener("click", ()=>{
+  // Randomize starting selections (keeps practice fresh)
+  function randIndex(n){ return Math.floor(Math.random()*n); }
+
+  ["g_cpu","g_ram","g_gpu","g_storage","g_audio","g_peripherals",
+   "f_cpu","f_ram","f_gpu","f_storage","f_audio","f_peripherals"
+  ].forEach(id=>{
+    const el = document.getElementById(id);
+    el.selectedIndex = randIndex(el.options.length);
+  });
+
+  g_status.innerHTML = "";
+  f_status.innerHTML = "";
+  overallStatus.innerHTML = "";
+  hintStatus.innerHTML = "";
+  hintIndex = 0;
+});
+
+init();
+</script>
+
+</body>
+</html>

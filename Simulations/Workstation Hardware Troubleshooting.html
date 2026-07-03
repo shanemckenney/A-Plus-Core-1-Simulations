@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hardware Troubleshooting Simulation</title>
+
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f8;
+    margin:20px;
+    color:#111;
+  }
+  h1{ margin:0 0 6px; }
+  .instructions{ margin:0 0 18px; }
+
+  .device{
+    background:#fff;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:6px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.10);
+  }
+
+  .row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .col{
+    flex:1 1 260px;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    margin:8px 0 4px;
+    color:#333;
+  }
+
+  select{
+    width:100%;
+    padding:8px;
+    border-radius:4px;
+    border:1px solid #cfd6dd;
+    background:#fff;
+    font-size:14px;
+  }
+
+  button{
+    padding:8px 12px;
+    font-size:14px;
+    cursor:pointer;
+    border:1px solid #cfd6dd;
+    background:#f7f7f7;
+    border-radius:4px;
+  }
+  button:hover{ background:#eee; }
+
+  .btnRow{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+
+  .feedback{
+    margin-top:10px;
+    padding:10px;
+    border-radius:4px;
+    display:none;
+    border:1px solid transparent;
+    line-height:1.35;
+  }
+
+  .correct{
+    display:block;
+    background:#d4edda;
+    color:#155724;
+    border-color:#c3e6cb;
+  }
+
+  .incorrect{
+    display:block;
+    background:#f8d7da;
+    color:#721c24;
+    border-color:#f5c6cb;
+  }
+
+  .scoreBox{
+    margin-top:15px;
+    font-weight:bold;
+  }
+
+  .muted{
+    color:#555;
+    font-weight:normal;
+  }
+
+  .tiny{
+    font-size:12px;
+    color:#666;
+  }
+</style>
+</head>
+
+<body>
+  <h1>Workstation Hardware Troubleshooting Simulation</h1>
+  <p class="instructions">
+    A technician is diagnosing several device issues reported by employees.<br><br>
+    <strong>INSTRUCTIONS:</strong> Select the appropriate issue and solution for each scenario.
+    Each option may be used more than once.
+  </p>
+
+  <div id="devices"></div>
+
+  <div class="scoreBox" id="score"></div>
+
+<script>
+/*** Options (reusable across scenarios) ***/
+const issues = [
+  "Battery issue",
+  "Loose or damaged power connector",
+  "Overheating",
+  "RAM issue",
+  "Touchscreen/digitizer failure",
+  "Incorrect input/source selected",
+  "Damaged video cable/connector",
+  "Backlight failure",
+  "Resolution/refresh rate misconfiguration"
+];
+
+const solutions = [
+  "Replace the battery",
+  "Reseat or repair the DC jack",
+  "Clean vents/fans and remove dust",
+  "Reseat or replace the RAM",
+  "Replace the touchscreen/digitizer assembly",
+  "Select the correct monitor input",
+  "Replace the video cable",
+  "Replace the monitor",
+  "Set the native resolution/refresh rate"
+];
+
+/*** Scenarios ***/
+const scenarios = [
+  {
+    text: "Laptop battery will not charge even though it shows plugged in.",
+    correctIssue: "Loose or damaged power connector",
+    correctSolution: "Reseat or repair the DC jack",
+    explanation: "A loose or failing DC jack can detect power but not maintain a stable charging connection."
+  },
+  {
+    text: "Laptop shuts down during video calls and feels very hot.",
+    correctIssue: "Overheating",
+    correctSolution: "Clean vents/fans and remove dust",
+    explanation: "Thermal shutdown often indicates blocked airflow or dust buildup in vents/fans."
+  },
+  {
+    text: "Laptop powers on but shows a black screen and gives beep codes.",
+    correctIssue: "RAM issue",
+    correctSolution: "Reseat or replace the RAM",
+    explanation: "Beep codes with no display commonly point to memory not seated properly or failed RAM."
+  },
+  {
+    text: "Phone screen powers on but taps are not registering.",
+    correctIssue: "Touchscreen/digitizer failure",
+    correctSolution: "Replace the touchscreen/digitizer assembly",
+    explanation: "If the display works but touch input fails, the digitizer is likely defective."
+  },
+  {
+    text: "Monitor displays 'No Signal' even though the computer is running.",
+    correctIssue: "Incorrect input/source selected",
+    correctSolution: "Select the correct monitor input",
+    explanation: "A very common cause is the monitor being set to the wrong input (HDMI/DP)."
+  },
+  {
+    text: "Monitor flickers when the cable is moved.",
+    correctIssue: "Damaged video cable/connector",
+    correctSolution: "Replace the video cable",
+    explanation: "If symptoms change when moving the cable, it usually indicates a failing cable/connector."
+  },
+  {
+    text: "Monitor is extremely dim even with brightness turned up.",
+    correctIssue: "Backlight failure",
+    correctSolution: "Replace the monitor",
+    explanation: "A failing backlight causes a faint image even when brightness is increased."
+  },
+  {
+    text: "Image looks stretched after connecting a docking station.",
+    correctIssue: "Resolution/refresh rate misconfiguration",
+    correctSolution: "Set the native resolution/refresh rate",
+    explanation: "Docking stations can change display settings. Setting native resolution/refresh rate fixes distortion."
+  }
+];
+
+/*** Helpers ***/
+function createDropdown(options, placeholderText){
+  const select = document.createElement("select");
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = placeholderText;
+  select.appendChild(placeholder);
+
+  options.forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    select.appendChild(opt);
+  });
+
+  return select;
+}
+
+function updateOverallScore(){
+  let correctCount = 0;
+  let answeredCount = 0;
+
+  scenarios.forEach((s, i) => {
+    const issueVal = document.getElementById("issue"+i).value;
+    const solVal   = document.getElementById("solution"+i).value;
+
+    if(issueVal && solVal) answeredCount++;
+
+    // We treat a scenario as "correct" only if it has been answered AND matches
+    if(issueVal === s.correctIssue && solVal === s.correctSolution){
+      correctCount++;
+    }
+  });
+
+  const scoreEl = document.getElementById("score");
+  scoreEl.innerHTML = `Score: ${correctCount} / ${scenarios.length}
+    <span class="muted"> (Answered: ${answeredCount} / ${scenarios.length})</span>`;
+}
+
+/*** Immediate feedback per scenario ***/
+function checkScenario(i){
+  const s = scenarios[i];
+  const issueVal = document.getElementById("issue"+i).value;
+  const solVal   = document.getElementById("solution"+i).value;
+  const fb       = document.getElementById("feedback"+i);
+
+  // Only show feedback once both are selected
+  if(!issueVal || !solVal){
+    fb.style.display = "none";
+    fb.className = "feedback";
+    fb.innerHTML = "";
+    updateOverallScore();
+    return;
+  }
+
+  if(issueVal === s.correctIssue && solVal === s.correctSolution){
+    fb.className = "feedback correct";
+    fb.innerHTML = `<strong>Correct.</strong> ${s.explanation}`;
+  } else {
+    fb.className = "feedback incorrect";
+    fb.innerHTML =
+      `<strong>Incorrect.</strong><br>
+       <span class="tiny"><strong>Correct Issue:</strong> ${s.correctIssue}<br>
+       <strong>Correct Solution:</strong> ${s.correctSolution}</span><br>
+       ${s.explanation}`;
+  }
+  fb.style.display = "block";
+  updateOverallScore();
+}
+
+function resetScenario(i){
+  document.getElementById("issue"+i).value = "";
+  document.getElementById("solution"+i).value = "";
+  const fb = document.getElementById("feedback"+i);
+  fb.style.display = "none";
+  fb.className = "feedback";
+  fb.innerHTML = "";
+  updateOverallScore();
+}
+
+function loadScenarios(){
+  const container = document.getElementById("devices");
+
+  scenarios.forEach((s, i) => {
+    const card = document.createElement("div");
+    card.className = "device";
+
+    const p = document.createElement("p");
+    p.innerHTML = `<strong>Scenario ${i+1}:</strong> ${s.text}`;
+    card.appendChild(p);
+
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const col1 = document.createElement("div");
+    col1.className = "col";
+    const issueLabel = document.createElement("label");
+    issueLabel.textContent = "Select Issue:";
+    const issueSelect = createDropdown(issues, "-- Select an issue --");
+    issueSelect.id = "issue"+i;
+
+    col1.appendChild(issueLabel);
+    col1.appendChild(issueSelect);
+
+    const col2 = document.createElement("div");
+    col2.className = "col";
+    const solLabel = document.createElement("label");
+    solLabel.textContent = "Select Solution:";
+    const solSelect = createDropdown(solutions, "-- Select a solution --");
+    solSelect.id = "solution"+i;
+
+    col2.appendChild(solLabel);
+    col2.appendChild(solSelect);
+
+    row.appendChild(col1);
+    row.appendChild(col2);
+    card.appendChild(row);
+
+    const btnRow = document.createElement("div");
+    btnRow.className = "btnRow";
+
+    const checkBtn = document.createElement("button");
+    checkBtn.textContent = "Check Answer";
+    checkBtn.onclick = () => checkScenario(i);
+
+    const resetBtn = document.createElement("button");
+    resetBtn.textContent = "Reset";
+    resetBtn.onclick = () => resetScenario(i);
+
+    btnRow.appendChild(checkBtn);
+    btnRow.appendChild(resetBtn);
+    card.appendChild(btnRow);
+
+    const fb = document.createElement("div");
+    fb.className = "feedback";
+    fb.id = "feedback"+i;
+    card.appendChild(fb);
+
+    // Optional: auto-check when both dropdowns changed (immediate immediate feedback)
+    issueSelect.addEventListener("change", () => {
+      // If they already chose a solution too, instantly show feedback
+      if(document.getElementById("solution"+i).value) checkScenario(i);
+      else updateOverallScore();
+    });
+    solSelect.addEventListener("change", () => {
+      // If they already chose an issue too, instantly show feedback
+      if(document.getElementById("issue"+i).value) checkScenario(i);
+      else updateOverallScore();
+    });
+
+    container.appendChild(card);
+  });
+
+  updateOverallScore();
+}
+
+loadScenarios();
+</script>
+</body>
+</html>

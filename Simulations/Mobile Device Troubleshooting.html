@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mobile Device Troubleshooting Activity</title>
+
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#111a33;
+  --panel2:#16214a;
+  --text:#f2f6ff;
+  --muted:#c6d3ff;
+  --border:rgba(255,255,255,.18);
+  --accent:#7aa2ff;
+  --good:#2be4a7;
+  --warn:#ffd36a;
+  --radius:16px;
+  --radius2:12px;
+  --shadow:0 18px 40px rgba(0,0,0,.45);
+  --mono: ui-monospace, Consolas, monospace;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+header{
+  max-width:1100px;
+  margin:auto;
+  padding:28px 18px 14px;
+}
+
+h1{margin:0 0 6px;font-size:22px}
+.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.35}
+
+.disclaimer{
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(0,0,0,.28);
+  color:var(--muted);
+  font-size:13px;
+}
+.disclaimer strong{color:var(--text); font-weight:700}
+
+.controls{
+  display:flex;
+  gap:12px;
+  margin-top:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.badge, select{
+  font-family:var(--mono);
+  font-size:13px;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+}
+
+select option{
+  background:#0f1736;
+  color:#ffffff;
+}
+
+.toggle{
+  width:48px;height:26px;border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.15);
+  position:relative;cursor:pointer;
+}
+.toggle span{
+  width:22px;height:22px;background:var(--accent);
+  border-radius:50%;position:absolute;top:1px;left:1px;
+  transition:.2s;
+}
+.toggle.on span{left:24px;background:var(--good)}
+
+main{
+  max-width:1100px;
+  margin:auto;
+  padding:0 18px 36px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:16px;
+}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+.card{
+  background:linear-gradient(180deg,var(--panel),rgba(17,26,51,.85));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.cardHeader{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+
+.cardBody{
+  padding:16px;
+  background:rgba(0,0,0,.25);
+}
+
+.partGroup{
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  background:rgba(0,0,0,.35);
+  margin-bottom:14px;
+}
+
+.groupHead{
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+
+.opt{
+  display:flex;
+  gap:10px;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  align-items:flex-start;
+}
+.opt:last-child{border-bottom:none}
+.opt:hover{background:rgba(255,255,255,.06)}
+.opt input{margin-top:2px}
+
+.footer{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:1px solid var(--border);
+  background:rgba(122,162,255,.25);
+  color:var(--text);
+  padding:10px 16px;
+  border-radius:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+button.secondary{background:rgba(255,255,255,.12)}
+
+.results{
+  margin-top:14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  background:rgba(0,0,0,.45);
+  padding:12px;
+  line-height:1.35;
+}
+.results.hidden{display:none}
+.results b{font-weight:800}
+
+.pill{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  margin-left:8px;
+  color:var(--muted);
+  background:rgba(255,255,255,.06);
+}
+
+.exam-mode .training-only{display:none}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Mobile Device Troubleshooting Activity</h1>
+  <p class="sub">Instructor-developed training simulation to build troubleshooting and decision-making skills aligned to publicly available CompTIA A+ objectives.</p>
+
+  <div class="disclaimer">
+    <strong>Instructor Product Notice:</strong> Scenarios and options are original and designed for skill-building. This activity is not a replica of any live certification exam question.
+  </div>
+
+  <div class="controls">
+    <span class="badge">Scenario</span>
+    <select id="scenarioSelect" aria-label="Scenario selector">
+      <option value="battery">Rapid Battery Drain</option>
+      <option value="data">No Cellular Data</option>
+      <option value="rotation">Screen Does Not Rotate</option>
+      <option value="swollen">Laptop Not Laying Flat</option>
+      <option value="black">Laptop Screen Is Black</option>
+      <option value="burnin">Tablet Screen Burn-In</option>
+      <option value="projector">Projector Has No Image</option>
+      <option value="wifi_after_screen">Wi-Fi Fails After Screen Replacement</option>
+    </select>
+
+    <span class="badge">Mode</span>
+    <div id="examToggle" class="toggle" role="switch" aria-checked="false" tabindex="0"><span></span></div>
+    <span id="modeLabel" class="badge">TRAINING</span>
+    <span class="pill training-only">Feedback On</span>
+    <span class="pill training-only">Explanations On</span>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+
+    <div class="card">
+      <div class="cardHeader">Scenario</div>
+      <div class="cardBody">
+        <p id="scenarioText" style="margin:0;"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">Diagnosis & Action</div>
+      <div class="cardBody">
+
+        <div class="partGroup">
+          <div class="groupHead">Most Likely Cause</div>
+          <div id="causeOptions"></div>
+        </div>
+
+        <div class="partGroup">
+          <div class="groupHead">Best Next Step</div>
+          <div id="actionOptions"></div>
+        </div>
+
+        <div class="footer">
+          <button id="submitBtn">Submit</button>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+
+        <div id="results" class="results hidden" aria-live="polite"></div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+let examMode = false;
+let currentScenario = "battery";
+
+/*
+  Exam realism lock-ins:
+  - 4 causes + 4 actions per scenario (no bloat)
+  - Scenarios are original and objective-aligned
+  - Training mode: minimal explanation (1–2 sentences)
+  - Exam mode: score only
+*/
+const SCENARIOS = {
+  battery: {
+    text: "The user reports their phone battery drains quickly during normal daily use. The device is not physically damaged and the battery health status shows normal.",
+    causes: [
+      { value:"bg_apps", label:"Background apps running continuously (high background activity)" },
+      { value:"power_settings", label:"High power settings enabled (high brightness, GPS, Bluetooth, 5G always on)" },
+      { value:"poor_signal", label:"Poor cellular signal causing increased transmit power" },
+      { value:"aging_battery", label:"Battery cells are failing due to age or wear" }
+    ],
+    actions: [
+      { value:"battery_usage", label:"Review battery usage and restrict background activity for top-draining apps" },
+      { value:"lower_radios", label:"Lower brightness and disable unused radios/features (GPS, Bluetooth, 5G)" },
+      { value:"power_save", label:"Enable power saving mode and restart the device" },
+      { value:"replace_battery", label:"Replace the battery" }
+    ],
+    correct:{ cause:"bg_apps", action:"battery_usage" },
+    explain:"On A+ style questions, start by identifying the simplest, most common drain source (app/background activity) before replacement."
+  },
+
+  data: {
+    text: "The device connects to Wi-Fi at the office, but cellular data does not work when the user leaves the building. Other phones on the same carrier have data service in that area.",
+    causes: [
+      { value:"airplane", label:"Airplane mode enabled or cellular radio disabled" },
+      { value:"cell_data_off", label:"Cellular data disabled or APN settings misconfigured" },
+      { value:"sim_issue", label:"SIM card not seated, disabled, or not provisioned" },
+      { value:"carrier_outage", label:"Carrier network outage" }
+    ],
+    actions: [
+      { value:"verify_cell", label:"Verify airplane mode is off and cellular data is enabled; confirm APN settings if required" },
+      { value:"reseat_sim", label:"Power off, reseat SIM, power on, and retest" },
+      { value:"reset_net", label:"Reset network settings and retest" },
+      { value:"contact_carrier", label:"Contact the carrier to verify account provisioning and outages" }
+    ],
+    correct:{ cause:"cell_data_off", action:"verify_cell" },
+    explain:"CompTIA-style troubleshooting rewards checking settings and configuration first, especially when Wi-Fi works and other phones have service."
+  },
+
+  rotation: {
+    text: "The screen does not rotate when the device is turned sideways. The touchscreen works normally and the issue started after the user changed display settings.",
+    causes: [
+      { value:"rotation_lock", label:"Orientation/rotation lock enabled" },
+      { value:"app_override", label:"An app or accessibility setting is overriding auto-rotate behavior" },
+      { value:"sensor_fault", label:"Accelerometer/gyroscope sensor fault" },
+      { value:"os_glitch", label:"OS display service glitch after a recent update" }
+    ],
+    actions: [
+      { value:"disable_lock", label:"Disable orientation/rotation lock and retest" },
+      { value:"reboot_safe", label:"Restart and test without third-party apps (safe mode if available)" },
+      { value:"sensor_test", label:"Run sensor diagnostics/calibration and retest" },
+      { value:"update_os", label:"Install pending OS updates and retest" }
+    ],
+    correct:{ cause:"rotation_lock", action:"disable_lock" },
+    explain:"Auto-rotate failures are commonly caused by a simple setting. The best next step is to verify the lock state before deeper diagnostics."
+  },
+
+  swollen: {
+    text: "A laptop does not sit flat and the bottom case appears bowed outward. The laptop also becomes warm during light use and the trackpad feels harder to click than usual.",
+    causes: [
+      { value:"swollen_battery", label:"Swollen lithium-ion battery expanding the chassis" },
+      { value:"hinge_damage", label:"Hinge damage causing the case to flex upward" },
+      { value:"case_warp", label:"Chassis warped from heat exposure" },
+      { value:"assembly_issue", label:"Incorrect reassembly or internal component misalignment" }
+    ],
+    actions: [
+      { value:"power_down", label:"Power down immediately, disconnect power, and remove from service for battery replacement" },
+      { value:"continue_use", label:"Continue using the laptop until the next maintenance window" },
+      { value:"reseat_parts", label:"Open the case and reseat internal components while the system is running" },
+      { value:"run_diag", label:"Run hardware diagnostics to confirm the failure" }
+    ],
+    correct:{ cause:"swollen_battery", action:"power_down" },
+    explain:"A swollen battery is a safety issue. CompTIA-style best practice is to power down and remove from service rather than troubleshoot while powered."
+  },
+
+  black: {
+    text: "A laptop powers on and you can hear Windows startup sounds, but the built-in display is black. When you connect an external monitor, the desktop displays normally.",
+    causes: [
+      { value:"brightness", label:"Brightness turned all the way down or display output toggled incorrectly" },
+      { value:"lcd_cable", label:"Internal display cable is disconnected or not seated" },
+      { value:"backlight_fail", label:"LCD backlight or display panel failure" },
+      { value:"gpu_fail", label:"GPU failure" }
+    ],
+    actions: [
+      { value:"check_brightness", label:"Increase brightness and toggle display output keys, then retest" },
+      { value:"inspect_cable", label:"Inspect and reseat the internal display cable connection" },
+      { value:"replace_panel", label:"Replace the LCD/display assembly" },
+      { value:"replace_gpu", label:"Replace the GPU or system board" }
+    ],
+    // External monitor works => GPU is unlikely. Best exam-aligned approach: verify simplest (brightness) THEN inspect cable/panel.
+    // Keep this as a single best answer: cable not seated is a very common post-repair/assembly cause.
+    correct:{ cause:"lcd_cable", action:"inspect_cable" },
+    explain:"When external video works, focus on the internal display path (cable/panel/backlight). The best next step is typically inspection before replacement."
+  },
+
+  burnin: {
+    text: "A tablet shows faint images that remain visible even after restarting and after leaving the screen off for an extended period. The touchscreen and apps function normally.",
+    causes: [
+      { value:"burnin", label:"Permanent screen burn-in from prolonged static images" },
+      { value:"image_retention", label:"Temporary image retention that will clear with time" },
+      { value:"protector", label:"Screen protector or surface film causing a visual artifact" },
+      { value:"gpu_artifact", label:"Graphics artifact caused by the GPU or drivers" }
+    ],
+    actions: [
+      { value:"pixel_refresh", label:"Run a pixel refresh / display conditioning feature (if available)" },
+      { value:"timeout", label:"Reduce brightness and enable shorter screen timeout settings" },
+      { value:"replace_display", label:"Replace the display" },
+      { value:"update_os", label:"Update the OS and retest" }
+    ],
+    correct:{ cause:"burnin", action:"replace_display" },
+    explain:"If an image persists after power cycling and time off, treat it as permanent damage. On A+ style questions, replacement is appropriate when the condition is irreversible."
+  },
+
+  projector: {
+    text: "A projector powers on but shows 'No Signal.' The laptop is awake and working. The same cable was recently used in another room with a different projector.",
+    causes: [
+      { value:"wrong_input", label:"Projector is set to the wrong input/source" },
+      { value:"resolution", label:"Unsupported resolution or refresh rate mismatch" },
+      { value:"cable_loose", label:"Loose or damaged video cable/adapter" },
+      { value:"lamp_fail", label:"Projector lamp or internal display hardware failure" }
+    ],
+    actions: [
+      { value:"select_input", label:"Select the correct input/source on the projector and retest" },
+      { value:"lower_res", label:"Set laptop display to duplicate/mirror and lower resolution, then retest" },
+      { value:"reseat_cable", label:"Reseat/replace the cable or adapter and retest" },
+      { value:"known_good", label:"Test with a known-good device to isolate the projector" }
+    ],
+    correct:{ cause:"wrong_input", action:"select_input" },
+    explain:"For “no signal,” CompTIA-style best practice is to confirm the selected input/source first before replacing cables or hardware."
+  },
+
+  wifi_after_screen: {
+    text: "A laptop cannot connect to Wi-Fi after the screen was recently replaced. Other wireless devices on the same network connect without issue.",
+    causes: [
+      { value:"antenna", label:"Wi-Fi antenna leads were not reconnected during screen replacement" },
+      { value:"nic_loose", label:"Wireless network card is not seated properly" },
+      { value:"wifi_disabled", label:"Wireless is disabled (airplane mode or function key toggle)" },
+      { value:"router_down", label:"Wireless router/access point failure" }
+    ],
+    actions: [
+      { value:"inspect_antenna", label:"Inspect and reconnect the Wi-Fi antenna leads routed through the display/hinge area" },
+      { value:"reseat_nic", label:"Reseat the wireless network card and retest" },
+      { value:"enable_wifi", label:"Verify Wi-Fi is enabled and airplane mode is off, then retest" },
+      { value:"reset_net", label:"Reset network settings and retest" }
+    ],
+    correct:{ cause:"antenna", action:"inspect_antenna" },
+    explain:"Laptop Wi-Fi antennas are often routed through the display assembly, so missed antenna connections are a common post-repair cause."
+  }
+};
+
+function renderOptionsForScenario(s){
+  const causeDiv = document.getElementById("causeOptions");
+  const actionDiv = document.getElementById("actionOptions");
+
+  causeDiv.innerHTML = "";
+  actionDiv.innerHTML = "";
+
+  s.causes.forEach(c=>{
+    causeDiv.innerHTML += `
+      <label class="opt">
+        <input type="radio" name="cause" value="${c.value}">
+        <span>${c.label}</span>
+      </label>`;
+  });
+
+  s.actions.forEach(a=>{
+    actionDiv.innerHTML += `
+      <label class="opt">
+        <input type="radio" name="action" value="${a.value}">
+        <span>${a.label}</span>
+      </label>`;
+  });
+}
+
+function loadScenario(key){
+  currentScenario = key;
+  const s = SCENARIOS[key];
+  document.getElementById("scenarioText").textContent = s.text;
+  renderOptionsForScenario(s);
+  resetSelections();
+}
+
+function getSelected(name){
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || null;
+}
+
+function submit(){
+  const cause = getSelected("cause");
+  const action = getSelected("action");
+
+  const results = document.getElementById("results");
+  results.classList.remove("hidden");
+
+  if(!cause || !action){
+    results.textContent = "Please select both a cause and a best next step.";
+    return;
+  }
+
+  const s = SCENARIOS[currentScenario];
+  const correct = (cause === s.correct.cause && action === s.correct.action);
+
+  results.innerHTML = correct
+    ? "<b>Result: Correct</b>"
+    : "<b>Result: Needs Review</b>";
+
+  if(!examMode){
+    const p = document.createElement("p");
+    p.className = "training-only";
+    p.style.margin = "8px 0 0";
+    p.textContent = s.explain;
+    results.appendChild(p);
+  }
+}
+
+function resetSelections(){
+  document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
+  document.getElementById("results").classList.add("hidden");
+  document.getElementById("results").innerHTML = "";
+}
+
+function setExamMode(on){
+  examMode = on;
+  document.body.classList.toggle("exam-mode", examMode);
+  document.getElementById("examToggle").classList.toggle("on", examMode);
+  document.getElementById("modeLabel").textContent = examMode ? "EXAM" : "TRAINING";
+  document.getElementById("examToggle").setAttribute("aria-checked", String(examMode));
+  // Clear any revealed feedback when switching modes
+  resetSelections();
+}
+
+document.getElementById("scenarioSelect").addEventListener("change", e => loadScenario(e.target.value));
+document.getElementById("submitBtn").addEventListener("click", submit);
+document.getElementById("resetBtn").addEventListener("click", resetSelections);
+
+const toggle = document.getElementById("examToggle");
+toggle.addEventListener("click", ()=> setExamMode(!examMode));
+toggle.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    setExamMode(!examMode);
+  }
+});
+
+// init
+loadScenario("battery");
+</script>
+
+</body>
+</html>

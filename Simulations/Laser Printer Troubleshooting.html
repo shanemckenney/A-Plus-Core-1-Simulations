@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Laser Printer Troubleshooting</title>
+
+<style>
+body { font-family: Arial, sans-serif; margin: 22px; }
+h1 { margin: 0 0 6px; }
+.muted { color: #555; }
+.card { border: 1px solid #ccc; border-radius: 12px; padding: 14px; margin: 14px 0; background: #fafafa; }
+.row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 980px) { .row { grid-template-columns: 1.15fr 0.85fr; } }
+
+.choices button {
+  display: block; width: 100%;
+  text-align: left;
+  padding: 12px; margin: 10px 0;
+  border-radius: 12px; border: 1px solid #777;
+  background: #fff; cursor: pointer; font-size: 16px;
+}
+.choices button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+button.small {
+  padding: 10px 12px; border-radius: 12px; border: 1px solid #777;
+  background: #fff; cursor: pointer;
+}
+
+.result { display: none; padding: 12px; border-radius: 12px; border: 1px solid #ccc; }
+.ok { background: #d4edda; border-color: #28a745; }
+.bad { background: #f8d7da; border-color: #dc3545; }
+
+.pill { display: inline-block; padding: 2px 10px; border: 1px solid #aaa; border-radius: 999px; font-size: 0.9em; margin-left: 8px; }
+
+.reveal { display: none; }
+.svgwrap { border: 1px solid #ccc; border-radius: 12px; background: #fff; padding: 10px; }
+.callout { font-size: 14px; margin-top: 8px; }
+
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.legend div { border: 1px solid #ddd; border-radius: 12px; padding: 10px; background: #fff; }
+
+.hl { display: none; }
+.hl.show { display: inline; }
+
+.label { font-size: 14px; fill: #333; }
+.tiny { font-size: 12px; fill: #333; opacity: 0.9; }
+
+.mode { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+.mode label { display:flex; gap:8px; align-items:center; cursor:pointer; }
+.mode input { transform: scale(1.15); }
+</style>
+</head>
+
+<body>
+
+<h1>Laser Printer Troubleshooting </h1>
+<div class="muted">Identify the failing component. Then the diagram highlights its location and shows paper movement.</div>
+
+<div class="card mode">
+<strong>Mode:</strong>
+<label><input type="radio" name="mode" value="practice" checked> Practice</label>
+<label><input type="radio" name="mode" value="exam"> Exam</label>
+<button class="small" id="newScenarioBtn">New scenario</button>
+<button class="small" id="resetBtn">Reset</button>
+</div>
+
+<div class="row">
+<div class="card">
+<h2>Scenario</h2>
+<div id="scenarioText"></div>
+
+<div id="practiceTip" class="card" style="background:#fff;">
+<strong>Practice Tip:</strong>  
+Smearing → Fuser |  
+Repeating marks → Drum | 
+Blank/faint → Transfer roller | 
+Won’t feed → Pickup rollers
+</div>
+
+<h3>Choose the failing component:</h3>
+<div class="choices">
+<button onclick="selectAnswer('pickup')">Pickup rollers</button>
+<button onclick="selectAnswer('fuser')">Fuser</button>
+<button onclick="selectAnswer('drum')">Imaging drum</button>
+<button onclick="selectAnswer('transfer')">Transfer roller</button>
+<button onclick="selectAnswer('toner')">Toner cartridge</button>
+</div>
+
+<div id="resultBox" class="result"></div>
+<div id="debrief" class="card" style="display:none;"></div>
+</div>
+
+<div class="card">
+<h2>Front-Open Laser Printer View</h2>
+<div class="reveal" id="visualPanel">
+
+<div class="svgwrap">
+<svg viewBox="0 0 900 560" width="100%" height="auto">
+
+<defs>
+<linearGradient id="body" x1="0" x2="1">
+<stop offset="0" stop-color="#f6f6f6"/>
+<stop offset="1" stop-color="#e2e2e2"/>
+</linearGradient>
+
+<marker id="arrowHead" markerWidth="10" markerHeight="10"
+        refX="8" refY="5" orient="auto">
+  <path d="M0,0 L10,5 L0,10 Z" fill="#b5b5b5"></path>
+</marker>
+</defs>
+
+<!-- Printer body -->
+<rect x="90" y="60" width="720" height="380" rx="22" fill="url(#body)" stroke="#666" stroke-width="3"/>
+<rect x="140" y="30" width="620" height="70" rx="16" fill="#ededed" stroke="#666" stroke-width="3"/>
+
+<!-- Front door open -->
+<path d="M150 300 L760 300 L800 440 L110 440 Z" fill="#f9f9f9" stroke="#777" stroke-width="3"/>
+
+<!-- Paper tray -->
+<rect x="170" y="440" width="560" height="70" rx="14" fill="#f1f1f1" stroke="#777" stroke-width="3"/>
+<text x="190" y="535" class="tiny">Paper tray</text>
+
+<!-- Pickup rollers -->
+<ellipse cx="330" cy="421" rx="38" ry="12" fill="#d9d9d9" stroke="#777" stroke-width="2"/>
+<ellipse cx="450" cy="421" rx="38" ry="12" fill="#d9d9d9" stroke="#777" stroke-width="2"/>
+<ellipse cx="570" cy="421" rx="38" ry="12" fill="#d9d9d9" stroke="#777" stroke-width="2"/>
+<text x="260" y="390" class="label">Pickup rollers</text>
+
+<!-- Paper path (clean version) -->
+<path d="M220 420 C300 380, 360 360, 430 350
+         C520 335, 590 320, 680 250"
+      fill="none"
+      stroke="#b5b5b5"
+      stroke-width="5"
+      stroke-linecap="round"
+      marker-end="url(#arrowHead)" />
+
+<path d="M320 388 C360 372, 395 362, 430 350"
+      fill="none" stroke="#a0a0a0" stroke-width="6"
+      marker-end="url(#arrowHead)" opacity="0.9"/>
+
+<path d="M500 338 C545 330, 590 315, 640 285"
+      fill="none" stroke="#a0a0a0" stroke-width="6"
+      marker-end="url(#arrowHead)" opacity="0.9"/>
+
+<!-- Toner -->
+<rect x="215" y="185" width="280" height="55" rx="12" fill="#fff" stroke="#888" stroke-width="2"/>
+<text x="235" y="220" class="label">Toner cartridge</text>
+
+<!-- Drum -->
+<ellipse cx="355" cy="275" rx="120" ry="22" fill="#e6f2ff" stroke="#777" stroke-width="2"/>
+<text x="235" y="308" class="label">Imaging drum</text>
+
+<!-- Transfer roller -->
+<rect x="250" y="330" width="210" height="20" rx="10" fill="#fff" stroke="#777" stroke-width="2"/>
+<text x="480" y="345" class="label">Transfer roller</text>
+
+<!-- Fuser -->
+<rect x="560" y="150" width="210" height="120" rx="18" fill="#fff" stroke="#777" stroke-width="2"/>
+<text x="585" y="185" class="label">Fuser</text>
+<text x="585" y="210" class="tiny">(hot rollers)</text>
+
+<!-- Highlights -->
+<rect class="hl" id="hl_pickup" x="280" y="392" width="360" height="56" rx="18" fill="none" stroke="#28a745" stroke-width="8"/>
+<rect class="hl" id="hl_fuser" x="552" y="142" width="226" height="136" rx="20" fill="none" stroke="#28a745" stroke-width="8"/>
+<ellipse class="hl" id="hl_drum" cx="355" cy="275" rx="132" ry="30" fill="none" stroke="#28a745" stroke-width="8"/>
+<rect class="hl" id="hl_transfer" x="242" y="322" width="226" height="36" rx="14" fill="none" stroke="#28a745" stroke-width="8"/>
+<rect class="hl" id="hl_toner" x="207" y="177" width="296" height="71" rx="16" fill="none" stroke="#28a745" stroke-width="8"/>
+
+</svg>
+</div>
+
+<div class="callout" id="calloutText"></div>
+</div>
+</div>
+</div>
+
+<script>
+const SCENARIOS = [
+{
+text: "Toner smears when touched and gets worse after warm-up.",
+correct: "fuser",
+explain: "Smearing + heat-related worsening means toner is not being bonded to paper. That is the fuser’s job (heat + pressure)."
+},
+{
+text: "Repeating marks appear in the same location on every page.",
+correct: "drum",
+explain: "Repeating defects at consistent intervals indicate a rotating component. The imaging drum rotates and commonly causes this."
+},
+{
+text: "Printer feeds paper normally but pages come out blank.",
+correct: "transfer",
+explain: "If paper feeds but toner does not transfer to the page, the transfer roller is likely failing."
+},
+{
+text: "Printer will not pull paper from the tray or grabs multiple sheets.",
+correct: "pickup",
+explain: "Feed issues like no pickup or multi-feed usually indicate worn pickup rollers."
+}
+];
+
+let currentScenario;
+let mode = "practice";
+
+function pickScenario() {
+currentScenario = SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)];
+document.getElementById("scenarioText").innerHTML = currentScenario.text;
+
+document.getElementById("resultBox").style.display = "none";
+document.getElementById("visualPanel").style.display = "none";
+document.getElementById("debrief").style.display = "none";
+
+clearHighlights();
+}
+
+function clearHighlights() {
+["hl_pickup","hl_fuser","hl_drum","hl_transfer","hl_toner"].forEach(id=>{
+document.getElementById(id).classList.remove("show");
+});
+}
+
+function selectAnswer(choice) {
+clearHighlights();
+
+let resultBox = document.getElementById("resultBox");
+let debrief = document.getElementById("debrief");
+
+document.getElementById("visualPanel").style.display = "block";
+resultBox.style.display = "block";
+
+if (choice === currentScenario.correct) {
+resultBox.className = "result ok";
+resultBox.innerHTML =
+"<strong>Correct.</strong><br><br>" +
+"<strong>Highlighted:</strong> " + label(currentScenario.correct) + "<br>" +
+shortFunction(currentScenario.correct);
+
+if (mode === "practice") {
+debrief.style.display = "block";
+debrief.innerHTML = "<strong>Explanation:</strong><br>" + currentScenario.explain;
+}
+}
+else {
+resultBox.className = "result bad";
+resultBox.innerHTML =
+"<strong>Incorrect.</strong><br><br>" +
+"<strong>Highlighted:</strong> " + label(currentScenario.correct) + "<br>" +
+shortFunction(currentScenario.correct);
+
+if (mode === "practice") {
+debrief.style.display = "block";
+debrief.innerHTML = "<strong>Why:</strong><br>" + currentScenario.explain;
+}
+}
+
+document.getElementById("hl_" + currentScenario.correct).classList.add("show");
+}
+
+function label(choice){
+switch(choice){
+case "pickup": return "Pickup rollers (front/bottom)";
+case "fuser": return "Fuser (rear of printer)";
+case "drum": return "Imaging drum (center)";
+case "transfer": return "Transfer roller (below drum)";
+case "toner": return "Toner cartridge";
+}
+}
+
+function shortFunction(choice){
+switch(choice){
+case "pickup": return "Grabs paper from the tray.";
+case "fuser": return "Heat + pressure bonds toner to paper.";
+case "drum": return "Holds the electrostatic image.";
+case "transfer": return "Moves toner from drum to paper.";
+case "toner": return "Supplies toner powder.";
+}
+}
+
+document.querySelectorAll("input[name='mode']").forEach(r=>{
+r.addEventListener("change", e => {
+mode = e.target.value;
+});
+});
+
+document.getElementById("newScenarioBtn").addEventListener("click", pickScenario);
+document.getElementById("resetBtn").addEventListener("click", pickScenario);
+
+pickScenario();
+</script>
+
+</body>
+</html>

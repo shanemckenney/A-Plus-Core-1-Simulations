@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Audio Troubleshooting Simulation</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --panel2:#0f1730;
+      --text:#e9ecf5;
+      --muted:#b7bfd8;
+      --line:rgba(255,255,255,0.12);
+      --good:#39d98a;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
+      --accent:#8aa0ff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(138,160,255,0.25), transparent 60%),
+                  radial-gradient(1000px 700px at 110% 10%, rgba(57,217,138,0.14), transparent 55%),
+                  radial-gradient(900px 700px at 50% 120%, rgba(255,204,102,0.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:24px 18px 10px;
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .topbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:12px;
+      justify-content:space-between;
+    }
+    h1{
+      font-size:20px;
+      margin:0;
+      font-weight:700;
+      letter-spacing:0.2px;
+    }
+    .sub{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:8px 10px;
+      background:rgba(255,255,255,0.03);
+      font-size:13px;
+      color:var(--muted);
+    }
+    .pill strong{color:var(--text); font-weight:700;}
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:10px 18px 26px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr;}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card .hd .title{
+      font-weight:800;
+      font-size:14px;
+      letter-spacing:0.2px;
+      margin:0;
+    }
+    .card .hd .hint{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+      line-height:1.3;
+    }
+    .card .bd{
+      padding:14px;
+    }
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    select, button, input[type="range"]{
+      font-family:var(--sans);
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(10,16,32,0.6);
+      color:var(--text);
+      padding:10px 10px;
+      outline:none;
+    }
+    select{
+      width:100%;
+    }
+    .field{
+      flex:1;
+      min-width:240px;
+    }
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    button{
+      cursor:pointer;
+      font-weight:700;
+      padding:10px 12px;
+      transition: transform .03s ease, filter .12s ease;
+    }
+    button:active{transform:translateY(1px);}
+    .primary{
+      background: linear-gradient(180deg, rgba(138,160,255,0.35), rgba(138,160,255,0.15));
+      border-color: rgba(138,160,255,0.5);
+    }
+    .ghost{
+      background:rgba(255,255,255,0.03);
+    }
+    .danger{
+      background: linear-gradient(180deg, rgba(255,107,107,0.25), rgba(255,107,107,0.12));
+      border-color: rgba(255,107,107,0.45);
+    }
+    .toggle{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      user-select:none;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,0.03);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--bad);
+      box-shadow: 0 0 0 6px rgba(255,107,107,0.09);
+    }
+    .dot.on{
+      background:var(--good);
+      box-shadow: 0 0 0 6px rgba(57,217,138,0.10);
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px 12px;
+      align-items:center;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,0.03);
+      margin-top:10px;
+    }
+    .k{
+      color:var(--muted);
+      font-size:12px;
+    }
+    .v{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--text);
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .badge.good{border-color: rgba(57,217,138,0.45); color: rgba(57,217,138,0.95);}
+    .badge.bad{border-color: rgba(255,107,107,0.45); color: rgba(255,107,107,0.95);}
+    .badge.warn{border-color: rgba(255,204,102,0.45); color: rgba(255,204,102,0.95);}
+    .mini{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+      margin:0;
+    }
+    .log{
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.35;
+      color:#e8ebff;
+      background:rgba(0,0,0,0.25);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      max-height:260px;
+      overflow:auto;
+      white-space:pre-wrap;
+    }
+    .hr{
+      height:1px;
+      background:var(--line);
+      margin:14px 0;
+    }
+    .result{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+      margin-top:12px;
+    }
+    .result h3{
+      margin:0 0 8px;
+      font-size:14px;
+      letter-spacing:0.2px;
+    }
+    .explain{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,0.22);
+      background:rgba(0,0,0,0.18);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    footer{
+      max-width:1100px;
+      margin:0 auto;
+      padding:0 18px 26px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    a{color:var(--accent); text-decoration:none;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>Audio Troubleshooting Simulation</h1>
+        <p class="sub">
+          Diagnose and correct endpoint audio issues by validating <strong>output</strong>, <strong>input</strong>,
+          <strong>permissions</strong>, and <strong>services</strong> in the proper order.
+        </p>
+      </div>
+
+      <div class="pill" title="Mode changes feedback behavior after submission">
+        Mode:
+        <strong id="modeLabel">Practice</strong>
+        <button class="ghost" id="toggleModeBtn" type="button">Switch Mode</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- LEFT: Scenario + Student Actions -->
+      <section class="card" aria-label="Scenario and Tasks">
+        <div class="hd">
+          <div>
+            <p class="title">Scenario</p>
+            <p class="hint">
+              Users in a shared training environment report: “We can’t hear audio in meetings” and “Microphones don’t work during calls.”
+              Your job is to correct the endpoint configuration so playback and recording work reliably.
+            </p>
+          </div>
+          <div class="badge warn" id="scenarioBadge">Multiple misconfigs present</div>
+        </div>
+
+        <div class="bd">
+          <div class="row">
+            <div class="field">
+              <label for="playbackSelect">Select the correct default playback device (what users hear)</label>
+              <select id="playbackSelect">
+                <option value="">-- Choose a playback device --</option>
+                <option>HDMI Output (Monitor)</option>
+                <option>Bluetooth Audio Device</option>
+                <option>Speakers (Realtek High Definition Audio)</option>
+                <option>USB Headset</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="recordingSelect">Select the correct default recording device (what users speak into)</label>
+              <select id="recordingSelect">
+                <option value="">-- Choose a recording device --</option>
+                <option>Webcam Microphone</option>
+                <option>Line-In (Audio Jack)</option>
+                <option>USB Headset Microphone</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>Microphone status and level</label>
+              <div class="kv">
+                <div class="k">Microphone enabled</div>
+                <div class="v">
+                  <span class="badge" id="micEnabledBadge">Disabled</span>
+                </div>
+
+                <div class="k">Microphone muted</div>
+                <div class="v">
+                  <span class="badge" id="micMutedBadge">Muted</span>
+                </div>
+
+                <div class="k">Input level</div>
+                <div class="v">
+                  <span id="micLevelReadout">5%</span>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px; justify-content:flex-start;">
+                <button class="ghost" type="button" id="toggleMicEnabled">Toggle Enabled</button>
+                <button class="ghost" type="button" id="toggleMicMuted">Toggle Mute</button>
+                <div style="flex:1; min-width:240px;">
+                  <label for="micLevel" style="margin:0 0 6px;">Adjust input level</label>
+                  <input id="micLevel" type="range" min="0" max="100" value="5" />
+                </div>
+              </div>
+              <p class="mini">Tip: In real troubleshooting, low input level can look like “no mic detected” inside an app.</p>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row" style="align-items:stretch;">
+            <div class="field">
+              <label>OS privacy setting: allow apps to access microphone</label>
+              <div class="toggle" role="button" tabindex="0" id="privacyToggle" aria-pressed="false">
+                <span class="dot" id="privacyDot"></span>
+                <div>
+                  <div style="font-weight:800; font-size:13px;">Microphone access for apps</div>
+                  <div class="mini" id="privacyText">Blocked by OS privacy setting</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Meeting app output selection (app-level override)</label>
+              <select id="appOutputSelect">
+                <option value="">-- App output device --</option>
+                <option>Use System Default</option>
+                <option>HDMI Output (Monitor)</option>
+                <option>Bluetooth Audio Device</option>
+                <option>Speakers (Realtek High Definition Audio)</option>
+                <option>USB Headset</option>
+              </select>
+              <p class="mini">Some apps override Windows defaults. “Use System Default” is often the best choice if defaults are correct.</p>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="field">
+              <label>Windows services status (identify vs repair)</label>
+              <div class="kv">
+                <div class="k">Windows Audio</div>
+                <div class="v"><span class="badge bad" id="svcAudioBadge">Stopped</span></div>
+
+                <div class="k">Windows Audio Endpoint Builder</div>
+                <div class="v"><span class="badge bad" id="svcEndpointBadge">Stopped</span></div>
+              </div>
+
+              <div class="row" style="margin-top:10px; justify-content:flex-start;">
+                <button class="ghost" type="button" id="startServicesBtn">Start Services</button>
+                <button class="ghost" type="button" id="stopServicesBtn">Stop Services</button>
+                <span class="badge warn" id="svcNote">Services are part of the chain</span>
+              </div>
+
+              <p class="mini">
+                In some exam-style simulations, you may only be asked to identify whether these services are running.
+                Here, you can simulate starting/stopping them to see how it impacts the environment.
+              </p>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <div class="btns">
+              <button class="ghost" type="button" id="resetBtn">Reset Scenario</button>
+              <button class="primary" type="button" id="submitBtn">Submit</button>
+            </div>
+          </div>
+
+          <div class="result" id="resultBox" style="display:none;">
+            <h3 id="resultTitle">Results</h3>
+            <div id="resultSummary" class="mini"></div>
+            <div id="resultDetails"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: "OS View" + Logs -->
+      <aside class="card" aria-label="System View">
+        <div class="hd">
+          <div>
+            <p class="title">System View</p>
+            <p class="hint">This panel simulates what a tech could observe while troubleshooting: defaults, symptoms, and validation tests.</p>
+          </div>
+          <div class="badge" id="healthBadge">Unstable</div>
+        </div>
+
+        <div class="bd">
+          <div class="kv">
+            <div class="k">Symptom</div>
+            <div class="v" id="symptomText">Users report “no sound” + “mic not detected”</div>
+
+            <div class="k">Current default playback</div>
+            <div class="v" id="osPlayback">HDMI Output (Monitor)</div>
+
+            <div class="k">Current default recording</div>
+            <div class="v" id="osRecording">Webcam Microphone</div>
+
+            <div class="k">App output override</div>
+            <div class="v" id="appOutput">Bluetooth Audio Device</div>
+
+            <div class="k">Mic permission</div>
+            <div class="v" id="osPrivacy">Blocked</div>
+
+            <div class="k">Services</div>
+            <div class="v" id="osServices">Stopped</div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <span class="badge" id="testBadge">Validation not run</span>
+            <button class="ghost" type="button" id="runTestBtn">Run Audio Validation</button>
+          </div>
+
+          <div class="log" id="log">
+[System] Environment loaded.
+[User Report] "We can't hear anything during meetings."
+[User Report] "The microphone isn't working in the meeting app."
+[Hint] Validate the chain: Output -> Input -> Permissions -> Services -> App override.
+          </div>
+
+          <div class="hr"></div>
+
+          <p class="mini">
+            <strong>What to remember:</strong> If services are stopped, changing device selections alone will not fix audio.
+            If privacy is blocked, the app may show “no mic” even when a mic is selected.
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <footer>
+    <strong>Instructor-designed training simulation.</strong> This activity is built to reinforce endpoint troubleshooting workflows aligned with CompTIA A+ objectives
+    (output vs input, default devices, privacy permissions, and service awareness). It is not intended to replicate or disclose live exam content.
+  </footer>
+
+<script>
+/* =========================
+   Simulation State
+   ========================= */
+const state = {
+  mode: "practice", // practice | exam
+  // Underlying "OS reality" (what's actually configured)
+  os: {
+    playback: "HDMI Output (Monitor)",
+    recording: "Webcam Microphone",
+    privacyAppsAllowed: false,
+    micEnabled: false,
+    micMuted: true,
+    micLevel: 5,
+    svcAudioRunning: false,
+    svcEndpointRunning: false,
+    appOutputOverride: "Bluetooth Audio Device" // app uses this unless "Use System Default"
+  }
+};
+
+// What "good" looks like for this scenario.
+const expected = {
+  playback: "Speakers (Realtek High Definition Audio)",  // You can swap to "USB Headset" if you want that as the right answer.
+  recording: "USB Headset Microphone",
+  privacyAppsAllowed: true,
+  micEnabled: true,
+  micMuted: false,
+  micLevelMin: 75,
+  svcAudioRunning: true,
+  svcEndpointRunning: true,
+  appOutputBest: "Use System Default"
+};
+
+const els = {
+  modeLabel: document.getElementById("modeLabel"),
+  toggleModeBtn: document.getElementById("toggleModeBtn"),
+  playbackSelect: document.getElementById("playbackSelect"),
+  recordingSelect: document.getElementById("recordingSelect"),
+  micEnabledBadge: document.getElementById("micEnabledBadge"),
+  micMutedBadge: document.getElementById("micMutedBadge"),
+  micLevel: document.getElementById("micLevel"),
+  micLevelReadout: document.getElementById("micLevelReadout"),
+  toggleMicEnabled: document.getElementById("toggleMicEnabled"),
+  toggleMicMuted: document.getElementById("toggleMicMuted"),
+  privacyToggle: document.getElementById("privacyToggle"),
+  privacyDot: document.getElementById("privacyDot"),
+  privacyText: document.getElementById("privacyText"),
+  appOutputSelect: document.getElementById("appOutputSelect"),
+  svcAudioBadge: document.getElementById("svcAudioBadge"),
+  svcEndpointBadge: document.getElementById("svcEndpointBadge"),
+  startServicesBtn: document.getElementById("startServicesBtn"),
+  stopServicesBtn: document.getElementById("stopServicesBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  submitBtn: document.getElementById("submitBtn"),
+  resultBox: document.getElementById("resultBox"),
+  resultTitle: document.getElementById("resultTitle"),
+  resultSummary: document.getElementById("resultSummary"),
+  resultDetails: document.getElementById("resultDetails"),
+  healthBadge: document.getElementById("healthBadge"),
+  scenarioBadge: document.getElementById("scenarioBadge"),
+  symptomText: document.getElementById("symptomText"),
+  osPlayback: document.getElementById("osPlayback"),
+  osRecording: document.getElementById("osRecording"),
+  osPrivacy: document.getElementById("osPrivacy"),
+  osServices: document.getElementById("osServices"),
+  appOutput: document.getElementById("appOutput"),
+  testBadge: document.getElementById("testBadge"),
+  runTestBtn: document.getElementById("runTestBtn"),
+  log: document.getElementById("log")
+};
+
+/* =========================
+   Helpers
+   ========================= */
+function badgeSet(el, text, kind){
+  el.textContent = text;
+  el.classList.remove("good","bad","warn");
+  if(kind) el.classList.add(kind);
+}
+function appendLog(line){
+  els.log.textContent += "\n" + line;
+  els.log.scrollTop = els.log.scrollHeight;
+}
+function updateModeUI(){
+  els.modeLabel.textContent = state.mode === "practice" ? "Practice" : "Exam";
+  els.toggleModeBtn.textContent = state.mode === "practice" ? "Switch to Exam" : "Switch to Practice";
+  appendLog(`[Mode] ${state.mode === "practice" ? "Practice mode (detailed explanations after submit)" : "Exam mode (minimal feedback)"} enabled.`);
+}
+function updateOSView(){
+  els.osPlayback.textContent = state.os.playback;
+  els.osRecording.textContent = state.os.recording;
+  els.osPrivacy.textContent = state.os.privacyAppsAllowed ? "Allowed" : "Blocked";
+  els.osServices.textContent = (state.os.svcAudioRunning && state.os.svcEndpointRunning) ? "Running" : "Stopped";
+  els.appOutput.textContent = state.os.appOutputOverride;
+
+  const stable =
+    state.os.svcAudioRunning &&
+    state.os.svcEndpointRunning &&
+    state.os.privacyAppsAllowed &&
+    (state.os.playback === expected.playback) &&
+    (state.os.recording === expected.recording) &&
+    state.os.micEnabled &&
+    !state.os.micMuted &&
+    (state.os.micLevel >= expected.micLevelMin) &&
+    (state.os.appOutputOverride === expected.appOutputBest);
+
+  badgeSet(els.healthBadge, stable ? "Stable" : "Unstable", stable ? "good" : "warn");
+  els.symptomText.textContent = stable
+    ? "Audio and microphone function normally across apps"
+    : "Users report “no sound” + “mic not detected”";
+
+  // Services badges
+  badgeSet(els.svcAudioBadge, state.os.svcAudioRunning ? "Running" : "Stopped", state.os.svcAudioRunning ? "good" : "bad");
+  badgeSet(els.svcEndpointBadge, state.os.svcEndpointRunning ? "Running" : "Stopped", state.os.svcEndpointRunning ? "good" : "bad");
+
+  // Mic badges / readout
+  badgeSet(els.micEnabledBadge, state.os.micEnabled ? "Enabled" : "Disabled", state.os.micEnabled ? "good" : "bad");
+  badgeSet(els.micMutedBadge, state.os.micMuted ? "Muted" : "Unmuted", state.os.micMuted ? "bad" : "good");
+  els.micLevel.value = state.os.micLevel;
+  els.micLevelReadout.textContent = `${state.os.micLevel}%`;
+
+  // Privacy toggle visuals
+  els.privacyDot.classList.toggle("on", state.os.privacyAppsAllowed);
+  els.privacyToggle.setAttribute("aria-pressed", state.os.privacyAppsAllowed ? "true" : "false");
+  els.privacyText.textContent = state.os.privacyAppsAllowed ? "Allowed for apps" : "Blocked by OS privacy setting";
+}
+
+/* =========================
+   Interactions that "configure the system"
+   ========================= */
+els.playbackSelect.addEventListener("change", () => {
+  if(!els.playbackSelect.value) return;
+  state.os.playback = els.playbackSelect.value;
+  appendLog(`[Action] Default playback set to: ${state.os.playback}`);
+  updateOSView();
+});
+els.recordingSelect.addEventListener("change", () => {
+  if(!els.recordingSelect.value) return;
+  state.os.recording = els.recordingSelect.value;
+  appendLog(`[Action] Default recording set to: ${state.os.recording}`);
+  updateOSView();
+});
+els.micLevel.addEventListener("input", () => {
+  state.os.micLevel = parseInt(els.micLevel.value, 10);
+  els.micLevelReadout.textContent = `${state.os.micLevel}%`;
+});
+els.micLevel.addEventListener("change", () => {
+  appendLog(`[Action] Microphone input level set to: ${state.os.micLevel}%`);
+  updateOSView();
+});
+els.toggleMicEnabled.addEventListener("click", () => {
+  state.os.micEnabled = !state.os.micEnabled;
+  appendLog(`[Action] Microphone ${state.os.micEnabled ? "enabled" : "disabled"}.`);
+  updateOSView();
+});
+els.toggleMicMuted.addEventListener("click", () => {
+  state.os.micMuted = !state.os.micMuted;
+  appendLog(`[Action] Microphone ${state.os.micMuted ? "muted" : "unmuted"}.`);
+  updateOSView();
+});
+function togglePrivacy(){
+  state.os.privacyAppsAllowed = !state.os.privacyAppsAllowed;
+  appendLog(`[Action] OS microphone permission for apps: ${state.os.privacyAppsAllowed ? "Allowed" : "Blocked"}.`);
+  updateOSView();
+}
+els.privacyToggle.addEventListener("click", togglePrivacy);
+els.privacyToggle.addEventListener("keydown", (e) => {
+  if(e.key === "Enter" || e.key === " ") togglePrivacy();
+});
+
+els.appOutputSelect.addEventListener("change", () => {
+  if(!els.appOutputSelect.value) return;
+  state.os.appOutputOverride = els.appOutputSelect.value;
+  appendLog(`[Action] Meeting app output set to: ${state.os.appOutputOverride}`);
+  updateOSView();
+});
+
+els.startServicesBtn.addEventListener("click", () => {
+  state.os.svcAudioRunning = true;
+  state.os.svcEndpointRunning = true;
+  appendLog(`[Action] Services started: Windows Audio + Audio Endpoint Builder.`);
+  updateOSView();
+});
+els.stopServicesBtn.addEventListener("click", () => {
+  state.os.svcAudioRunning = false;
+  state.os.svcEndpointRunning = false;
+  appendLog(`[Action] Services stopped: Windows Audio + Audio Endpoint Builder.`);
+  updateOSView();
+});
+
+/* =========================
+   Validation Test (what a user would observe)
+   ========================= */
+els.runTestBtn.addEventListener("click", () => {
+  els.testBadge.textContent = "Validation run";
+  const issues = [];
+
+  if(!state.os.svcAudioRunning || !state.os.svcEndpointRunning){
+    issues.push("Audio services are stopped (no audio subsystem available).");
+  }
+  if(state.os.playback !== expected.playback){
+    issues.push(`Default playback is set to "${state.os.playback}" (audio may be playing somewhere else).`);
+  }
+  if(state.os.recording !== expected.recording){
+    issues.push(`Default recording is set to "${state.os.recording}" (app may listen to the wrong mic).`);
+  }
+  if(!state.os.micEnabled){
+    issues.push("Microphone is disabled.");
+  }
+  if(state.os.micMuted){
+    issues.push("Microphone is muted.");
+  }
+  if(state.os.micLevel < expected.micLevelMin){
+    issues.push(`Microphone input level is low (${state.os.micLevel}%).`);
+  }
+  if(!state.os.privacyAppsAllowed){
+    issues.push("OS privacy blocks microphone access for apps.");
+  }
+  if(state.os.appOutputOverride !== expected.appOutputBest){
+    issues.push(`Meeting app is overriding output ("${state.os.appOutputOverride}") instead of using system default.`);
+  }
+
+  appendLog("[Validation] Running endpoint audio check...");
+  if(issues.length === 0){
+    appendLog("[Validation] PASS: Playback and microphone input function normally. App sees mic and audio output is correct.");
+    badgeSet(els.testBadge, "Validation PASS", "good");
+  } else {
+    appendLog("[Validation] FAIL: Issues detected:");
+    issues.forEach((i) => appendLog("  - " + i));
+    badgeSet(els.testBadge, "Validation FAIL", "bad");
+  }
+});
+
+/* =========================
+   Submit (grading)
+   ========================= */
+function grade(){
+  const checks = [
+    { key:"Services running", pass: state.os.svcAudioRunning && state.os.svcEndpointRunning,
+      why:"Audio relies on Windows Audio + Endpoint Builder. If they are stopped, device selections won’t matter." },
+    { key:"Correct playback", pass: state.os.playback === expected.playback,
+      why:"If the wrong output is selected (HDMI/Bluetooth), sound can be playing but not audible to the user." },
+    { key:"Correct recording", pass: state.os.recording === expected.recording,
+      why:"Recording (mic) is separate from playback. Picking the wrong mic makes apps show “no input” or capture silence." },
+    { key:"Mic enabled", pass: state.os.micEnabled,
+      why:"A disabled mic cannot capture audio regardless of the selected input device." },
+    { key:"Mic unmuted", pass: !state.os.micMuted,
+      why:"Mute causes silent input even though the correct device is selected." },
+    { key:"Mic level ≥ " + expected.micLevelMin + "%", pass: state.os.micLevel >= expected.micLevelMin,
+      why:"Very low input levels can look like a broken mic in conferencing apps." },
+    { key:"App mic privacy allowed", pass: state.os.privacyAppsAllowed,
+      why:"Windows privacy settings can block microphone access even when the device is configured correctly." },
+    { key:"Meeting app uses system default", pass: state.os.appOutputOverride === expected.appOutputBest,
+      why:"If an app overrides output, it can send audio to the wrong place even when Windows defaults are correct." }
+  ];
+
+  const passed = checks.filter(c => c.pass).length;
+  const total = checks.length;
+
+  // Display results
+  els.resultBox.style.display = "block";
+  const allPass = passed === total;
+
+  els.resultTitle.textContent = allPass ? "Submission: Correct Configuration Achieved" : "Submission: Configuration Incomplete";
+  els.resultSummary.textContent = `You met ${passed} of ${total} required conditions.`;
+
+  // Details
+  const rows = checks.map(c => {
+    const icon = c.pass ? "✅" : "❌";
+    const cls = c.pass ? "good" : "bad";
+    return `
+      <div style="display:flex; gap:10px; align-items:flex-start; margin:8px 0;">
+        <span class="badge ${cls}" style="min-width:90px; justify-content:center;">${c.pass ? "PASS" : "FAIL"}</span>
+        <div style="flex:1;">
+          <div style="font-weight:800; font-size:13px;">${icon} ${c.key}</div>
+          ${state.mode === "practice" ? `<div class="explain">${c.why}</div>` : ``}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // In exam mode, only show minimal feedback (no explanations)
+  els.resultDetails.innerHTML = rows;
+
+  // Update scenario badge
+  badgeSet(els.scenarioBadge, allPass ? "All issues resolved" : "Fixes still needed", allPass ? "good" : "warn");
+
+  appendLog(`[Submit] ${allPass ? "All conditions satisfied. Audio should now work." : "Some conditions are not met. Continue troubleshooting."}`);
+}
+
+els.submitBtn.addEventListener("click", grade);
+
+/* =========================
+   Reset
+   ========================= */
+function resetScenario(){
+  // Reset to a "broken" but realistic state (matches the common traps we discussed)
+  state.os.playback = "HDMI Output (Monitor)";
+  state.os.recording = "Webcam Microphone";
+  state.os.privacyAppsAllowed = false;
+  state.os.micEnabled = false;
+  state.os.micMuted = true;
+  state.os.micLevel = 5;
+  state.os.svcAudioRunning = false;
+  state.os.svcEndpointRunning = false;
+  state.os.appOutputOverride = "Bluetooth Audio Device";
+
+  // Reset UI selections
+  els.playbackSelect.value = "";
+  els.recordingSelect.value = "";
+  els.appOutputSelect.value = "";
+
+  // Reset results and test badge
+  els.resultBox.style.display = "none";
+  badgeSet(els.testBadge, "Validation not run");
+  els.log.textContent =
+`[System] Environment loaded.
+[User Report] "We can't hear anything during meetings."
+[User Report] "The microphone isn't working in the meeting app."
+[Hint] Validate the chain: Output -> Input -> Permissions -> Services -> App override.`;
+
+  badgeSet(els.scenarioBadge, "Multiple misconfigs present", "warn");
+  updateOSView();
+  appendLog("[System] Scenario reset to initial broken state.");
+}
+els.resetBtn.addEventListener("click", resetScenario);
+
+/* =========================
+   Mode toggle
+   ========================= */
+els.toggleModeBtn.addEventListener("click", () => {
+  state.mode = state.mode === "practice" ? "exam" : "practice";
+  updateModeUI();
+});
+
+/* =========================
+   Init
+   ========================= */
+(function init(){
+  // Preload app output dropdown with "Use System Default" option first
+  // (kept already in markup)
+  updateModeUI();
+  updateOSView();
+})();
+</script>
+</body>
+</html>

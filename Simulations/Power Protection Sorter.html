@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Power Protection Sorter (Practice)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .scenario { padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 16px; }
+    .layout { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start; }
+    .bank, .zone { border: 1px solid #bbb; border-radius: 10px; padding: 12px; }
+    .bank h3, .zone h3 { margin: 0 0 10px; }
+    .device {
+      padding: 10px; margin: 8px 0; border: 1px solid #999; border-radius: 10px;
+      background: #f7f7f7; cursor: grab;
+    }
+    .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .zone { min-height: 240px; background: #fff; }
+    .zone.over { outline: 3px dashed #666; }
+    .controls { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+    button { padding: 10px 12px; border-radius: 10px; border: 1px solid #777; background: #fff; cursor: pointer; }
+    .status { margin-top: 12px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; background: #fafafa; }
+    .muted { color: #555; font-size: 0.95em; }
+    .rationale { display:none; margin-top: 10px; }
+    .tag { display:inline-block; padding:2px 8px; border:1px solid #aaa; border-radius: 999px; margin-left:8px; font-size: 0.85em; color:#333; }
+  </style>
+</head>
+<body>
+
+  <h1>Power Protection Sorter (Practice)</h1>
+
+  <div class="scenario">
+    <strong>Scenario:</strong> A small front office has brief power flickers a few times per month.
+    The goal is to keep critical services stable and protect equipment.
+    <div class="muted">Drag each device into the best option: <b>UPS</b>, <b>Surge Protector</b>, or <b>Wall Outlet</b>.</div>
+  </div>
+
+  <div class="layout">
+    <div class="bank">
+      <h3>Devices</h3>
+      <div id="deviceBank"></div>
+      <div class="muted">Tip: UPS is for battery runtime + surge. Surge strip is surge only.</div>
+    </div>
+
+    <div class="zones">
+      <div class="zone" data-zone="UPS">
+        <h3>UPS <span class="tag">battery + surge</span></h3>
+      </div>
+      <div class="zone" data-zone="SURGE">
+        <h3>Surge Protector <span class="tag">surge only</span></h3>
+      </div>
+      <div class="zone" data-zone="WALL">
+        <h3>Wall Outlet <span class="tag">no protection</span></h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="checkBtn">Check Answers</button>
+    <button id="resetBtn">Reset</button>
+    <button id="toggleRationaleBtn">Show/Hide Rationale</button>
+  </div>
+
+  <div id="status" class="status">Place all devices, then click <b>Check Answers</b>.</div>
+
+  <div id="rationale" class="rationale status">
+    <b>Rationale (teach-back):</b>
+    <ul>
+      <li><b>UPS:</b> devices where sudden power loss causes session/data loss or takes down critical connectivity (PC, monitor, modem/router/switch).</li>
+      <li><b>Surge:</b> sensitive electronics that don’t need battery runtime (scanner, chargers, lamps, speakers).</li>
+      <li><b>Wall:</b> high-draw/heating devices that don’t belong on a UPS (especially laser printers).</li>
+    </ul>
+  </div>
+
+<script>
+  // --- Editable content (make it YOURS) ---
+  const devices = [
+    { id: "pc", label: "Desktop computer" },
+    { id: "mon", label: "Primary monitor" },
+    { id: "modem", label: "Modem / ONT" },
+    { id: "router", label: "Wi-Fi router" },
+    { id: "switch", label: "8-port switch" },
+    { id: "laser", label: "Laser printer" },
+    { id: "scan", label: "Flatbed scanner" },
+    { id: "lamp", label: "Desk lamp" },
+    { id: "charger", label: "Phone charger" }
+  ];
+
+  // Key is principle-based, not “exam exact”
+  const answerKey = {
+    UPS:    ["pc", "mon", "modem", "router", "switch"],
+    SURGE:  ["scan", "lamp", "charger"],
+    WALL:   ["laser"]
+  };
+
+  // --- Build UI ---
+  const bank = document.getElementById("deviceBank");
+  const zones = Array.from(document.querySelectorAll(".zone"));
+  const status = document.getElementById("status");
+  const rationale = document.getElementById("rationale");
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function createDeviceEl(d) {
+    const el = document.createElement("div");
+    el.className = "device";
+    el.draggable = true;
+    el.id = d.id;
+    el.textContent = d.label;
+    el.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", d.id);
+    });
+    return el;
+  }
+
+  function reset() {
+    bank.innerHTML = "";
+    zones.forEach(z => {
+      // keep title, remove dropped devices
+      Array.from(z.querySelectorAll(".device")).forEach(d => d.remove());
+    });
+
+    shuffle([...devices]).forEach(d => bank.appendChild(createDeviceEl(d)));
+    status.textContent = "Place all devices, then click Check Answers.";
+    rationale.style.display = "none";
+  }
+
+  zones.forEach(zone => {
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      zone.classList.add("over");
+    });
+    zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      zone.classList.remove("over");
+      const id = e.dataTransfer.getData("text/plain");
+      const el = document.getElementById(id);
+      if (el) zone.appendChild(el);
+    });
+  });
+
+  document.getElementById("checkBtn").addEventListener("click", () => {
+    const placements = { UPS: [], SURGE: [], WALL: [] };
+
+    zones.forEach(z => {
+      const zoneName = z.dataset.zone;
+      const ids = Array.from(z.querySelectorAll(".device")).map(d => d.id);
+      placements[zoneName] = ids;
+    });
+
+    const allPlaced = devices.every(d =>
+      placements.UPS.includes(d.id) || placements.SURGE.includes(d.id) || placements.WALL.includes(d.id)
+    );
+
+    if (!allPlaced) {
+      status.textContent = "Not graded yet: place every device into a category.";
+      return;
+    }
+
+    let correct = 0;
+    let total = devices.length;
+    let feedback = [];
+
+    for (const [zone, ids] of Object.entries(placements)) {
+      ids.forEach(id => {
+        const isCorrect = answerKey[zone].includes(id);
+        if (isCorrect) correct++;
+        else {
+          // find correct zone
+          const correctZone = Object.keys(answerKey).find(z => answerKey[z].includes(id));
+          const label = devices.find(d => d.id === id)?.label || id;
+          feedback.push(`${label}: should be in ${correctZone}`);
+        }
+      });
+    }
+
+    status.innerHTML = `<b>Score:</b> ${correct}/${total}` + (feedback.length ? `<br><br><b>Fix these:</b><br>• ${feedback.join("<br>• ")}` : "<br><br><b>Nice.</b> Explain your reasoning for one UPS choice.");
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", reset);
+  document.getElementById("toggleRationaleBtn").addEventListener("click", () => {
+    rationale.style.display = (rationale.style.display === "none" || !rationale.style.display) ? "block" : "none";
+  });
+
+  reset();
+</script>
+</body>
+</html>
