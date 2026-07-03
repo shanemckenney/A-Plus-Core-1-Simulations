@@ -3,98 +3,307 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Laser Printer Troubleshooting</title>
+<title>A+ Core 1 - Laser Printer Troubleshooting</title>
 
 <style>
-body { font-family: Arial, sans-serif; margin: 22px; }
-h1 { margin: 0 0 6px; }
-.muted { color: #555; }
-.card { border: 1px solid #ccc; border-radius: 12px; padding: 14px; margin: 14px 0; background: #fafafa; }
-.row { display: grid; grid-template-columns: 1fr; gap: 14px; }
-@media (min-width: 980px) { .row { grid-template-columns: 1.15fr 0.85fr; } }
+    :root {
+      --bg: #090d1a;
+      --panel: #111827;
+      --panel-hdr: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --good: #10b981;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 12px;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
 
-.choices button {
-  display: block; width: 100%;
-  text-align: left;
-  padding: 12px; margin: 10px 0;
-  border-radius: 12px; border: 1px solid #777;
-  background: #fff; cursor: pointer; font-size: 16px;
-}
-.choices button:disabled { opacity: 0.6; cursor: not-allowed; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: radial-gradient(1000px 600px at 10% 10%, rgba(59, 130, 246, 0.15), transparent 50%), var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
 
-.controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-button.small {
-  padding: 10px 12px; border-radius: 12px; border: 1px solid #777;
-  background: #fff; cursor: pointer;
-}
+    header {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
 
-.result { display: none; padding: 12px; border-radius: 12px; border: 1px solid #ccc; }
-.ok { background: #d4edda; border-color: #28a745; }
-.bad { background: #f8d7da; border-color: #dc3545; }
+    h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+    h2 { font-size: 14px; margin: 0 0 12px 0; font-weight: 700; }
+    
+    .mode-ctrl { display: flex; align-items: center; gap: 10px; }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.secondary { background: rgba(239, 68, 68, 0.2); border-color: var(--bad); }
 
-.pill { display: inline-block; padding: 2px 10px; border: 1px solid #aaa; border-radius: 999px; font-size: 0.9em; margin-left: 8px; }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .badge.info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+    .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
 
-.reveal { display: none; }
-.svgwrap { border: 1px solid #ccc; border-radius: 12px; background: #fff; padding: 10px; }
-.callout { font-size: 14px; margin-top: 8px; }
+    .workspace {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 20px;
+    }
 
-.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.legend div { border: 1px solid #ddd; border-radius: 12px; padding: 10px; background: #fff; }
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
 
-.hl { display: none; }
-.hl.show { display: inline; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
-.label { font-size: 14px; fill: #333; }
-.tiny { font-size: 12px; fill: #333; opacity: 0.9; }
+    .card-hdr {
+      background: var(--panel-hdr);
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
 
-.mode { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
-.mode label { display:flex; gap:8px; align-items:center; cursor:pointer; }
-.mode input { transform: scale(1.15); }
-</style>
+    .card-bd { padding: 20px; flex: 1; overflow-y: auto; max-height: 75vh; }
+
+    .prompt {
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 4px solid var(--accent);
+      padding: 15px;
+      border-radius: 4px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .tip-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .scenario-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .choices button {
+      padding: 10px 12px;
+      text-align: left;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .choices button:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--accent); }
+    .choices button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .controls { display: flex; gap: 8px; margin: 12px 0 16px 0; flex-wrap: wrap; }
+
+    .result {
+      display: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      border-left: 3px solid transparent;
+      margin-bottom: 12px;
+    }
+    .result.ok {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border-left-color: var(--good);
+    }
+    .result.bad {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border-left-color: var(--bad);
+    }
+
+    .reveal { display: none; }
+    .svgwrap { 
+      border: 1px solid var(--border); 
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px; 
+      margin-bottom: 12px;
+    }
+
+    .callout { font-size: 12px; margin-top: 8px; color: var(--muted); }
+
+    .mode-control {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .mode-control label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .mode-control input {
+      cursor: pointer;
+    }
+
+    .hl { display: none; }
+    .hl.show { display: inline; }
+
+    .label { font-size: 12px; fill: #666; }
+    .tiny { font-size: 11px; fill: #666; opacity: 0.8; }
+
+    .debrief {
+      display: none;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .card-bd { max-height: none; }
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>Laser Printer Troubleshooting </h1>
-<div class="muted">Identify the failing component. Then the diagram highlights its location and shows paper movement.</div>
+<header>
+  <a href="../index.html" class="btn" style="align-self: center;">← Back to Simulations</a>
+  <div>
+    <h1>Laser Printer Troubleshooting</h1>
+  </div>
+  <div class="mode-ctrl">
+    <span class="badge danger">Domain 3.8</span>
+  </div>
+</header>
 
-<div class="card mode">
-<strong>Mode:</strong>
-<label><input type="radio" name="mode" value="practice" checked> Practice</label>
-<label><input type="radio" name="mode" value="exam"> Exam</label>
-<button class="small" id="newScenarioBtn">New scenario</button>
-<button class="small" id="resetBtn">Reset</button>
-</div>
+<main class="workspace">
 
-<div class="row">
-<div class="card">
-<h2>Scenario</h2>
-<div id="scenarioText"></div>
+  <section class="card">
+    <div class="card-hdr">
+      <span>Troubleshooting Scenarios</span>
+    </div>
+    <div class="card-bd">
+      <div class="prompt">
+        <strong>Support Lab Assignment:</strong><br>
+        Identify the failing laser printer component based on symptoms. The diagram shows component location and paper flow.
+      </div>
 
-<div id="practiceTip" class="card" style="background:#fff;">
-<strong>Practice Tip:</strong>  
-Smearing → Fuser |  
-Repeating marks → Drum | 
-Blank/faint → Transfer roller | 
-Won’t feed → Pickup rollers
-</div>
+      <div class="tip-card">
+        <strong>Quick Reference:</strong><br>
+        Smearing → Fuser | Repeating marks → Drum | Blank/faint → Transfer roller | Won't feed → Pickup rollers
+      </div>
 
-<h3>Choose the failing component:</h3>
-<div class="choices">
-<button onclick="selectAnswer('pickup')">Pickup rollers</button>
-<button onclick="selectAnswer('fuser')">Fuser</button>
-<button onclick="selectAnswer('drum')">Imaging drum</button>
-<button onclick="selectAnswer('transfer')">Transfer roller</button>
-<button onclick="selectAnswer('toner')">Toner cartridge</button>
-</div>
+      <div class="mode-control">
+        <strong>Mode:</strong>
+        <label><input type="radio" name="mode" value="practice" checked> Practice</label>
+        <label><input type="radio" name="mode" value="exam"> Exam</label>
+      </div>
 
-<div id="resultBox" class="result"></div>
-<div id="debrief" class="card" style="display:none;"></div>
-</div>
+      <div class="scenario-card">
+        <h2>Current Scenario</h2>
+        <p id="scenarioText" style="margin: 0; font-size: 13px; line-height: 1.6;"></p>
 
-<div class="card">
-<h2>Front-Open Laser Printer View</h2>
-<div class="reveal" id="visualPanel">
+        <h2 style="margin-top: 12px;">Choose the failing component:</h2>
+        <div class="choices">
+          <button onclick="selectAnswer('pickup')">Pickup rollers</button>
+          <button onclick="selectAnswer('fuser')">Fuser</button>
+          <button onclick="selectAnswer('drum')">Imaging drum</button>
+          <button onclick="selectAnswer('transfer')">Transfer roller</button>
+          <button onclick="selectAnswer('toner')">Toner cartridge</button>
+        </div>
+
+        <div id="resultBox" class="result"></div>
+        <div id="debrief" class="debrief"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" id="newScenarioBtn">New Scenario</button>
+        <button class="btn secondary" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-hdr">
+      <span>Laser Printer Schematic</span>
+    </div>
+    <div class="card-bd">
+      <div class="reveal" id="visualPanel">
 
 <div class="svgwrap">
 <svg viewBox="0 0 900 560" width="100%" height="auto">
@@ -173,16 +382,18 @@ Won’t feed → Pickup rollers
 </div>
 
 <div class="callout" id="calloutText"></div>
-</div>
-</div>
-</div>
+      </div>
+    </div>
+  </section>
+
+</main>
 
 <script>
 const SCENARIOS = [
 {
 text: "Toner smears when touched and gets worse after warm-up.",
 correct: "fuser",
-explain: "Smearing + heat-related worsening means toner is not being bonded to paper. That is the fuser’s job (heat + pressure)."
+explain: "Smearing + heat-related worsening means toner is not being bonded to paper. That is the fuser's job (heat + pressure)."
 },
 {
 text: "Repeating marks appear in the same location on every page.",

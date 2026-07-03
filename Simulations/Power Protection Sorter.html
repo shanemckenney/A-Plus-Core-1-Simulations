@@ -3,77 +3,294 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Power Protection Sorter (Practice)</title>
+  <title>A+ Core 1 - Power Protection Sorter</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .scenario { padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 16px; }
-    .layout { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start; }
-    .bank, .zone { border: 1px solid #bbb; border-radius: 10px; padding: 12px; }
-    .bank h3, .zone h3 { margin: 0 0 10px; }
-    .device {
-      padding: 10px; margin: 8px 0; border: 1px solid #999; border-radius: 10px;
-      background: #f7f7f7; cursor: grab;
+    :root {
+      --bg: #090d1a;
+      --panel: #111827;
+      --panel-hdr: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --good: #10b981;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 12px;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .zone { min-height: 240px; background: #fff; }
-    .zone.over { outline: 3px dashed #666; }
-    .controls { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
-    button { padding: 10px 12px; border-radius: 10px; border: 1px solid #777; background: #fff; cursor: pointer; }
-    .status { margin-top: 12px; padding: 10px; border-radius: 8px; border: 1px solid #ccc; background: #fafafa; }
-    .muted { color: #555; font-size: 0.95em; }
-    .rationale { display:none; margin-top: 10px; }
-    .tag { display:inline-block; padding:2px 8px; border:1px solid #aaa; border-radius: 999px; margin-left:8px; font-size: 0.85em; color:#333; }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background: radial-gradient(1000px 600px at 10% 10%, rgba(59, 130, 246, 0.15), transparent 50%), var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 20px;
+    }
+
+    h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+    h2 { font-size: 14px; margin: 0 0 12px 0; font-weight: 700; }
+    h3 { font-size: 13px; margin: 0 0 10px 0; font-weight: 700; }
+    
+    .mode-ctrl { display: flex; align-items: center; gap: 10px; }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.secondary { background: rgba(239, 68, 68, 0.2); border-color: var(--bad); }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: var(--mono);
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .badge.info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+    .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+
+    .workspace {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-hdr {
+      background: var(--panel-hdr);
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-bd { padding: 16px; flex: 1; }
+
+    .device-bank {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .device {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: grab;
+      user-select: none;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .device:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--accent); }
+    .device:active { cursor: grabbing; }
+
+    .zones {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 1000px) {
+      .zones { grid-template-columns: 1fr; }
+    }
+
+    .zone {
+      min-height: 200px;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .zone.over { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+
+    .zone-title {
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .zone-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .zone-device {
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .zone-device:hover { background: rgba(255, 255, 255, 0.12); }
+
+    .status { 
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .rationale {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .prompt {
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 4px solid var(--accent);
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Power Protection Sorter (Practice)</h1>
-
-  <div class="scenario">
-    <strong>Scenario:</strong> A small front office has brief power flickers a few times per month.
-    The goal is to keep critical services stable and protect equipment.
-    <div class="muted">Drag each device into the best option: <b>UPS</b>, <b>Surge Protector</b>, or <b>Wall Outlet</b>.</div>
+<header>
+  <a href="../index.html" class="btn" style="align-self: center;">← Back to Simulations</a>
+  <div>
+    <h1>Power Protection Sorter</h1>
   </div>
+  <div class="mode-ctrl">
+    <span class="badge info">Domain 3.6</span>
+  </div>
+</header>
 
-  <div class="layout">
-    <div class="bank">
-      <h3>Devices</h3>
-      <div id="deviceBank"></div>
-      <div class="muted">Tip: UPS is for battery runtime + surge. Surge strip is surge only.</div>
+<main class="workspace">
+
+  <section class="card">
+    <div class="card-hdr">Devices to Classify</div>
+    <div class="card-bd">
+      <div class="prompt">
+        <strong>Scenario:</strong> A small office experiences brief power flickers a few times per month. Drag each device into the appropriate protection category.
+      </div>
+
+      <h3>Available Devices</h3>
+      <div class="device-bank" id="deviceBank"></div>
+
+      <div class="controls">
+        <button class="btn primary" id="checkBtn">Evaluate Classification</button>
+        <button class="btn secondary" id="resetBtn">Reset</button>
+        <button class="btn" id="toggleRationaleBtn">Show Rationale</button>
+      </div>
+
+      <div id="status" class="status">Drag all devices into their protection category → Click Evaluate.</div>
+      <div id="rationale" class="rationale">
+        <strong>Classification Rationale:</strong>
+        <ul style="margin: 8px 0 0 16px; padding: 0;">
+          <li><strong>UPS:</strong> Critical devices where power loss = data/session loss (PC, monitor, modem, router, switch)</li>
+          <li><strong>Surge Protector:</strong> Sensitive electronics that don't need battery runtime (scanner, chargers, lamps)</li>
+          <li><strong>Wall Outlet:</strong> High-draw/heating devices unsuitable for UPS (especially laser printers)</li>
+        </ul>
+      </div>
     </div>
+  </section>
 
-    <div class="zones">
-      <div class="zone" data-zone="UPS">
-        <h3>UPS <span class="tag">battery + surge</span></h3>
-      </div>
-      <div class="zone" data-zone="SURGE">
-        <h3>Surge Protector <span class="tag">surge only</span></h3>
-      </div>
-      <div class="zone" data-zone="WALL">
-        <h3>Wall Outlet <span class="tag">no protection</span></h3>
+  <section class="card">
+    <div class="card-hdr">Protection Categories</div>
+    <div class="card-bd">
+      <div class="zones">
+        <div class="zone" data-zone="UPS">
+          <div class="zone-title">UPS <span class="tag">battery + surge</span></div>
+          <div class="zone-items" id="zone-UPS"></div>
+        </div>
+        <div class="zone" data-zone="SURGE">
+          <div class="zone-title">Surge Protector <span class="tag">surge only</span></div>
+          <div class="zone-items" id="zone-SURGE"></div>
+        </div>
+        <div class="zone" data-zone="WALL">
+          <div class="zone-title">Wall Outlet <span class="tag">no protection</span></div>
+          <div class="zone-items" id="zone-WALL"></div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="controls">
-    <button id="checkBtn">Check Answers</button>
-    <button id="resetBtn">Reset</button>
-    <button id="toggleRationaleBtn">Show/Hide Rationale</button>
-  </div>
-
-  <div id="status" class="status">Place all devices, then click <b>Check Answers</b>.</div>
-
-  <div id="rationale" class="rationale status">
-    <b>Rationale (teach-back):</b>
-    <ul>
-      <li><b>UPS:</b> devices where sudden power loss causes session/data loss or takes down critical connectivity (PC, monitor, modem/router/switch).</li>
-      <li><b>Surge:</b> sensitive electronics that don’t need battery runtime (scanner, chargers, lamps, speakers).</li>
-      <li><b>Wall:</b> high-draw/heating devices that don’t belong on a UPS (especially laser printers).</li>
-    </ul>
-  </div>
+</main>
 
 <script>
-  // --- Editable content (make it YOURS) ---
   const devices = [
     { id: "pc", label: "Desktop computer" },
     { id: "mon", label: "Primary monitor" },
@@ -86,25 +303,24 @@
     { id: "charger", label: "Phone charger" }
   ];
 
-  // Key is principle-based, not “exam exact”
   const answerKey = {
     UPS:    ["pc", "mon", "modem", "router", "switch"],
     SURGE:  ["scan", "lamp", "charger"],
     WALL:   ["laser"]
   };
 
-  // --- Build UI ---
   const bank = document.getElementById("deviceBank");
   const zones = Array.from(document.querySelectorAll(".zone"));
   const status = document.getElementById("status");
   const rationale = document.getElementById("rationale");
 
   function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+      [copy[i], copy[j]] = [copy[j], copy[i]];
     }
-    return arr;
+    return copy;
   }
 
   function createDeviceEl(d) {
@@ -114,6 +330,7 @@
     el.id = d.id;
     el.textContent = d.label;
     el.addEventListener("dragstart", (e) => {
+      e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", d.id);
     });
     return el;
@@ -122,12 +339,11 @@
   function reset() {
     bank.innerHTML = "";
     zones.forEach(z => {
-      // keep title, remove dropped devices
-      Array.from(z.querySelectorAll(".device")).forEach(d => d.remove());
+      const zoneId = z.dataset.zone;
+      document.getElementById(`zone-${zoneId}`).innerHTML = "";
     });
-
     shuffle([...devices]).forEach(d => bank.appendChild(createDeviceEl(d)));
-    status.textContent = "Place all devices, then click Check Answers.";
+    status.textContent = "Drag all devices into their protection category → Click Evaluate.";
     rationale.style.display = "none";
   }
 
@@ -142,16 +358,25 @@
       zone.classList.remove("over");
       const id = e.dataTransfer.getData("text/plain");
       const el = document.getElementById(id);
-      if (el) zone.appendChild(el);
+      if (el) {
+        const zoneId = zone.dataset.zone;
+        document.getElementById(`zone-${zoneId}`).appendChild(el);
+      }
+    });
+
+    document.getElementById(`zone-${zone.dataset.zone}`).addEventListener("click", (e) => {
+      if (e.target.classList.contains("device")) {
+        const deviceId = e.target.id;
+        bank.appendChild(document.getElementById(deviceId));
+      }
     });
   });
 
   document.getElementById("checkBtn").addEventListener("click", () => {
     const placements = { UPS: [], SURGE: [], WALL: [] };
-
     zones.forEach(z => {
       const zoneName = z.dataset.zone;
-      const ids = Array.from(z.querySelectorAll(".device")).map(d => d.id);
+      const ids = Array.from(document.getElementById(`zone-${zoneName}`).querySelectorAll(".device")).map(d => d.id);
       placements[zoneName] = ids;
     });
 
@@ -165,23 +390,22 @@
     }
 
     let correct = 0;
-    let total = devices.length;
-    let feedback = [];
-
+    const feedback = [];
     for (const [zone, ids] of Object.entries(placements)) {
       ids.forEach(id => {
-        const isCorrect = answerKey[zone].includes(id);
-        if (isCorrect) correct++;
-        else {
-          // find correct zone
+        if (answerKey[zone].includes(id)) {
+          correct++;
+        } else {
           const correctZone = Object.keys(answerKey).find(z => answerKey[z].includes(id));
           const label = devices.find(d => d.id === id)?.label || id;
-          feedback.push(`${label}: should be in ${correctZone}`);
+          feedback.push(`${label} → ${correctZone}`);
         }
       });
     }
 
-    status.innerHTML = `<b>Score:</b> ${correct}/${total}` + (feedback.length ? `<br><br><b>Fix these:</b><br>• ${feedback.join("<br>• ")}` : "<br><br><b>Nice.</b> Explain your reasoning for one UPS choice.");
+    status.innerHTML = `<strong>Score: ${correct}/${devices.length}</strong>` + 
+      (feedback.length ? `<br><br><strong>Corrections needed:</strong><br>• ${feedback.join("<br>• ")}` : 
+      "<br><br><strong>Perfect!</strong> Explain your UPS selection to reinforce learning.");
   });
 
   document.getElementById("resetBtn").addEventListener("click", reset);
