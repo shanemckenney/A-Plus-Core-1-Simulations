@@ -1,516 +1,689 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Mobile Device Troubleshooting Activity</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mobile Device Troubleshooting</title>
 
 <style>
-:root{
-  --bg:#0b1020;
-  --panel:#111a33;
-  --panel2:#16214a;
-  --text:#f2f6ff;
-  --muted:#c6d3ff;
-  --border:rgba(255,255,255,.18);
-  --accent:#1f9e5d;
-  --good:#2be4a7;
-  --warn:#ffd36a;
-  --radius:16px;
-  --radius2:12px;
-  --shadow:0 18px 40px rgba(0,0,0,.45);
-  --mono: ui-monospace, Consolas, monospace;
-}
+  :root {
+    --bg-dark: #0f172a;
+    --sidebar-bg: #1e293b;
+    --panel-bg: #111827;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --border: #334155;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, monospace;
+  }
 
-*{box-sizing:border-box}
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-body{
-  margin:0;
-  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  background:var(--bg);
-  color:var(--text);
-}
+  /* Header Navbar */
+  header {
+    background: #0b1120;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand { font-weight: 700; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+  .brand span { color: var(--accent-blue); }
+  .score-badge {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid var(--accent-blue);
+    padding: 8px 16px;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 16px;
+    color: #93c5fd;
+  }
 
-header{
-  max-width:1100px;
-  margin:auto;
-  padding:28px 18px 14px;
-}
+  /* Main Layout */
+  .app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
 
-h1{margin:0 0 6px;font-size:22px}
-.sub{margin:0;color:var(--muted);font-size:14px;line-height:1.35}
+  /* Sidebar (Ticket Queue) */
+  .sidebar {
+    width: 320px; 
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .ticket-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .ticket-item {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .ticket-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-left: 5px solid var(--accent-blue);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .ticket-item.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .ticket-item.closed {
+    opacity: 0.7;
+    pointer-events: auto;
+  }
+  .ticket-id { font-family: var(--font-mono); font-size: 14px; font-weight: bold; margin-bottom: 6px;}
+  .ticket-caller { font-size: 16px; margin-bottom: 12px; }
+  .status-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .status-open { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.5); }
+  .status-closed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.5); }
+  .status-locked { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.5); }
+  
+  .sidebar-footer {
+    padding: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+    background: rgba(0,0,0,0.1);
+  }
+  .sidebar-footer strong { color: var(--text-main); }
 
-.disclaimer{
-  margin-top:10px;
-  padding:10px 12px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background:rgba(0,0,0,.28);
-  color:var(--muted);
-  font-size:13px;
-}
-.disclaimer strong{color:var(--text); font-weight:700}
+  /* Workspace (Active Ticket) */
+  .workspace {
+    flex: 1;
+    background: var(--bg-dark);
+    padding: 32px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+  }
+  .ticket-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+  }
+  .panel-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .meta-group { display: flex; gap: 32px; margin-top: 16px; }
+  .meta-item { display: flex; flex-direction: column; gap: 6px; }
+  .meta-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;}
+  .meta-value { font-size: 16px; }
 
-.controls{
-  display:flex;
-  gap:12px;
-  margin-top:12px;
-  align-items:center;
-  flex-wrap:wrap;
-}
+  .panel-body { padding: 32px; flex: 1; }
+  
+  .description-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--warning);
+    padding: 20px;
+    border-radius: 4px;
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
 
-.badge, select{
-  font-family:var(--mono);
-  font-size:13px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:var(--panel2);
-  color:var(--text);
-}
+  /* Forms */
+  .form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .form-group { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .form-group label { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+  select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-main);
+    font-size: 15px;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent-blue); }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
 
-select option{
-  background:#0f1736;
-  color:#ffffff;
-}
+  .btn {
+    padding: 14px 28px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
-.toggle{
-  width:48px;height:26px;border-radius:999px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.15);
-  position:relative;cursor:pointer;
-}
-.toggle span{
-  width:22px;height:22px;background:var(--accent);
-  border-radius:50%;position:absolute;top:1px;left:1px;
-  transition:.2s;
-}
-.toggle.on span{left:24px;background:var(--good)}
+  /* Mentor Feedback */
+  .feedback-box {
+    margin-top: 32px;
+    padding: 20px;
+    border-radius: 8px;
+    display: none;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .feedback-box.error {
+    display: block;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid var(--danger);
+  }
+  .feedback-box.success {
+    display: block;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-left: 4px solid var(--success);
+  }
+  .feedback-title { font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-size: 18px;}
+  .mentor-icon { font-size: 22px; }
+  
+  /* End Screen */
+  .end-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .end-screen h2 { font-size: 32px; color: var(--success); margin-bottom: 16px; }
+  .end-screen p { font-size: 18px; color: var(--text-muted); margin-bottom: 40px; }
+  .final-score { font-size: 64px; font-weight: bold; color: white; margin-bottom: 16px; }
 
-main{
-  max-width:1100px;
-  margin:auto;
-  padding:0 18px 36px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1.05fr .95fr;
-  gap:16px;
-}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-
-.card{
-  background:linear-gradient(180deg,var(--panel),rgba(17,26,51,.85));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-}
-
-.cardHeader{
-  padding:14px 16px;
-  border-bottom:1px solid var(--border);
-  font-weight:700;
-}
-
-.cardBody{
-  padding:16px;
-  background:rgba(0,0,0,.25);
-}
-
-.partGroup{
-  border:1px solid var(--border);
-  border-radius:var(--radius2);
-  background:rgba(0,0,0,.35);
-  margin-bottom:14px;
-}
-
-.groupHead{
-  padding:10px 12px;
-  border-bottom:1px solid var(--border);
-  font-weight:700;
-}
-
-.opt{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  border-bottom:1px solid rgba(255,255,255,.12);
-  cursor:pointer;
-  align-items:flex-start;
-}
-.opt:last-child{border-bottom:none}
-.opt:hover{background:rgba(255,255,255,.06)}
-.opt input{margin-top:2px}
-
-.footer{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-button{
-  border:1px solid var(--border);
-  background:rgba(122,162,255,.25);
-  color:var(--text);
-  padding:10px 16px;
-  border-radius:14px;
-  font-weight:700;
-  cursor:pointer;
-}
-button.secondary{background:rgba(255,255,255,.12)}
-
-.results{
-  margin-top:14px;
-  border:1px solid var(--border);
-  border-radius:var(--radius2);
-  background:rgba(0,0,0,.45);
-  padding:12px;
-  line-height:1.35;
-}
-.results.hidden{display:none}
-.results b{font-weight:800}
-
-.pill{
-  display:inline-block;
-  font-family:var(--mono);
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  margin-left:8px;
-  color:var(--muted);
-  background:rgba(255,255,255,.06);
-}
-
-.exam-mode .training-only{display:none}
 </style>
 </head>
-
 <body>
-<nav style="padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);"><a href="../index.html" style="color: #93c5fd; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">← Back to Simulations</a></nav>
-<header>
-  <h1>Mobile Device Troubleshooting Activity</h1>
-  <p class="sub">Instructor-developed training simulation to build troubleshooting and decision-making skills aligned to publicly available CompTIA A+ objectives.</p>
 
-  <div class="disclaimer">
-    <strong>Instructor Product Notice:</strong> Scenarios and options are original and designed for skill-building. This activity is not a replica of any live certification exam question.
-  </div>
-
-  <div class="controls">
-    <span class="badge">Scenario</span>
-    <select id="scenarioSelect" aria-label="Scenario selector">
-      <option value="battery">Rapid Battery Drain</option>
-      <option value="data">No Cellular Data</option>
-      <option value="rotation">Screen Does Not Rotate</option>
-      <option value="swollen">Laptop Not Laying Flat</option>
-      <option value="black">Laptop Screen Is Black</option>
-      <option value="burnin">Tablet Screen Burn-In</option>
-      <option value="projector">Projector Has No Image</option>
-      <option value="wifi_after_screen">Wi-Fi Fails After Screen Replacement</option>
-    </select>
-
-    <span class="badge">Mode</span>
-    <div id="examToggle" class="toggle" role="switch" aria-checked="false" tabindex="0"><span></span></div>
-    <span id="modeLabel" class="badge">TRAINING</span>
-    <span class="pill training-only">Feedback On</span>
-    <span class="pill training-only">Explanations On</span>
-  </div>
-</header>
-
-<main>
-  <div class="grid">
-
-    <div class="card">
-      <div class="cardHeader">Scenario</div>
-      <div class="cardBody">
-        <p id="scenarioText" style="margin:0;"></p>
-      </div>
+  <header>
+    <div class="brand">
+      <span>📱</span> Mobile Device Help Desk
     </div>
+    <div class="score-badge" id="global-score">Score: 0 / 80</div>
+  </header>
 
-    <div class="card">
-      <div class="cardHeader">Diagnosis & Action</div>
-      <div class="cardBody">
-
-        <div class="partGroup">
-          <div class="groupHead">Most Likely Cause</div>
-          <div id="causeOptions"></div>
-        </div>
-
-        <div class="partGroup">
-          <div class="groupHead">Best Next Step</div>
-          <div id="actionOptions"></div>
-        </div>
-
-        <div class="footer">
-          <button id="submitBtn">Submit</button>
-          <button id="resetBtn" class="secondary">Reset</button>
-        </div>
-
-        <div id="results" class="results hidden" aria-live="polite"></div>
-
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">My Ticket Queue</div>
+      <ul class="ticket-list" id="ticket-list">
+        </ul>
+      <div class="sidebar-footer">
+        <strong>Instructor Product Notice:</strong> This activity is an instructor-developed training simulation to build troubleshooting and decision-making skills. It is not a replica of any live certification exam.
       </div>
-    </div>
+    </aside>
 
+    <main class="workspace">
+      <div class="ticket-panel" id="ticket-workspace">
+        </div>
+    </main>
   </div>
-</main>
 
 <script>
-let examMode = false;
-let currentScenario = "battery";
-
-/*
-  Exam realism lock-ins:
-  - 4 causes + 4 actions per scenario (no bloat)
-  - Scenarios are original and objective-aligned
-  - Training mode: minimal explanation (1–2 sentences)
-  - Exam mode: score only
-*/
-const SCENARIOS = {
-  battery: {
-    text: "The user reports their phone battery drains quickly during normal daily use. The device is not physically damaged and the battery health status shows normal.",
-    causes: [
-      { value:"bg_apps", label:"Background apps running continuously (high background activity)" },
-      { value:"power_settings", label:"High power settings enabled (high brightness, GPS, Bluetooth, 5G always on)" },
-      { value:"poor_signal", label:"Poor cellular signal causing increased transmit power" },
-      { value:"aging_battery", label:"Battery cells are failing due to age or wear" }
-    ],
-    actions: [
-      { value:"battery_usage", label:"Review battery usage and restrict background activity for top-draining apps" },
-      { value:"lower_radios", label:"Lower brightness and disable unused radios/features (GPS, Bluetooth, 5G)" },
-      { value:"power_save", label:"Enable power saving mode and restart the device" },
-      { value:"replace_battery", label:"Replace the battery" }
-    ],
-    correct:{ cause:"bg_apps", action:"battery_usage" },
-    explain:"On A+ style questions, start by identifying the simplest, most common drain source (app/background activity) before replacement."
-  },
-
-  data: {
-    text: "The device connects to Wi-Fi at the office, but cellular data does not work when the user leaves the building. Other phones on the same carrier have data service in that area.",
-    causes: [
-      { value:"airplane", label:"Airplane mode enabled or cellular radio disabled" },
-      { value:"cell_data_off", label:"Cellular data disabled or APN settings misconfigured" },
-      { value:"sim_issue", label:"SIM card not seated, disabled, or not provisioned" },
-      { value:"carrier_outage", label:"Carrier network outage" }
-    ],
-    actions: [
-      { value:"verify_cell", label:"Verify airplane mode is off and cellular data is enabled; confirm APN settings if required" },
-      { value:"reseat_sim", label:"Power off, reseat SIM, power on, and retest" },
-      { value:"reset_net", label:"Reset network settings and retest" },
-      { value:"contact_carrier", label:"Contact the carrier to verify account provisioning and outages" }
-    ],
-    correct:{ cause:"cell_data_off", action:"verify_cell" },
-    explain:"CompTIA-style troubleshooting rewards checking settings and configuration first, especially when Wi-Fi works and other phones have service."
-  },
-
-  rotation: {
-    text: "The screen does not rotate when the device is turned sideways. The touchscreen works normally and the issue started after the user changed display settings.",
-    causes: [
-      { value:"rotation_lock", label:"Orientation/rotation lock enabled" },
-      { value:"app_override", label:"An app or accessibility setting is overriding auto-rotate behavior" },
-      { value:"sensor_fault", label:"Accelerometer/gyroscope sensor fault" },
-      { value:"os_glitch", label:"OS display service glitch after a recent update" }
-    ],
-    actions: [
-      { value:"disable_lock", label:"Disable orientation/rotation lock and retest" },
-      { value:"reboot_safe", label:"Restart and test without third-party apps (safe mode if available)" },
-      { value:"sensor_test", label:"Run sensor diagnostics/calibration and retest" },
-      { value:"update_os", label:"Install pending OS updates and retest" }
-    ],
-    correct:{ cause:"rotation_lock", action:"disable_lock" },
-    explain:"Auto-rotate failures are commonly caused by a simple setting. The best next step is to verify the lock state before deeper diagnostics."
-  },
-
-  swollen: {
-    text: "A laptop does not sit flat and the bottom case appears bowed outward. The laptop also becomes warm during light use and the trackpad feels harder to click than usual.",
-    causes: [
-      { value:"swollen_battery", label:"Swollen lithium-ion battery expanding the chassis" },
-      { value:"hinge_damage", label:"Hinge damage causing the case to flex upward" },
-      { value:"case_warp", label:"Chassis warped from heat exposure" },
-      { value:"assembly_issue", label:"Incorrect reassembly or internal component misalignment" }
-    ],
-    actions: [
-      { value:"power_down", label:"Power down immediately, disconnect power, and remove from service for battery replacement" },
-      { value:"continue_use", label:"Continue using the laptop until the next maintenance window" },
-      { value:"reseat_parts", label:"Open the case and reseat internal components while the system is running" },
-      { value:"run_diag", label:"Run hardware diagnostics to confirm the failure" }
-    ],
-    correct:{ cause:"swollen_battery", action:"power_down" },
-    explain:"A swollen battery is a safety issue. CompTIA-style best practice is to power down and remove from service rather than troubleshoot while powered."
-  },
-
-  black: {
-    text: "A laptop powers on and you can hear Windows startup sounds, but the built-in display is black. When you connect an external monitor, the desktop displays normally.",
-    causes: [
-      { value:"brightness", label:"Brightness turned all the way down or display output toggled incorrectly" },
-      { value:"lcd_cable", label:"Internal display cable is disconnected or not seated" },
-      { value:"backlight_fail", label:"LCD backlight or display panel failure" },
-      { value:"gpu_fail", label:"GPU failure" }
-    ],
-    actions: [
-      { value:"check_brightness", label:"Increase brightness and toggle display output keys, then retest" },
-      { value:"inspect_cable", label:"Inspect and reseat the internal display cable connection" },
-      { value:"replace_panel", label:"Replace the LCD/display assembly" },
-      { value:"replace_gpu", label:"Replace the GPU or system board" }
-    ],
-    // External monitor works => GPU is unlikely. Best exam-aligned approach: verify simplest (brightness) THEN inspect cable/panel.
-    // Keep this as a single best answer: cable not seated is a very common post-repair/assembly cause.
-    correct:{ cause:"lcd_cable", action:"inspect_cable" },
-    explain:"When external video works, focus on the internal display path (cable/panel/backlight). The best next step is typically inspection before replacement."
-  },
-
-  burnin: {
-    text: "A tablet shows faint images that remain visible even after restarting and after leaving the screen off for an extended period. The touchscreen and apps function normally.",
-    causes: [
-      { value:"burnin", label:"Permanent screen burn-in from prolonged static images" },
-      { value:"image_retention", label:"Temporary image retention that will clear with time" },
-      { value:"protector", label:"Screen protector or surface film causing a visual artifact" },
-      { value:"gpu_artifact", label:"Graphics artifact caused by the GPU or drivers" }
-    ],
-    actions: [
-      { value:"pixel_refresh", label:"Run a pixel refresh / display conditioning feature (if available)" },
-      { value:"timeout", label:"Reduce brightness and enable shorter screen timeout settings" },
-      { value:"replace_display", label:"Replace the display" },
-      { value:"update_os", label:"Update the OS and retest" }
-    ],
-    correct:{ cause:"burnin", action:"replace_display" },
-    explain:"If an image persists after power cycling and time off, treat it as permanent damage. On A+ style questions, replacement is appropriate when the condition is irreversible."
-  },
-
-  projector: {
-    text: "A projector powers on but shows 'No Signal.' The laptop is awake and working. The same cable was recently used in another room with a different projector.",
-    causes: [
-      { value:"wrong_input", label:"Projector is set to the wrong input/source" },
-      { value:"resolution", label:"Unsupported resolution or refresh rate mismatch" },
-      { value:"cable_loose", label:"Loose or damaged video cable/adapter" },
-      { value:"lamp_fail", label:"Projector lamp or internal display hardware failure" }
-    ],
-    actions: [
-      { value:"select_input", label:"Select the correct input/source on the projector and retest" },
-      { value:"lower_res", label:"Set laptop display to duplicate/mirror and lower resolution, then retest" },
-      { value:"reseat_cable", label:"Reseat/replace the cable or adapter and retest" },
-      { value:"known_good", label:"Test with a known-good device to isolate the projector" }
-    ],
-    correct:{ cause:"wrong_input", action:"select_input" },
-    explain:"For “no signal,” CompTIA-style best practice is to confirm the selected input/source first before replacing cables or hardware."
-  },
-
-  wifi_after_screen: {
-    text: "A laptop cannot connect to Wi-Fi after the screen was recently replaced. Other wireless devices on the same network connect without issue.",
-    causes: [
-      { value:"antenna", label:"Wi-Fi antenna leads were not reconnected during screen replacement" },
-      { value:"nic_loose", label:"Wireless network card is not seated properly" },
-      { value:"wifi_disabled", label:"Wireless is disabled (airplane mode or function key toggle)" },
-      { value:"router_down", label:"Wireless router/access point failure" }
-    ],
-    actions: [
-      { value:"inspect_antenna", label:"Inspect and reconnect the Wi-Fi antenna leads routed through the display/hinge area" },
-      { value:"reseat_nic", label:"Reseat the wireless network card and retest" },
-      { value:"enable_wifi", label:"Verify Wi-Fi is enabled and airplane mode is off, then retest" },
-      { value:"reset_net", label:"Reset network settings and retest" }
-    ],
-    correct:{ cause:"antenna", action:"inspect_antenna" },
-    explain:"Laptop Wi-Fi antennas are often routed through the display assembly, so missed antenna connections are a common post-repair cause."
-  }
-};
-
-function renderOptionsForScenario(s){
-  const causeDiv = document.getElementById("causeOptions");
-  const actionDiv = document.getElementById("actionOptions");
-
-  causeDiv.innerHTML = "";
-  actionDiv.innerHTML = "";
-
-  s.causes.forEach(c=>{
-    causeDiv.innerHTML += `
-      <label class="opt">
-        <input type="radio" name="cause" value="${c.value}">
-        <span>${c.label}</span>
-      </label>`;
-  });
-
-  s.actions.forEach(a=>{
-    actionDiv.innerHTML += `
-      <label class="opt">
-        <input type="radio" name="action" value="${a.value}">
-        <span>${a.label}</span>
-      </label>`;
-  });
-}
-
-function loadScenario(key){
-  currentScenario = key;
-  const s = SCENARIOS[key];
-  document.getElementById("scenarioText").textContent = s.text;
-  renderOptionsForScenario(s);
-  resetSelections();
-}
-
-function getSelected(name){
-  return document.querySelector(`input[name="${name}"]:checked`)?.value || null;
-}
-
-function submit(){
-  const cause = getSelected("cause");
-  const action = getSelected("action");
-
-  const results = document.getElementById("results");
-  results.classList.remove("hidden");
-
-  if(!cause || !action){
-    results.textContent = "Please select both a cause and a best next step.";
-    return;
+  // Array randomizer function
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
-  const s = SCENARIOS[currentScenario];
-  const correct = (cause === s.correct.cause && action === s.correct.action);
+  const tickets = [
+    {
+      id: "INC-2001",
+      caller: "Jessica (Sales)",
+      priority: "Low",
+      desc: "Hi IT, my phone battery is draining so fast! It used to last all day, but now it's dead by lunch. I haven't dropped it, and the battery health says it's perfectly normal.",
+      causes: [
+        "Background apps running continuously",
+        "High power settings enabled",
+        "Poor cellular signal",
+        "Aging battery cells"
+      ],
+      actions: [
+        "Review battery usage and restrict background apps",
+        "Lower brightness and disable unused radios",
+        "Enable power saving mode and restart",
+        "Replace the battery"
+      ],
+      correctIssue: "Background apps running continuously",
+      correctSolution: "Review battery usage and restrict background apps",
+      mentorWrong: "Before ordering parts or assuming hardware failure, start with the most common software cause. What runs invisibly that drains power?",
+      mentorRight: "Spot on! Apps pulling data or keeping the CPU awake are the #1 cause of rapid drain on healthy devices. Always check battery usage stats and restrict background activity before ordering replacement parts."
+    },
+    {
+      id: "INC-2002",
+      caller: "Marcus (Field Ops)",
+      priority: "Medium",
+      desc: "My Wi-Fi works fine when I'm at the corporate office, but the second I drive away, my cellular data is completely dead. Other guys on my team use the same carrier and have perfect 5G service out here.",
+      causes: [
+        "Airplane mode or cellular radio disabled",
+        "Cellular data disabled or APN misconfigured",
+        "SIM card not seated or disabled",
+        "Carrier network outage"
+      ],
+      actions: [
+        "Verify airplane mode is off and cellular data enabled",
+        "Power off, reseat SIM, and retest",
+        "Reset network settings",
+        "Contact the carrier"
+      ],
+      correctIssue: "Cellular data disabled or APN misconfigured",
+      correctSolution: "Verify airplane mode is off and cellular data enabled",
+      mentorWrong: "If Wi-Fi works, the device itself isn't totally dead. If coworkers have signal, the network is up. Focus on the software settings related specifically to cellular data.",
+      mentorRight: "Exactly! If Wi-Fi works but cellular doesn't, it's an isolated radio issue. Check the simplest Layer 1/2 settings (like making sure Cellular Data wasn't accidentally toggled off, or verifying the APN) before escalating to the carrier or swapping SIM cards."
+    },
+    {
+      id: "INC-2003",
+      caller: "Chloe (Design)",
+      priority: "Low",
+      desc: "I was messing around in my settings earlier, and now my tablet screen won't rotate sideways anymore when I turn it. The touchscreen itself still works fine.",
+      causes: [
+        "Orientation/rotation lock enabled",
+        "App overriding auto-rotate",
+        "Accelerometer/gyroscope sensor fault",
+        "OS display service glitch"
+      ],
+      actions: [
+        "Disable orientation/rotation lock and retest",
+        "Restart and test without third-party apps",
+        "Run sensor diagnostics/calibration",
+        "Install pending OS updates"
+      ],
+      correctIssue: "Orientation/rotation lock enabled",
+      correctSolution: "Disable orientation/rotation lock and retest",
+      mentorWrong: "Don't jump to a hardware sensor failure just yet. Look closely at the clue: 'I was messing around in my settings earlier...'",
+      mentorRight: "Always check the easy stuff first! The most common reason a screen stops rotating is the user accidentally tapping the rotation lock toggle in the quick settings menu. Verify the lock state before running deep diagnostics."
+    },
+    {
+      id: "INC-2004",
+      caller: "David (Finance)",
+      priority: "High",
+      desc: "My laptop is wobbling on my desk and the bottom case looks like it's bowing outward. The trackpad is also really stiff and hard to click suddenly.",
+      causes: [
+        "Swollen lithium-ion battery",
+        "Hinge damage causing case flex",
+        "Chassis warped from heat",
+        "Incorrect internal reassembly"
+      ],
+      actions: [
+        "Power down immediately and remove from service",
+        "Continue using until maintenance window",
+        "Reseat internal components while running",
+        "Run hardware diagnostics"
+      ],
+      correctIssue: "Swollen lithium-ion battery",
+      correctSolution: "Power down immediately and remove from service",
+      mentorWrong: "This is a severe physical safety issue, not a normal hardware glitch. Never keep using or try to open a pressurized, bulging system while it is active.",
+      mentorRight: "Great catch. A bulging chassis, especially near the trackpad, is a classic sign of lithium-ion battery gas buildup. This is a severe fire and explosion hazard. The correct A+ protocol is to power it down, disconnect it, and isolate it immediately."
+    },
+    {
+      id: "INC-2005",
+      caller: "Omar (Engineering)",
+      priority: "Medium",
+      desc: "I turn on my laptop and hear the Windows startup sounds, but the built-in screen is totally black. But when I plug it into my external desk monitor, the desktop shows up perfectly.",
+      causes: [
+        "Brightness turned down or output toggled",
+        "Internal display cable disconnected/loose",
+        "LCD backlight or display panel failure",
+        "GPU failure"
+      ],
+      actions: [
+        "Increase brightness and toggle display output",
+        "Inspect and reseat the internal display cable",
+        "Replace the display/LCD assembly",
+        "Replace the GPU or system board"
+      ],
+      correctIssue: "Internal display cable disconnected/loose",
+      correctSolution: "Inspect and reseat the internal display cable",
+      mentorWrong: "If the external display works, that rules out a GPU or motherboard failure. Focus on the physical connection to the internal screen itself.",
+      mentorRight: "Perfect logic. If the external monitor works perfectly, the motherboard and GPU are fine. The issue is strictly the path to the built-in screen. A loose LVDS/eDP internal cable is the prime suspect, especially after a bump, drop, or recent repair."
+    },
+    {
+      id: "INC-2006",
+      caller: "Elena (Marketing)",
+      priority: "Medium",
+      desc: "My company OLED tablet has weird, faint, ghostly images of my email app stuck on the screen. It stays there even after I restart the tablet and leave the screen off all weekend.",
+      causes: [
+        "Permanent screen burn-in",
+        "Temporary image retention",
+        "Screen protector artifact",
+        "Graphics artifact from GPU"
+      ],
+      actions: [
+        "Run a pixel refresh feature",
+        "Reduce brightness and screen timeout",
+        "Replace the display/LCD assembly",
+        "Update the OS and retest"
+      ],
+      correctIssue: "Permanent screen burn-in",
+      correctSolution: "Replace the display/LCD assembly",
+      mentorWrong: "If the image persists even after the screen has been powered completely off for a weekend, it's not a temporary glitch. Software settings won't fix physical pixel degradation.",
+      mentorRight: "Correct. OLED and older LCD panels can suffer permanent ghosting (burn-in) if static images are left on max brightness for months. Once it's burned in and persists through power cycles, the only fix is complete hardware replacement."
+    },
+    {
+      id: "INC-2007",
+      caller: "Greg (Executives)",
+      priority: "High",
+      desc: "I'm trying to present to the board. My laptop is awake, and I plugged it into the HDMI cable, but the conference room projector just shows a blue screen that says 'No Signal'.",
+      causes: [
+        "Projector set to wrong input/source",
+        "Unsupported resolution or refresh rate",
+        "Loose or damaged video cable/adapter",
+        "Projector lamp failure"
+      ],
+      actions: [
+        "Select the correct input/source on the projector",
+        "Lower resolution and duplicate display",
+        "Reseat/replace the external video cable",
+        "Test with a known-good device"
+      ],
+      correctIssue: "Projector set to wrong input/source",
+      correctSolution: "Select the correct input/source on the projector",
+      mentorWrong: "Don't assume the cable or projector is broken right away. 'No Signal' means the projector works, but it can't find the data. What is the simplest solution?",
+      mentorRight: "Nailed it. When moving cables or switching rooms, the projector often just needs to be told which port to look at. Always cycle the inputs/sources before assuming the cable, laptop, or lamp is bad."
+    },
+    {
+      id: "INC-2008",
+      caller: "Alicia (HR)",
+      priority: "Medium",
+      desc: "Your team just replaced my cracked laptop screen this morning. It looks beautiful, but now the laptop won't connect to Wi-Fi at all. Everyone else near me is connected fine.",
+      causes: [
+        "Wi-Fi antennas not reconnected",
+        "Wireless network card not seated",
+        "Wireless is disabled (airplane mode)",
+        "Wireless router failure"
+      ],
+      actions: [
+        "Inspect and reconnect Wi-Fi antenna leads",
+        "Reseat the wireless network card",
+        "Verify Wi-Fi is enabled",
+        "Reset network settings"
+      ],
+      correctIssue: "Wi-Fi antennas not reconnected",
+      correctSolution: "Inspect and reconnect Wi-Fi antenna leads",
+      mentorWrong: "Think about the history of the device. A recent physical repair to the screen directly involves components that route through that exact area. What got missed?",
+      mentorRight: "Excellent troubleshooting! Wi-Fi antenna wires run straight from the motherboard, through the laptop hinges, and up into the screen lid. If a tech just replaced the screen assembly, it is highly likely they forgot to snap the tiny antenna cables back onto the Wi-Fi card."
+    }
+  ];
 
-  results.innerHTML = correct
-    ? "<b>Result: Correct</b>"
-    : "<b>Result: Needs Review</b>";
+  let currentTicketIndex = 0;
+  let totalScore = 0;
+  let currentTicketAttempts = 0;
 
-  if(!examMode){
-    const p = document.createElement("p");
-    p.className = "training-only";
-    p.style.margin = "8px 0 0";
-    p.textContent = s.explain;
-    results.appendChild(p);
+  // DOM Elements
+  const ticketListEl = document.getElementById('ticket-list');
+  const workspaceEl = document.getElementById('ticket-workspace');
+  const globalScoreEl = document.getElementById('global-score');
+
+  function renderSidebar() {
+    ticketListEl.innerHTML = '';
+    
+    tickets.forEach((ticket, index) => {
+      const li = document.createElement('li');
+      li.className = 'ticket-item';
+      
+      let statusHtml = '';
+      if (index < currentTicketIndex) {
+        li.classList.add('closed');
+        statusHtml = '<span class="status-badge status-closed">Closed</span>';
+      } else if (index === currentTicketIndex) {
+        li.classList.add('active');
+        statusHtml = '<span class="status-badge status-open">Open</span>';
+      } else {
+        li.classList.add('locked');
+        statusHtml = '<span class="status-badge status-locked">Locked</span>';
+      }
+
+      li.innerHTML = `
+        <div class="ticket-id">${ticket.id}</div>
+        <div class="ticket-caller">${ticket.caller}</div>
+        ${statusHtml}
+      `;
+      
+      // Allow clicking previously solved tickets to review them
+      if (index <= currentTicketIndex) {
+        li.onclick = () => renderTicket(index);
+      }
+      
+      ticketListEl.appendChild(li);
+    });
   }
-}
 
-function resetSelections(){
-  document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
-  document.getElementById("results").classList.add("hidden");
-  document.getElementById("results").innerHTML = "";
-}
-
-function setExamMode(on){
-  examMode = on;
-  document.body.classList.toggle("exam-mode", examMode);
-  document.getElementById("examToggle").classList.toggle("on", examMode);
-  document.getElementById("modeLabel").textContent = examMode ? "EXAM" : "TRAINING";
-  document.getElementById("examToggle").setAttribute("aria-checked", String(examMode));
-  // Clear any revealed feedback when switching modes
-  resetSelections();
-}
-
-document.getElementById("scenarioSelect").addEventListener("change", e => loadScenario(e.target.value));
-document.getElementById("submitBtn").addEventListener("click", submit);
-document.getElementById("resetBtn").addEventListener("click", resetSelections);
-
-const toggle = document.getElementById("examToggle");
-toggle.addEventListener("click", ()=> setExamMode(!examMode));
-toggle.addEventListener("keydown", (e)=>{
-  if(e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    setExamMode(!examMode);
+  function createDropdown(options, placeholder) {
+    const select = document.createElement("select");
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = placeholder;
+    defaultOpt.disabled = true;
+    defaultOpt.selected = true;
+    select.appendChild(defaultOpt);
+    
+    // Shuffle the options so they are randomized for every load
+    const randomizedOptions = shuffleArray(options);
+    
+    randomizedOptions.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
+    });
+    return select;
   }
-});
 
-// init
-loadScenario("battery");
+  function renderTicket(index) {
+    const ticket = tickets[index];
+    const isCompleted = index < currentTicketIndex;
+    
+    // Reset attempts if viewing the current active ticket
+    if (index === currentTicketIndex) {
+      currentTicketAttempts = 0;
+    }
+
+    workspaceEl.innerHTML = `
+      <div class="panel-header">
+        <div>
+          <h2 style="margin: 0; font-size: 24px;">${ticket.id} - Mobile & Laptop Diagnostics</h2>
+          <div class="meta-group">
+            <div class="meta-item">
+              <span class="meta-label">Caller</span>
+              <span class="meta-value">${ticket.caller}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Priority</span>
+              <span class="meta-value" style="color: ${ticket.priority === 'High' ? 'var(--danger)' : ticket.priority === 'Medium' ? 'var(--warning)' : 'var(--text-main)'}; font-weight: bold;">${ticket.priority}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-body">
+        <div class="meta-label" style="margin-bottom: 12px;">User Description</div>
+        <div class="description-box">"${ticket.desc}"</div>
+
+        <div class="form-row">
+          <div class="form-group" id="issue-group">
+            <label>Root Cause Analysis</label>
+          </div>
+          <div class="form-group" id="solution-group">
+            <label>Action Taken (Resolution)</label>
+          </div>
+        </div>
+
+        <button class="btn" id="resolve-btn" ${isCompleted ? 'disabled' : ''}>
+          ${isCompleted ? 'Ticket Closed' : 'Resolve Incident'}
+        </button>
+
+        <div id="feedback-area"></div>
+      </div>
+    `;
+
+    // Only pass the 4 specific options for this ticket
+    const issueSelect = createDropdown(ticket.causes, "-- Select Root Cause --");
+    const solutionSelect = createDropdown(ticket.actions, "-- Select Action Taken --");
+    
+    if (isCompleted) {
+      issueSelect.value = ticket.correctIssue;
+      solutionSelect.value = ticket.correctSolution;
+      issueSelect.disabled = true;
+      solutionSelect.disabled = true;
+    }
+
+    document.getElementById('issue-group').appendChild(issueSelect);
+    document.getElementById('solution-group').appendChild(solutionSelect);
+
+    if (!isCompleted) {
+      document.getElementById('resolve-btn').onclick = () => {
+        checkResolution(index, issueSelect.value, solutionSelect.value);
+      };
+    } else {
+      // Show correct feedback immediately if reviewing a closed ticket
+      showFeedback(ticket.mentorRight, true);
+    }
+  }
+
+  function showFeedback(message, isSuccess) {
+    const area = document.getElementById('feedback-area');
+    area.innerHTML = `
+      <div class="feedback-box ${isSuccess ? 'success' : 'error'}">
+        <div class="feedback-title">
+          <span class="mentor-icon">${isSuccess ? '🎓' : '💡'}</span> 
+          Senior Tech Notes:
+        </div>
+        ${message}
+      </div>
+    `;
+  }
+
+  function checkResolution(index, selectedIssue, selectedSolution) {
+    const ticket = tickets[index];
+    
+    if (!selectedIssue || !selectedSolution) {
+      alert("Please select both a Root Cause and an Action Taken.");
+      return;
+    }
+
+    currentTicketAttempts++;
+
+    if (selectedIssue === ticket.correctIssue && selectedSolution === ticket.correctSolution) {
+      // Correct! Calculate points based on FCR (First Contact Resolution)
+      let pointsEarned = 0;
+      if (currentTicketAttempts === 1) pointsEarned = 10;
+      else if (currentTicketAttempts === 2) pointsEarned = 5;
+      else pointsEarned = 2;
+
+      totalScore += pointsEarned;
+      globalScoreEl.textContent = `Score: ${totalScore} / 80`;
+
+      showFeedback(`<strong>+${pointsEarned} Points!</strong><br><br>${ticket.mentorRight}`, true);
+      
+      // Disable inputs
+      document.querySelector('#issue-group select').disabled = true;
+      document.querySelector('#solution-group select').disabled = true;
+      
+      const btn = document.getElementById('resolve-btn');
+      btn.textContent = "Next Ticket ➔";
+      btn.style.background = "var(--success)";
+      
+      btn.onclick = () => {
+        currentTicketIndex++;
+        if (currentTicketIndex >= tickets.length) {
+          showEndScreen();
+        } else {
+          renderSidebar();
+          renderTicket(currentTicketIndex);
+        }
+      };
+      
+      // Update sidebar instantly to show it closed
+      const currentLi = ticketListEl.children[index];
+      currentLi.classList.remove('active');
+      currentLi.classList.add('closed');
+      currentLi.querySelector('.status-badge').className = "status-badge status-closed";
+      currentLi.querySelector('.status-badge').textContent = "Closed";
+
+    } else {
+      // Wrong answer
+      showFeedback(ticket.mentorWrong, false);
+    }
+  }
+
+  function showEndScreen() {
+    workspaceEl.innerHTML = `
+      <div class="end-screen">
+        <h2>Shift Completed!</h2>
+        <p>You have successfully closed all tickets in your queue.</p>
+        <div style="font-size: 16px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; margin-bottom: 10px;">Final Score</div>
+        <div class="final-score">${totalScore} / 80</div>
+        <p style="max-width: 600px; margin: 0 auto; line-height: 1.7;">
+          ${totalScore >= 70 ? "Excellent work! You have a great grasp on mobile device diagnostics and FCR (First-Contact Resolution)." : 
+            totalScore >= 50 ? "Good job! You're getting the hang of it, but there's room to improve your initial diagnostic accuracy." : 
+            "Keep studying! Review the tickets in your queue on the left to see the explanations and reinforce your hardware knowledge."}
+        </p>
+      </div>
+    `;
+    renderSidebar(); // Final update to sidebar
+  }
+
+  // Initialize
+  renderSidebar();
+  renderTicket(currentTicketIndex);
+
 </script>
-
 </body>
 </html>
