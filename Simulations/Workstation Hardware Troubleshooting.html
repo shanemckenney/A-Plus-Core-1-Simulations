@@ -3,496 +3,598 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>A+ Core 1 - Workstation Hardware Troubleshooting</title>
+<title>Help Desk Hardware Troubleshooting</title>
 
 <style>
   :root {
-    --bg: #090d1a;
-    --panel: #111827;
-    --panel-hdr: #1f2937;
-    --text: #f3f4f6;
-    --muted: #9ca3af;
-    --accent: #1f9e5d;
-    --accent-hover: #16a34a;
-    --good: #10b981;
-    --bad: #ef4444;
-    --warn: #f59e0b;
-    --border: rgba(255, 255, 255, 0.1);
-    --radius: 12px;
-    --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --bg-dark: #0f172a;
+    --sidebar-bg: #1e293b;
+    --panel-bg: #111827;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --border: #334155;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, monospace;
   }
 
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: var(--sans);
-    background: radial-gradient(1000px 600px at 10% 10%, rgba(31, 158, 93, 0.15), transparent 50%), var(--bg);
-    color: var(--text);
-    padding: 20px;
-    min-height: 100vh;
+    font-family: var(--font-sans);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
   }
 
+  /* Header Navbar */
   header {
-    max-width: 800px;
-    margin: 0 auto 20px;
+    background: #0b1120;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
   }
-
-  h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
-  .mode-ctrl { display: flex; align-items: center; gap: 10px; }
-  
-  .btn {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text);
-    font-size: 13px;
+  .brand { font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .brand span { color: var(--accent-blue); }
+  .score-badge {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid var(--accent-blue);
+    padding: 6px 12px;
+    border-radius: 99px;
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 14px;
+    color: #93c5fd;
   }
-  .btn:hover { background: rgba(255, 255, 255, 0.1); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); }
-  .btn.primary:hover { background: var(--accent-hover); }
-  .btn.secondary { background: rgba(239, 68, 68, 0.2); border-color: var(--bad); }
 
-  .badge {
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-family: var(--mono);
+  /* Main Layout */
+  .app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Sidebar (Ticket Queue) */
+  .sidebar {
+    width: 280px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .ticket-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .ticket-item {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .ticket-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-left: 4px solid var(--accent-blue);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .ticket-item.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .ticket-item.closed {
+    opacity: 0.7;
+    pointer-events: auto;
+  }
+  .ticket-id { font-family: var(--font-mono); font-size: 13px; font-weight: bold; margin-bottom: 4px;}
+  .ticket-caller { font-size: 14px; margin-bottom: 8px; }
+  .status-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
     font-weight: bold;
     text-transform: uppercase;
-    border: 1px solid transparent;
   }
-  .badge.info { background: rgba(31, 158, 93, 0.15); color: #86efac; border-color: rgba(31, 158, 93, 0.3); }
-  .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
-
-  .workspace {
-    max-width: 800px; /* Narrowed for better reading focus */
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .card-hdr {
-    background: var(--panel-hdr);
+  .status-open { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.5); }
+  .status-closed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.5); }
+  .status-locked { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.5); }
+  
+  .sidebar-footer {
     padding: 12px 16px;
-    font-weight: 700;
-    font-size: 14px;
+    font-size: 10px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    line-height: 1.4;
+    background: rgba(0,0,0,0.1);
+  }
+
+  /* Workspace (Active Ticket) */
+  .workspace {
+    flex: 1;
+    background: var(--bg-dark);
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+  }
+  .ticket-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  .panel-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
   }
+  .meta-group { display: flex; gap: 24px; margin-top: 12px; }
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .meta-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;}
+  .meta-value { font-size: 14px; }
 
-  .card-bd { padding: 24px; flex: 1; }
-
-  .prompt {
-    background: rgba(0, 0, 0, 0.2);
-    border-left: 4px solid var(--accent);
-    padding: 18px;
+  .panel-body { padding: 24px; flex: 1; }
+  
+  .description-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--warning);
+    padding: 16px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     margin-bottom: 24px;
   }
 
-  .scenario-card {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border);
-    padding: 18px;
-    border-radius: 8px;
-    margin-bottom: 16px;
+  /* Forms */
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
   }
-
-  .scenario-title {
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 12px;
-    font-size: 14px;
-  }
-
-  .scenario-text {
-    color: #e5e7eb;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  
+  .form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
   select {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid #475569;
-    background: #1e293b;
-    color: var(--text);
-    font-size: 13.5px;
-    outline: none;
-    cursor: pointer;
-  }
-  select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(31, 158, 93, 0.1); }
-
-  .scenario-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-
-  .feedback {
-    display: none;
-    margin-top: 14px; 
     padding: 12px;
-    border-radius: 6px; 
-    font-size: 13px;
-    border-left: 4px solid transparent;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent-blue); }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn {
+    padding: 12px 24px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+  /* Mentor Feedback */
+  .feedback-box {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: 8px;
+    display: none;
     line-height: 1.5;
   }
-
-  .feedback.correct {
+  .feedback-box.error {
     display: block;
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
-    border-left-color: var(--good);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid var(--danger);
   }
-
-  .feedback.incorrect {
+  .feedback-box.success {
     display: block;
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    border-left-color: var(--bad);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-left: 4px solid var(--success);
   }
+  .feedback-title { font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;}
+  .mentor-icon { font-size: 18px; }
+  
+  /* End Screen */
+  .end-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .end-screen h2 { font-size: 28px; color: var(--success); margin-bottom: 10px; }
+  .end-screen p { font-size: 16px; color: var(--text-muted); margin-bottom: 30px; }
+  .final-score { font-size: 48px; font-weight: bold; color: white; margin-bottom: 10px; }
 
-  .feedback-details {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .results-box {
-    margin-top: 24px;
-    padding: 18px;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border);
-  }
-
-  .results-box h3 { 
-    margin: 0 0 10px 0; 
-    font-size: 15px; 
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .score-display {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .score-display .answered {
-    color: var(--muted);
-    font-weight: 400;
-  }
 </style>
 </head>
 <body>
-<nav style="max-width: 800px; margin: 0 auto; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;"><a href="../index.html" style="color: #93c5fd; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">← Back to Simulations</a></nav>
+
   <header>
-    <div>
-      <h1>Workstation Hardware Troubleshooting</h1>
+    <div class="brand">
+      <span>⚙️</span> Help Desk Simulator
     </div>
-    <div class="mode-ctrl">
-      <span class="badge info" id="mode-indicator">Mode: Training</span>
-      <button class="btn" id="toggle-mode-btn">Switch Mode</button>
-    </div>
+    <div class="score-badge" id="global-score">Score: 0 / 80</div>
   </header>
 
-  <main class="workspace">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">My Ticket Queue</div>
+      <ul class="ticket-list" id="ticket-list">
+        </ul>
+      <div class="sidebar-footer">
+        <strong>Disclaimer:</strong> This simulation was created by an instructor for educational purposes. The interface likeness is purely for immersive learning and is not licensed by, endorsed by, or affiliated with ServiceNow or any other real-world ticketing platform.
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <div class="ticket-panel" id="ticket-workspace">
+        </div>
+    </main>
+  </div>
+
+<script>
+  const issues = [
+    "Battery issue",
+    "Loose or damaged power connector",
+    "Overheating",
+    "RAM issue",
+    "Touchscreen/digitizer failure",
+    "Incorrect input/source selected",
+    "Damaged video cable/connector",
+    "Backlight failure",
+    "Resolution/refresh rate misconfiguration"
+  ];
+
+  const solutions = [
+    "Replace the battery",
+    "Reseat or repair the DC jack",
+    "Clean vents/fans and remove dust",
+    "Reseat or replace the RAM",
+    "Replace the touchscreen/digitizer assembly",
+    "Select the correct monitor input",
+    "Replace the video cable",
+    "Replace the monitor",
+    "Set the native resolution/refresh rate"
+  ];
+
+  const tickets = [
+    {
+      id: "INC-1001",
+      caller: "Sarah (Accounting)",
+      priority: "Medium",
+      desc: "Hi IT, my laptop battery won't charge. It says it's plugged in, but the battery percentage keeps dropping. I have my charger plugged into the wall and the laptop.",
+      correctIssue: "Loose or damaged power connector",
+      correctSolution: "Reseat or repair the DC jack",
+      mentorWrong: "Not quite! If the battery was completely dead, the laptop wouldn't hold a charge, but it also wouldn't know it was plugged in. Because it 'sees' the plug but isn't getting juice, the issue is physical. Try again!",
+      mentorRight: "Spot on! Think of the DC Jack like a funnel for electricity. If that funnel gets loose or breaks inside the laptop, the computer can feel the charger is plugged in, but the electricity spills out instead of making it to the battery. Fixing the jack restores the flow."
+    },
+    {
+      id: "INC-1002",
+      caller: "Mark (Sales)",
+      priority: "High",
+      desc: "Emergency! I'm trying to host Zoom calls with clients, but halfway through the meetings my laptop randomly shuts down. When I touch the bottom, it is burning hot.",
+      correctIssue: "Overheating",
+      correctSolution: "Clean vents/fans and remove dust",
+      mentorWrong: "Think about the symptoms. It only shuts down when under heavy load (video calls) and physical heat is present. What causes a system to protect itself by shutting down?",
+      mentorRight: "Exactly! Video calls force the CPU and GPU to work hard, generating heat. If dust blocks the vents, the fans can't push the hot air out. The motherboard detects dangerous temperatures and cuts power to prevent the chips from literally melting."
+    },
+    {
+      id: "INC-1003",
+      caller: "David (HR)",
+      priority: "Medium",
+      desc: "I hit the power button on my laptop. I can hear the fans spin up, but the screen stays totally black and the laptop just beeps at me loudly a few times in a row.",
+      correctIssue: "RAM issue",
+      correctSolution: "Reseat or replace the RAM",
+      mentorWrong: "If the screen is black AND there are beep codes, it's a POST (Power-On Self Test) failure. The motherboard is trying to tell you a core component is missing or failing before it can even load the display. Re-evaluate your choices.",
+      mentorRight: "Great job! Beep codes are the motherboard's way of crying for help when it can't load the display. The most common culprit for a 'no display + beeps' scenario is memory. If RAM gets unseated by a drop or fails, the system can't process data to boot."
+    },
+    {
+      id: "INC-1004",
+      caller: "Lisa (Marketing)",
+      priority: "Low",
+      desc: "My company smartphone is acting up. The screen turns on fine and looks perfect, but when I try to tap on my apps or swipe, absolutely nothing happens.",
+      correctIssue: "Touchscreen/digitizer failure",
+      correctSolution: "Replace the touchscreen/digitizer assembly",
+      mentorWrong: "Look closely at her description. The *display* (the part that shows the picture) is working perfectly. The part that translates her physical taps is what's broken.",
+      mentorRight: "Correct! A modern screen has two main layers: the LCD/OLED (which shows the image) and the Digitizer (the clear glass layer on top that senses electricity from your fingers). Since the image is fine, only the digitizer layer failed. Usually, you have to replace them as one whole assembly."
+    },
+    {
+      id: "INC-1005",
+      caller: "Kevin (Finance)",
+      priority: "Medium",
+      desc: "I came in this morning and turned on my desktop tower. The computer is humming, but my main monitor just floats a box that says 'No Signal'.",
+      correctIssue: "Incorrect input/source selected",
+      correctSolution: "Select the correct monitor input",
+      mentorWrong: "While it could be a bad cable, always start with the simplest, most common Layer 1 issue. If the monitor is looking for a signal on the wrong 'channel', it won't find the PC.",
+      mentorRight: "Always check the simple stuff first! Monitors have multiple ports (HDMI, DisplayPort, VGA). If the monitor is set to look at the HDMI port, but the PC is plugged into the DisplayPort, it will say 'No Signal'. Pressing the input/source button on the monitor fixes this instantly."
+    },
+    {
+      id: "INC-1006",
+      caller: "Amanda (Operations)",
+      priority: "Low",
+      desc: "My secondary monitor keeps flickering on and off. I noticed it specifically happens if I bump my desk or if I move the wires behind the monitor.",
+      correctIssue: "Damaged video cable/connector",
+      correctSolution: "Replace the video cable",
+      mentorWrong: "If the issue only triggers during physical movement of the wires, the problem is highly localized to the physical connection. What should you replace?",
+      mentorRight: "Nailed it. If a symptom changes based on physical movement, you have a physical short or a broken pin. The wire inside the cable is likely frayed, breaking the connection when bumped. Swapping the cable is the cheapest and fastest fix."
+    },
+    {
+      id: "INC-1007",
+      caller: "John (IT)",
+      priority: "Medium",
+      desc: "Working on a user's desk setup. One of their LCD monitors is incredibly dim. You can faintly see the Windows desktop if you shine your phone flashlight directly at the screen, but turning up the brightness buttons does nothing.",
+      correctIssue: "Backlight failure",
+      correctSolution: "Replace the monitor",
+      mentorWrong: "If you can see the image with a flashlight, the actual data (the LCD pixels) is working. The part of the monitor that provides the *light* is dead.",
+      mentorRight: "Perfect! An LCD screen works like a stained glass window. The LCD pixels create the colors and shapes, but without the backlight (the sun shining behind it), you can't see it. In modern monitors, a dead backlight usually means replacing the whole monitor."
+    },
+    {
+      id: "INC-1008",
+      caller: "Emily (Executive)",
+      priority: "High",
+      desc: "I just connected my laptop to the new docking station at my desk. The image is showing on my big monitor, but all the icons look massive, blurry, and stretched out.",
+      correctIssue: "Resolution/refresh rate misconfiguration",
+      correctSolution: "Set the native resolution/refresh rate",
+      mentorWrong: "The image is successfully making it to the screen, so the hardware (cables, monitor) is fine. The issue is how the software is formatting the picture for a new screen size.",
+      mentorRight: "Spot on! When you plug into a dock, Windows sometimes gets confused and defaults to a very low, generic resolution (like 800x600). Going into Display Settings and changing the resolution to match the monitor's native size (like 1920x1080) will snap everything back to crisp clarity."
+    }
+  ];
+
+  let currentTicketIndex = 0;
+  let totalScore = 0;
+  let currentTicketAttempts = 0;
+
+  // DOM Elements
+  const ticketListEl = document.getElementById('ticket-list');
+  const workspaceEl = document.getElementById('ticket-workspace');
+  const globalScoreEl = document.getElementById('global-score');
+
+  function renderSidebar() {
+    ticketListEl.innerHTML = '';
     
-    <section class="card">
-      <div class="card-hdr">
-        <span>Troubleshooting Scenarios</span>
-        <span class="badge danger">Domain 5.1</span>
-      </div>
-      <div class="card-bd">
-        <div class="prompt">
-          <strong>Support Ticket Assignment:</strong><br>
-          A technician is diagnosing several device issues reported by employees. Select the appropriate issue and solution for each scenario. Each option may be used more than once.
-        </div>
-
-        <div id="scenarios-container"></div>
-
-        <div class="results-box">
-          <h3>Progress</h3>
-          <div class="score-display" id="score-display">Score: 0/8 (<span class="answered">0 answered</span>)</div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <script>
-    const state = { mode: 'training' };
-
-    const issues = [
-      "Battery issue",
-      "Loose or damaged power connector",
-      "Overheating",
-      "RAM issue",
-      "Touchscreen/digitizer failure",
-      "Incorrect input/source selected",
-      "Damaged video cable/connector",
-      "Backlight failure",
-      "Resolution/refresh rate misconfiguration"
-    ];
-
-    const solutions = [
-      "Replace the battery",
-      "Reseat or repair the DC jack",
-      "Clean vents/fans and remove dust",
-      "Reseat or replace the RAM",
-      "Replace the touchscreen/digitizer assembly",
-      "Select the correct monitor input",
-      "Replace the video cable",
-      "Replace the monitor",
-      "Set the native resolution/refresh rate"
-    ];
-
-    const scenarios = [
-      {
-        text: "Laptop battery will not charge even though it shows plugged in.",
-        correctIssue: "Loose or damaged power connector",
-        correctSolution: "Reseat or repair the DC jack",
-        explanation: "A loose or failing DC jack can detect power but not maintain a stable charging connection."
-      },
-      {
-        text: "Laptop shuts down during video calls and feels very hot.",
-        correctIssue: "Overheating",
-        correctSolution: "Clean vents/fans and remove dust",
-        explanation: "Thermal shutdown often indicates blocked airflow or dust buildup in vents/fans."
-      },
-      {
-        text: "Laptop powers on but shows a black screen and gives beep codes.",
-        correctIssue: "RAM issue",
-        correctSolution: "Reseat or replace the RAM",
-        explanation: "Beep codes with no display commonly point to memory not seated properly or failed RAM."
-      },
-      {
-        text: "Phone screen powers on but taps are not registering.",
-        correctIssue: "Touchscreen/digitizer failure",
-        correctSolution: "Replace the touchscreen/digitizer assembly",
-        explanation: "If the display works but touch input fails, the digitizer is likely defective."
-      },
-      {
-        text: "Monitor displays 'No Signal' even though the computer is running.",
-        correctIssue: "Incorrect input/source selected",
-        correctSolution: "Select the correct monitor input",
-        explanation: "A very common cause is the monitor being set to the wrong input (HDMI/DP)."
-      },
-      {
-        text: "Monitor flickers when the cable is moved.",
-        correctIssue: "Damaged video cable/connector",
-        correctSolution: "Replace the video cable",
-        explanation: "If symptoms change when moving the cable, it usually indicates a failing cable/connector."
-      },
-      {
-        text: "Monitor is extremely dim even with brightness turned up.",
-        correctIssue: "Backlight failure",
-        correctSolution: "Replace the monitor",
-        explanation: "A failing backlight causes a faint image even when brightness is increased."
-      },
-      {
-        text: "Image looks stretched after connecting a docking station.",
-        correctIssue: "Resolution/refresh rate misconfiguration",
-        correctSolution: "Set the native resolution/refresh rate",
-        explanation: "Docking stations can change display settings. Setting native resolution/refresh rate fixes distortion."
-      }
-    ];
-
-    function createDropdown(options, placeholderText) {
-      const select = document.createElement("select");
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = placeholderText;
-      select.appendChild(placeholder);
-      options.forEach(optVal => {
-        const opt = document.createElement("option");
-        opt.value = optVal;
-        opt.textContent = optVal;
-        select.appendChild(opt);
-      });
-      return select;
-    }
-
-    function updateScore() {
-      let correctCount = 0;
-      let answeredCount = 0;
-
-      scenarios.forEach((s, i) => {
-        const issueVal = document.getElementById("issue" + i).value;
-        const solVal = document.getElementById("solution" + i).value;
-
-        if (issueVal && solVal) answeredCount++;
-        if (issueVal === s.correctIssue && solVal === s.correctSolution) {
-          correctCount++;
-        }
-      });
-
-      const scoreDisplay = document.getElementById('score-display');
-      scoreDisplay.innerHTML = `Score: ${correctCount}/${scenarios.length} (<span class="answered">${answeredCount} answered</span>)`;
-    }
-
-    function checkScenario(i) {
-      const s = scenarios[i];
-      const issueVal = document.getElementById("issue" + i).value;
-      const solVal = document.getElementById("solution" + i).value;
-      const fb = document.getElementById("feedback" + i);
-
-      if (!issueVal || !solVal) {
-        fb.style.display = "none";
-        fb.className = "feedback";
-        fb.innerHTML = "";
-        updateScore();
-        return;
-      }
-
-      if (issueVal === s.correctIssue && solVal === s.correctSolution) {
-        fb.className = "feedback correct";
-        fb.innerHTML = `✓ Correct: ${s.explanation}`;
+    tickets.forEach((ticket, index) => {
+      const li = document.createElement('li');
+      li.className = 'ticket-item';
+      
+      let statusHtml = '';
+      if (index < currentTicketIndex) {
+        li.classList.add('closed');
+        statusHtml = '<span class="status-badge status-closed">Closed</span>';
+      } else if (index === currentTicketIndex) {
+        li.classList.add('active');
+        statusHtml = '<span class="status-badge status-open">Open</span>';
       } else {
-        fb.className = "feedback incorrect";
-        fb.innerHTML = `✗ Incorrect<div class="feedback-details"><strong>Correct Issue:</strong> ${s.correctIssue}<br><strong>Correct Solution:</strong> ${s.correctSolution}<br><br>${s.explanation}</div>`;
+        li.classList.add('locked');
+        statusHtml = '<span class="status-badge status-locked">Locked</span>';
       }
-      fb.style.display = "block";
-      updateScore();
-    }
 
-    function resetScenario(i) {
-      document.getElementById("issue" + i).value = "";
-      document.getElementById("solution" + i).value = "";
-      document.getElementById("feedback" + i).style.display = "none";
-      document.getElementById("feedback" + i).className = "feedback";
-      document.getElementById("feedback" + i).innerHTML = "";
-      updateScore();
-    }
-
-    function loadScenarios() {
-      const container = document.getElementById("scenarios-container");
-
-      scenarios.forEach((s, i) => {
-        const card = document.createElement("div");
-        card.className = "scenario-card";
-
-        const title = document.createElement("div");
-        title.className = "scenario-title";
-        title.textContent = `Scenario ${i + 1}`;
-        card.appendChild(title);
-
-        const text = document.createElement("div");
-        text.className = "scenario-text";
-        text.textContent = s.text;
-        card.appendChild(text);
-
-        const form = document.createElement("div");
-        
-        const group1 = document.createElement("div");
-        group1.className = "form-group";
-        const label1 = document.createElement("label");
-        label1.textContent = "Issue";
-        const select1 = createDropdown(issues, "-- Select an issue --");
-        select1.id = "issue" + i;
-        group1.appendChild(label1);
-        group1.appendChild(select1);
-        form.appendChild(group1);
-
-        const group2 = document.createElement("div");
-        group2.className = "form-group";
-        const label2 = document.createElement("label");
-        label2.textContent = "Solution";
-        const select2 = createDropdown(solutions, "-- Select a solution --");
-        select2.id = "solution" + i;
-        group2.appendChild(label2);
-        group2.appendChild(select2);
-        form.appendChild(group2);
-
-        card.appendChild(form);
-
-        const actions = document.createElement("div");
-        actions.className = "scenario-actions";
-        const checkBtn = document.createElement("button");
-        checkBtn.className = "btn primary";
-        checkBtn.textContent = "Check";
-        checkBtn.onclick = () => checkScenario(i);
-        const resetBtn = document.createElement("button");
-        resetBtn.className = "btn secondary";
-        resetBtn.textContent = "Reset";
-        resetBtn.onclick = () => resetScenario(i);
-        actions.appendChild(checkBtn);
-        actions.appendChild(resetBtn);
-        card.appendChild(actions);
-
-        const fb = document.createElement("div");
-        fb.className = "feedback";
-        fb.id = "feedback" + i;
-        card.appendChild(fb);
-
-        select1.addEventListener("change", () => {
-          if (document.getElementById("solution" + i).value) checkScenario(i);
-          else updateScore();
-        });
-        select2.addEventListener("change", () => {
-          if (document.getElementById("issue" + i).value) checkScenario(i);
-          else updateScore();
-        });
-
-        container.appendChild(card);
-      });
-
-      updateScore();
-    }
-
-    // Mode Toggle
-    const modeIndicator = document.getElementById('mode-indicator');
-    const toggleModeBtn = document.getElementById('toggle-mode-btn');
-
-    toggleModeBtn.addEventListener('click', () => {
-      if (state.mode === 'training') {
-        state.mode = 'exam';
-        modeIndicator.textContent = 'Mode: Exam';
-        modeIndicator.className = 'badge danger';
-      } else {
-        state.mode = 'training';
-        modeIndicator.textContent = 'Mode: Training';
-        modeIndicator.className = 'badge info';
+      li.innerHTML = `
+        <div class="ticket-id">${ticket.id}</div>
+        <div class="ticket-caller">${ticket.caller}</div>
+        ${statusHtml}
+      `;
+      
+      // Allow clicking previously solved tickets to review them
+      if (index <= currentTicketIndex) {
+        li.onclick = () => renderTicket(index);
       }
+      
+      ticketListEl.appendChild(li);
     });
+  }
 
-    loadScenarios();
-  </script>
+  function createDropdown(options, placeholder) {
+    const select = document.createElement("select");
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = placeholder;
+    defaultOpt.disabled = true;
+    defaultOpt.selected = true;
+    select.appendChild(defaultOpt);
+    
+    options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
+    });
+    return select;
+  }
+
+  function renderTicket(index) {
+    const ticket = tickets[index];
+    const isCompleted = index < currentTicketIndex;
+    
+    // Reset attempts if viewing the current active ticket
+    if (index === currentTicketIndex) {
+      currentTicketAttempts = 0;
+    }
+
+    workspaceEl.innerHTML = `
+      <div class="panel-header">
+        <div>
+          <h2 style="margin: 0; font-size: 20px;">${ticket.id} - Hardware Diagnostics</h2>
+          <div class="meta-group">
+            <div class="meta-item">
+              <span class="meta-label">Caller</span>
+              <span class="meta-value">${ticket.caller}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Priority</span>
+              <span class="meta-value" style="color: ${ticket.priority === 'High' ? 'var(--danger)' : ticket.priority === 'Medium' ? 'var(--warning)' : 'var(--text-main)'}">${ticket.priority}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel-body">
+        <div class="meta-label" style="margin-bottom: 8px;">User Description</div>
+        <div class="description-box">"${ticket.desc}"</div>
+
+        <div class="form-row">
+          <div class="form-group" id="issue-group">
+            <label>Root Cause Analysis</label>
+          </div>
+          <div class="form-group" id="solution-group">
+            <label>Action Taken (Resolution)</label>
+          </div>
+        </div>
+
+        <button class="btn" id="resolve-btn" ${isCompleted ? 'disabled' : ''}>
+          ${isCompleted ? 'Ticket Closed' : 'Resolve Incident'}
+        </button>
+
+        <div id="feedback-area"></div>
+      </div>
+    `;
+
+    const issueSelect = createDropdown(issues, "-- Select Root Cause --");
+    const solutionSelect = createDropdown(solutions, "-- Select Action Taken --");
+    
+    if (isCompleted) {
+      issueSelect.value = ticket.correctIssue;
+      solutionSelect.value = ticket.correctSolution;
+      issueSelect.disabled = true;
+      solutionSelect.disabled = true;
+    }
+
+    document.getElementById('issue-group').appendChild(issueSelect);
+    document.getElementById('solution-group').appendChild(solutionSelect);
+
+    if (!isCompleted) {
+      document.getElementById('resolve-btn').onclick = () => {
+        checkResolution(index, issueSelect.value, solutionSelect.value);
+      };
+    } else {
+      // Show correct feedback immediately if reviewing a closed ticket
+      showFeedback(ticket.mentorRight, true);
+    }
+  }
+
+  function showFeedback(message, isSuccess) {
+    const area = document.getElementById('feedback-area');
+    area.innerHTML = `
+      <div class="feedback-box ${isSuccess ? 'success' : 'error'}">
+        <div class="feedback-title">
+          <span class="mentor-icon">${isSuccess ? '🎓' : '💡'}</span> 
+          Senior Tech Notes:
+        </div>
+        ${message}
+      </div>
+    `;
+  }
+
+  function checkResolution(index, selectedIssue, selectedSolution) {
+    const ticket = tickets[index];
+    
+    if (!selectedIssue || !selectedSolution) {
+      alert("Please select both a Root Cause and an Action Taken.");
+      return;
+    }
+
+    currentTicketAttempts++;
+
+    if (selectedIssue === ticket.correctIssue && selectedSolution === ticket.correctSolution) {
+      // Correct! Calculate points based on FCR (First Contact Resolution)
+      let pointsEarned = 0;
+      if (currentTicketAttempts === 1) pointsEarned = 10;
+      else if (currentTicketAttempts === 2) pointsEarned = 5;
+      else pointsEarned = 2;
+
+      totalScore += pointsEarned;
+      globalScoreEl.textContent = `Score: ${totalScore} / 80`;
+
+      showFeedback(`<strong>+${pointsEarned} Points!</strong><br>${ticket.mentorRight}`, true);
+      
+      // Disable inputs
+      document.querySelector('#issue-group select').disabled = true;
+      document.querySelector('#solution-group select').disabled = true;
+      
+      const btn = document.getElementById('resolve-btn');
+      btn.textContent = "Next Ticket ➔";
+      btn.style.background = "var(--success)";
+      
+      btn.onclick = () => {
+        currentTicketIndex++;
+        if (currentTicketIndex >= tickets.length) {
+          showEndScreen();
+        } else {
+          renderSidebar();
+          renderTicket(currentTicketIndex);
+        }
+      };
+      
+      // Update sidebar instantly to show it closed
+      const currentLi = ticketListEl.children[index];
+      currentLi.classList.remove('active');
+      currentLi.classList.add('closed');
+      currentLi.querySelector('.status-badge').className = "status-badge status-closed";
+      currentLi.querySelector('.status-badge').textContent = "Closed";
+
+    } else {
+      // Wrong answer
+      showFeedback(ticket.mentorWrong, false);
+    }
+  }
+
+  function showEndScreen() {
+    workspaceEl.innerHTML = `
+      <div class="end-screen">
+        <h2>Shift Completed!</h2>
+        <p>You have successfully closed all tickets in your queue.</p>
+        <div style="font-size: 14px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; margin-bottom: 5px;">Final Score</div>
+        <div class="final-score">${totalScore} / 80</div>
+        <p style="max-width: 500px; margin: 0 auto; line-height: 1.6;">
+          ${totalScore >= 70 ? "Excellent work! You have a great grasp on hardware diagnostics and FCR (First-Contact Resolution)." : 
+            totalScore >= 50 ? "Good job! You're getting the hang of it, but there's room to improve your initial diagnostic accuracy." : 
+            "Keep studying! Review the tickets in your queue on the left to see the explanations and reinforce your hardware knowledge."}
+        </p>
+      </div>
+    `;
+    renderSidebar(); // Final update to sidebar
+  }
+
+  // Initialize
+  renderSidebar();
+  renderTicket(currentTicketIndex);
+
+</script>
 </body>
 </html>
