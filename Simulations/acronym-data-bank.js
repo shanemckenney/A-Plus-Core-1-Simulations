@@ -115,7 +115,7 @@ const acronymData = [
     scenario: "A user complains they cannot access 'www.google.com' via their web browser. A technician pings '8.8.8.8' successfully, but pinging 'www.google.com' fails. Which service is most likely experiencing an issue?",
     options: ["DHCP", "DNS", "Gateway", "Subnet Mask"],
     answer: 1
-  }
+  },
   {
     id: "dos",
     acronym: "DoS",
@@ -250,7 +250,7 @@ const acronymData = [
     scenario: "A web developer needs to upload a directory of HTML and image files to a remote web server over port 21. Which protocol are they using?",
     options: ["SSH", "HTTP", "FTP", "RDP"],
     answer: 2
-  }
+  },
 {
     id: "gfs",
     acronym: "GFS",
@@ -430,7 +430,7 @@ const acronymData = [
     scenario: "A company connects all of its employee workstations, printers, and a local file server together using ethernet cables plugged into a central switch in the office. What type of network is this?",
     options: ["WAN", "PAN", "MAN", "LAN"],
     answer: 3
-  }
+  },
 {
     id: "lc",
     acronym: "LC",
@@ -610,9 +610,8 @@ const acronymData = [
     scenario: "A user is setting up a new 2TB internal hard drive on their Windows 11 desktop. They need the ability to assign folder-level security permissions to different local user accounts. Which file system must they choose?",
     options: ["exFAT", "FAT32", "NTFS", "APFS"],
     answer: 2
-  }
-{
-    {
+  },
+  {
     id: "ntp",
     acronym: "NTP",
     term: "Network Time Protocol",
@@ -800,7 +799,7 @@ const acronymData = [
     scenario: "A small business purchases a Network Attached Storage (NAS) device with four hard drives. The technician configures it so that if any single hard drive physically fails, no data is lost and the system keeps running. What technology is providing this fault tolerance?",
     options: ["SAN", "RAID", "SMART", "NVMe"],
     answer: 1
-  }
+  },
   {
     id: "ram",
     acronym: "RAM",
@@ -980,7 +979,7 @@ const acronymData = [
     scenario: "An employee opens File Explorer and maps a network drive (Z:) to a shared folder located on the corporate file server. Which protocol is primarily responsible for facilitating this file sharing over the network?",
     options: ["FTP", "SNMP", "SMB", "RDP"],
     answer: 2
-  }
+  },
 {
     id: "sms",
     acronym: "SMS",
@@ -1160,7 +1159,7 @@ const acronymData = [
     scenario: "A standard user attempts to install a new software application on their Windows workstation. Suddenly, the desktop dims and a prompt appears asking for an Administrator password. What Windows feature generated this prompt?",
     options: ["Windows Defender", "UAC", "BitLocker", "EFS"],
     answer: 1
-  }
+  },
 {
     id: "udp",
     acronym: "UDP",

@@ -139,6 +139,74 @@
       color: var(--accent-primary);
     }
 
+    /* ═══════════════════════════════════════ FEATURED ═══════════════════════════════════════ */
+    .featured-banner {
+      max-width: 1600px;
+      margin: 0 auto 40px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08), 0 20px 40px rgba(59, 130, 246, 0.12);
+    }
+
+    .featured-banner-text {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .featured-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent-secondary);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      margin-bottom: 10px;
+    }
+
+    .featured-banner-text h3 {
+      margin: 0 0 8px 0;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .featured-banner-text p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .featured-launch-btn {
+      flex-shrink: 0;
+      padding: 16px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, var(--accent-secondary), #0ea5e9);
+      transition: all 0.2s;
+    }
+
+    .featured-launch-btn:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+    }
+
     /* ═══════════════════════════════════════ TABS ═══════════════════════════════════════ */
     .tier-tabs {
       max-width: 1600px;
@@ -530,6 +598,16 @@
       </div>
     </div>
   </header>
+
+  <!-- ═════════════════════════════════════════ FEATURED ═════════════════════════════════════════ -->
+  <div class="featured-banner">
+    <div class="featured-banner-text">
+      <div class="featured-badge">📇 Essential Study Tool</div>
+      <h3>Acronym Flashcards</h3>
+      <p>Master all 150+ CompTIA A+ acronyms with spaced-repetition flashcards and scenario-based quizzes. Acronym recall underpins nearly every exam question — start here.</p>
+    </div>
+    <button class="featured-launch-btn" onclick="window.location.href='Simulations/Acronym-Flashcards.html'">Launch Flashcards</button>
+  </div>
 
   <!-- ═════════════════════════════════════════ TABS ═════════════════════════════════════════ -->
   <div class="tier-tabs">
