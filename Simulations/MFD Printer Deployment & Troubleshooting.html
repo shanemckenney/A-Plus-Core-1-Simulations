@@ -189,6 +189,18 @@ button.secondary{background:rgba(255,255,255,.12)}
   line-height:1.5;
 }
 .kv strong{color:var(--text)}
+
+.instr-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+.instr-overlay.open{ display:flex; }
+.instr-modal{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius,12px); max-width:640px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+.instr-modal-hdr{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--panel2, rgba(255,255,255,0.06)); position:sticky; top:0; }
+.instr-modal-hdr h2{ margin:0; font-size:16px; }
+.instr-modal-close{ background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; width:30px; height:30px; cursor:pointer; font-size:16px; line-height:1; }
+.instr-modal-bd{ padding:20px; font-size:13.5px; line-height:1.6; color:var(--text); }
+.instr-modal-bd h3{ font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:18px 0 8px; }
+.instr-modal-bd h3:first-child{ margin-top:0; }
+.instr-modal-bd ol, .instr-modal-bd ul{ margin:0 0 8px; padding-left:20px; }
+.instr-modal-bd p{ margin:0 0 10px; }
 </style>
 </head>
 
@@ -203,6 +215,7 @@ button.secondary{background:rgba(255,255,255,.12)}
   </div>
 
   <div class="controls">
+    <button id="instructions-btn" type="button">📘 Instructions</button>
     <span class="badge">Ticket</span>
     <select id="scenarioSelect" aria-label="Ticket selector">
       <option value="garbled">Scenario #1</option>
@@ -222,6 +235,28 @@ button.secondary{background:rgba(255,255,255,.12)}
     <span class="pill training-only">Explanations On</span>
   </div>
 </header>
+
+<div class="instr-overlay" id="instructions-modal" role="dialog" aria-modal="true" aria-labelledby="instructions-modal-title">
+  <div class="instr-modal">
+    <div class="instr-modal-hdr">
+      <h2 id="instructions-modal-title">How to Use This Simulation</h2>
+      <button class="instr-modal-close" id="instructions-close-btn" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="instr-modal-bd">
+      <h3>Objective</h3>
+      <p>You're triaging one of 8 printer support tickets — identify the most likely cause of the reported issue and the best next step to resolve it.</p>
+      <h3>How to Use This Simulator</h3>
+      <ol>
+        <li>Choose a ticket from the <strong>Scenario #</strong> dropdown and read the Ticket Details panel.</li>
+        <li>Select one option under <strong>Most Likely Cause</strong> AND one option under <strong>Best Next Step</strong> — both are required.</li>
+        <li>Click Submit to grade your answer.</li>
+        <li>The Training/Exam toggle in the header controls whether you see an explanation after submitting; switching tickets or modes resets your current selections.</li>
+      </ol>
+      <h3>On Exam Day</h3>
+      <p>Real PBQs often pair a cause with an action the same way — commit to both together based on the evidence in the ticket, rather than picking the fix first and working backward.</p>
+    </div>
+  </div>
+</div>
 
 <main>
   <div class="grid">
@@ -557,6 +592,22 @@ toggle.addEventListener("keydown", (e)=>{
 });
 
 loadScenario("garbled");
+
+// Instructions Modal
+(function(){
+  const btn = document.getElementById('instructions-btn');
+  const overlay = document.getElementById('instructions-modal');
+  const closeBtn = document.getElementById('instructions-close-btn');
+  if(!btn || !overlay) return;
+  function openModal(){ overlay.classList.add('open'); }
+  function closeModal(){ overlay.classList.remove('open'); }
+  btn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+})();
 </script>
 
 </body>

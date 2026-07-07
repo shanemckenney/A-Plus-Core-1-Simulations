@@ -225,6 +225,18 @@
       margin-bottom: 8px;
       line-height: 1.4;
     }
+
+    .instr-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+    .instr-overlay.open{ display:flex; }
+    .instr-modal{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius,12px); max-width:640px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .instr-modal-hdr{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--panel-hdr, rgba(255,255,255,0.06)); position:sticky; top:0; }
+    .instr-modal-hdr h2{ margin:0; font-size:16px; }
+    .instr-modal-close{ background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; width:30px; height:30px; cursor:pointer; font-size:16px; line-height:1; }
+    .instr-modal-bd{ padding:20px; font-size:13.5px; line-height:1.6; color:var(--text); }
+    .instr-modal-bd h3{ font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:18px 0 8px; }
+    .instr-modal-bd h3:first-child{ margin-top:0; }
+    .instr-modal-bd ol, .instr-modal-bd ul{ margin:0 0 8px; padding-left:20px; }
+    .instr-modal-bd p{ margin:0 0 10px; }
   </style>
 </head>
 <body>
@@ -234,10 +246,34 @@
       <h1>SOHO Wireless Router GUI Setup</h1>
     </div>
     <div class="mode-ctrl">
+      <button class="btn" id="instructions-btn" type="button">📘 Instructions</button>
       <span class="badge info" id="mode-indicator">Mode: Training</span>
       <button class="btn" id="toggle-mode-btn">Switch Mode</button>
     </div>
   </header>
+
+  <div class="instr-overlay" id="instructions-modal" role="dialog" aria-modal="true" aria-labelledby="instructions-modal-title">
+    <div class="instr-modal">
+      <div class="instr-modal-hdr">
+        <h2 id="instructions-modal-title">How to Use This Simulation</h2>
+        <button class="instr-modal-close" id="instructions-close-btn" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="instr-modal-bd">
+        <h3>Objective</h3>
+        <p>You're configuring a small office/home office wireless router to match a helpdesk ticket's exact security and network requirements — admin credentials, SSID, encryption, Wi-Fi passphrase, channel, and MAC filtering.</p>
+        <h3>How to Use This Simulator</h3>
+        <ol>
+          <li>Open each tab (Administration, Wireless Settings, Advanced/Security) and enter the values requested in the ticket.</li>
+          <li>After making changes in a tab, scroll to the bottom of the router panel and click <strong>Save Settings</strong> — this commits your changes. If you skip this step, your changes will <strong>not</strong> be graded, even though they still appear in the form.</li>
+          <li>Repeat step 2 for every tab you touch.</li>
+          <li>Once everything is saved, click <strong>Submit Configuration</strong> on the left card to grade your work.</li>
+          <li>Use <strong>Switch Mode</strong> (Training/Exam) in the header — Training shows which specific checks passed or failed and why; Exam only confirms your submission was received.</li>
+        </ol>
+        <h3>On Exam Day</h3>
+        <p>Real PBQs that simulate a router or device GUI won't remind you to click Save before moving on — get in the habit of applying every settings change before you leave a screen, because you often can't go back.</p>
+      </div>
+    </div>
+  </div>
 
   <main class="workspace">
     
@@ -530,6 +566,22 @@
         list.appendChild(item);
       });
     });
+
+    // Instructions Modal
+    (function(){
+      const btn = document.getElementById('instructions-btn');
+      const overlay = document.getElementById('instructions-modal');
+      const closeBtn = document.getElementById('instructions-close-btn');
+      if(!btn || !overlay) return;
+      function openModal(){ overlay.classList.add('open'); }
+      function closeModal(){ overlay.classList.remove('open'); }
+      btn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+      });
+    })();
   </script>
 </body>
 </html>

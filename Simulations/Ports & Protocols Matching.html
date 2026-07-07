@@ -203,6 +203,18 @@
       margin-bottom: 12px;
       line-height: 1.5;
     }
+
+    .instr-overlay{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+    .instr-overlay.open{ display:flex; }
+    .instr-modal{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius,12px); max-width:640px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .instr-modal-hdr{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--panel-hdr, rgba(255,255,255,0.06)); position:sticky; top:0; }
+    .instr-modal-hdr h2{ margin:0; font-size:16px; }
+    .instr-modal-close{ background:transparent; border:1px solid var(--border); color:var(--text); border-radius:6px; width:30px; height:30px; cursor:pointer; font-size:16px; line-height:1; }
+    .instr-modal-bd{ padding:20px; font-size:13.5px; line-height:1.6; color:var(--text); }
+    .instr-modal-bd h3{ font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin:18px 0 8px; }
+    .instr-modal-bd h3:first-child{ margin-top:0; }
+    .instr-modal-bd ol, .instr-modal-bd ul{ margin:0 0 8px; padding-left:20px; }
+    .instr-modal-bd p{ margin:0 0 10px; }
   </style>
 </head>
 <body>
@@ -212,10 +224,33 @@
       <h1>Network Infrastructure Ports &amp; Protocols Matrix</h1>
     </div>
     <div class="mode-ctrl">
+      <button class="btn" id="instructions-btn" type="button">📘 Instructions</button>
       <span class="badge info" id="mode-indicator">Mode: Training</span>
       <button class="btn" id="toggle-mode-btn">Switch Mode</button>
     </div>
   </header>
+
+  <div class="instr-overlay" id="instructions-modal" role="dialog" aria-modal="true" aria-labelledby="instructions-modal-title">
+    <div class="instr-modal">
+      <div class="instr-modal-hdr">
+        <h2 id="instructions-modal-title">How to Use This Simulation</h2>
+        <button class="instr-modal-close" id="instructions-close-btn" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="instr-modal-bd">
+        <h3>Objective</h3>
+        <p>Match each port number to its correct protocol or service in the matrix.</p>
+        <h3>How to Use This Simulator</h3>
+        <ol>
+          <li>Drag a port pill onto its matching target row, or click a port then click a target box to place it.</li>
+          <li>Click a filled target box again to clear it and try a different pairing.</li>
+          <li>Click <strong>Evaluate Matrix</strong> once every port is placed.</li>
+          <li>Use <strong>Switch Mode</strong> (Training/Exam) in the header to control whether incorrect answers show an explanation.</li>
+        </ol>
+        <h3>On Exam Day</h3>
+        <p>Port-matching PBQs typically show every item at once with no retry loop — place the ports you're certain of first, then use elimination on what's left.</p>
+      </div>
+    </div>
+  </div>
 
   <main class="workspace">
     
@@ -507,6 +542,22 @@
     // Inception Execution Loops
     renderPortBank();
     renderMatrixRows();
+
+    // Instructions Modal
+    (function(){
+      const btn = document.getElementById('instructions-btn');
+      const overlay = document.getElementById('instructions-modal');
+      const closeBtn = document.getElementById('instructions-close-btn');
+      if(!btn || !overlay) return;
+      function openModal(){ overlay.classList.add('open'); }
+      function closeModal(){ overlay.classList.remove('open'); }
+      btn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+      });
+    })();
   </script>
 </body>
 </html>
