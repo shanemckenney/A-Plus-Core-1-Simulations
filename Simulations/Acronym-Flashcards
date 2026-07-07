@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CompTIA A+ 220-1201 Acronym Flashcards</title>
+  <style>
+    /* --- CUSTOM REPO CSS VARIABLES --- */
+    :root {
+      --bg: #090d1a;                          
+      --panel: #111827;                       
+      --panel-hdr: #1f2937;                   
+      --text: #f3f4f6;                        
+      --muted: #9ca3af;                       
+      --accent: #3b82f6; /* Adjust this to match your Tier-specific color */
+      --good: #10b981;                        
+      --bad: #ef4444;                         
+      --border: rgba(255, 255, 255, 0.1);     
+    }
+
+    /* --- GLOBAL STYLES --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- SPLASH SCREEN --- */
+    #splash-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 20px;
+      text-align: center;
+      z-index: 50;
+    }
+    .warning-box {
+      background-color: var(--panel-hdr);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 25px;
+      max-width: 500px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .warning-box strong { color: var(--accent); }
+    .btn {
+      background-color: var(--accent);
+      color: var(--text);
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:active { opacity: 0.8; }
+
+    /* --- MAIN APP UI --- */
+    #app-container {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+    header {
+      background-color: var(--panel-hdr);
+      padding: 15px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    select {
+      background-color: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    select:focus { outline: 1px solid var(--accent); }
+    .progress-text {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* --- FLASHCARD AREA --- */
+    #flashcard-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      perspective: 1000px;
+    }
+    .card {
+      width: 100%;
+      max-width: 500px;
+      height: 350px;
+      background-color: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .card-back {
+      transform: rotateY(180deg);
+      background-color: var(--panel-hdr);
+    }
+    .card-title { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; color: var(--accent); }
+    .card-subtitle { font-size: 1.1rem; color: var(--muted); font-style: italic; }
+    .card-desc { font-size: 1.1rem; color: var(--text); margin-top: 15px; line-height: 1.5; }
+
+    /* --- PHASE 3 QUIZ UI --- */
+    .quiz-layout {
+      width: 100%;
+      max-width: 700px;
+      background-color: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .scenario-text { font-size: 1.15rem; margin-bottom: 25px; line-height: 1.6; }
+    .quiz-option {
+      background-color: var(--panel-hdr);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font-size: 1rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .quiz-option:hover { background-color: var(--bg); border-color: var(--accent); }
+    .quiz-option.correct { background-color: var(--good); border-color: var(--good); color: #fff; }
+    .quiz-option.incorrect { background-color: var(--bad); border-color: var(--bad); color: #fff; }
+
+    /* --- ACTION BAR (MOBILE FIRST) --- */
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      background-color: var(--panel-hdr);
+      border-top: 1px solid var(--border);
+    }
+    .action-btn {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: transform 0.1s;
+    }
+    .action-btn:active { transform: scale(0.95); }
+    .btn-bad { background-color: var(--bad); }
+    .btn-good { background-color: var(--good); }
+
+  </style>
+</head>
+<body>
+
+  <div id="splash-screen">
+    <h1 style="margin-bottom: 20px; color: var(--accent);">CompTIA A+ Core 1 Acronyms</h1>
+    <div class="warning-box">
+      <strong>Note on Progress Tracking:</strong><br><br>
+      Your study progress is saved locally in this browser to keep things fast and private. If you clear your browser cache, use incognito mode, or switch to a different device, your progress will reset.
+    </div>
+    <button class="btn" onclick="startApp()">Start Studying</button>
+  </div>
+
+  <div id="app-container">
+    <header>
+      <select id="phase-select" onchange="loadDeck()">
+        <option value="1">Phase 1: Memorization</option>
+        <option value="2">Phase 2: Use Cases</option>
+        <option value="3">Phase 3: Scenarios</option>
+      </select>
+      <div class="progress-text" id="progress-indicator">Card 1 / 10</div>
+    </header>
+
+    <div id="flashcard-area">
+      <div class="card" id="study-card" onclick="flipCard()">
+        <div class="card-face card-front">
+          <div class="card-title" id="front-title">...</div>
+          <div class="card-subtitle" id="front-subtitle">Tap to flip</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-title" id="back-title" style="font-size: 1.8rem;">...</div>
+          <div class="card-desc" id="back-desc"></div>
+        </div>
+      </div>
+
+      <div class="quiz-layout" id="quiz-card">
+        <div class="scenario-text" id="scenario-text">...</div>
+        <div id="quiz-options"></div>
+      </div>
+    </div>
+
+    <div class="action-bar" id="action-bar">
+      <button class="action-btn btn-bad" onclick="handleResult(false)">✕</button>
+      <button class="action-btn btn-good" onclick="handleResult(true)">✓</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let currentDeck = [];
+    let currentIndex = 0;
+    let userProgress = JSON.parse(localStorage.getItem('comptia_progress')) || {};
+
+    function startApp() {
+      // Initialize progress object if data.js loaded successfully and user is new
+      if (typeof acronymData === 'undefined') {
+        alert("Error: data.js file not found. Make sure it is in the same folder.");
+        return;
+      }
+      
+      if(Object.keys(userProgress).length === 0) {
+        acronymData.forEach(item => { userProgress[item.id] = 1; });
+        saveProgress();
+      }
+
+      document.getElementById('splash-screen').style.display = 'none';
+      document.getElementById('app-container').style.display = 'flex';
+      loadDeck();
+    }
+
+    function saveProgress() {
+      localStorage.setItem('comptia_progress', JSON.stringify(userProgress));
+    }
+
+    function loadDeck() {
+      const selectedPhase = parseInt(document.getElementById('phase-select').value);
+      
+      // Filter deck: Only show items where userProgress is EXACTLY or GREATER than selected phase
+      currentDeck = acronymData.filter(item => (userProgress[item.id] || 1) >= selectedPhase);
+      
+      // Shuffle deck for better studying
+      currentDeck = currentDeck.sort(() => Math.random() - 0.5);
+      
+      currentIndex = 0;
+      document.getElementById('study-card').classList.remove('is-flipped');
+      
+      if (currentDeck.length === 0) {
+        showEmptyState();
+      } else {
+        renderCard();
+      }
+    }
+
+    function renderCard() {
+      const selectedPhase = parseInt(document.getElementById('phase-select').value);
+      const currentItem = currentDeck[currentIndex];
+      const studyCard = document.getElementById('study-card');
+      const quizCard = document.getElementById('quiz-card');
+      const actionBar = document.getElementById('action-bar');
+      
+      document.getElementById('progress-indicator').innerText = `Card ${currentIndex + 1} / ${currentDeck.length}`;
+
+      if (selectedPhase === 1 || selectedPhase === 2) {
+        studyCard.style.display = 'block';
+        quizCard.style.display = 'none';
+        actionBar.style.display = 'flex';
+
+        if (selectedPhase === 1) {
+          // Phase 1: Acronym -> Term
+          document.getElementById('front-title').innerText = currentItem.acronym;
+          document.getElementById('front-subtitle').innerText = "Tap to view term";
+          document.getElementById('back-title').innerText = currentItem.term;
+          document.getElementById('back-desc').innerText = "";
+        } else {
+          // Phase 2: Term -> Use Case
+          document.getElementById('front-title').innerText = currentItem.term;
+          document.getElementById('front-subtitle').innerText = "Tap to view use case";
+          document.getElementById('back-title').innerText = currentItem.acronym;
+          document.getElementById('back-desc').innerText = currentItem.useCase;
+        }
+      } else {
+        // Phase 3: Scenario Quiz
+        studyCard.style.display = 'none';
+        quizCard.style.display = 'block';
+        actionBar.style.display = 'none'; // Hide X/Check, handled by quiz
+        
+        document.getElementById('scenario-text').innerText = currentItem.scenario;
+        const optionsContainer = document.getElementById('quiz-options');
+        optionsContainer.innerHTML = "";
+        
+        currentItem.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-option';
+          btn.innerText = opt;
+          btn.onclick = () => handleQuizAnswer(btn, idx, currentItem.answer, currentItem.id);
+          optionsContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function flipCard() {
+      document.getElementById('study-card').classList.toggle('is-flipped');
+    }
+
+    function showEmptyState() {
+      document.getElementById('study-card').style.display = 'block';
+      document.getElementById('quiz-card').style.display = 'none';
+      document.getElementById('action-bar').style.display = 'none';
+      document.getElementById('progress-indicator').innerText = "0 / 0";
+      
+      document.getElementById('front-title').innerText = "Deck Complete!";
+      document.getElementById('front-subtitle').innerText = "You have mastered all available terms for this phase.";
+      document.getElementById('back-title').innerText = "";
+      document.getElementById('back-desc').innerText = "";
+    }
+
+    function handleResult(isCorrect) {
+      const currentItem = currentDeck[currentIndex];
+      const selectedPhase = parseInt(document.getElementById('phase-select').value);
+
+      // If correct, promote the word to the next phase (Max phase 3)
+      if (isCorrect && (userProgress[currentItem.id] || 1) == selectedPhase && selectedPhase < 3) {
+        userProgress[currentItem.id] = selectedPhase + 1;
+        saveProgress();
+      }
+
+      document.getElementById('study-card').classList.remove('is-flipped');
+      setTimeout(nextCard, 150); // Small delay to let card flip back down
+    }
+
+    function handleQuizAnswer(btn, selectedIdx, correctIdx, itemId) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(o => o.onclick = null); // Disable further clicks
+
+      if (selectedIdx === correctIdx) {
+        btn.classList.add('correct');
+        // Scenario correct, no further phase to promote to currently, just move on
+        setTimeout(() => nextCard(), 1500);
+      } else {
+        btn.classList.add('incorrect');
+        options[correctIdx].classList.add('correct'); // Show correct answer
+        setTimeout(() => nextCard(), 3000); // Give user more time to read correct answer
+      }
+    }
+
+    function nextCard() {
+      currentIndex++;
+      if (currentIndex >= currentDeck.length) {
+        loadDeck(); // Refresh deck based on updated progress
+      } else {
+        renderCard();
+      }
+    }
+  </script>
+</body>
+</html>
