@@ -207,6 +207,22 @@
       transform: translateY(-2px);
     }
 
+    .featured-banner.resume-variant {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.08), 0 20px 40px rgba(139, 92, 246, 0.12);
+    }
+
+    .featured-banner.resume-variant .featured-badge {
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--accent-tertiary);
+      border-color: rgba(139, 92, 246, 0.4);
+    }
+
+    .featured-banner.resume-variant .featured-launch-btn {
+      background: linear-gradient(135deg, var(--accent-tertiary), #ec4899);
+    }
+
     /* ═══════════════════════════════════════ TABS ═══════════════════════════════════════ */
     .tier-tabs {
       max-width: 1600px;
@@ -607,6 +623,16 @@
       <p>Master all 150+ CompTIA A+ acronyms with spaced-repetition flashcards and scenario-based quizzes. Acronym recall underpins nearly every exam question — start here.</p>
     </div>
     <button class="featured-launch-btn" onclick="window.location.href='Simulations/Acronym-Flashcards.html'">Launch Flashcards</button>
+  </div>
+
+  <!-- ═════════════════════════════════════════ RESUME BULLETS ═════════════════════════════════════════ -->
+  <div class="featured-banner resume-variant">
+    <div class="featured-banner-text">
+      <div class="featured-badge">📄 Career Toolkit</div>
+      <h3>Resume Bullet Examples</h3>
+      <p>Turn these simulations into resume-ready achievements using Google's XYZ format ("Accomplished X, as measured by Y, by doing Z"). Ready-to-use bullets for every simulation.</p>
+    </div>
+    <button class="featured-launch-btn" onclick="window.location.href='resume-bullets.html'">View Resume Bullets</button>
   </div>
 
   <!-- ═════════════════════════════════════════ TABS ═════════════════════════════════════════ -->
