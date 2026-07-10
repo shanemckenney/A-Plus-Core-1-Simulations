@@ -240,10 +240,12 @@
 </head>
 <body>
 
+<nav style="padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);"><a href="../index.html" style="color: #93c5fd; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">← Back to Simulations</a></nav>
+
 <header>
-  <a href="../index.html" class="btn" style="align-self: center;">← Back to Simulations</a>
   <div>
     <h1>Power Protection Sorter</h1>
+    <p style="margin: 4px 0 0; font-size: 12px; color: var(--muted);">Riverside Office — Storm Recovery Inventory</p>
   </div>
   <div class="mode-ctrl">
     <button class="btn" id="instructions-btn" type="button">📘 Instructions</button>
@@ -258,17 +260,18 @@
       <button class="instr-modal-close" id="instructions-close-btn" type="button" aria-label="Close">✕</button>
     </div>
     <div class="instr-modal-bd">
-      <h3>Objective</h3>
-      <p>Sort each device into the power-protection category it actually needs: UPS, surge protector, or plain wall outlet.</p>
+      <h3>Situation</h3>
+      <p>You're picking up the pieces after a storm knocked out power to the Riverside office. Read the incident summary, then decide how every device in the inventory should be protected before the next outage.</p>
       <h3>How to Use This Simulator</h3>
       <ol>
-        <li>Drag each device from the bank into a protection zone.</li>
-        <li>Click a placed device to send it back to the bank if you change your mind.</li>
-        <li>Click <strong>Evaluate Classification</strong> for your score.</li>
-        <li>Use <strong>Show Rationale</strong> any time to see the reasoning behind each category — this sim has no Training/Exam mode, so feedback is always visible.</li>
+        <li>Drag each device from the inventory list into a protection zone.</li>
+        <li>Click a placed device to send it back to the inventory list if you change your mind.</li>
+        <li>Click <strong>Evaluate Classification</strong> to submit your protection plan.</li>
+        <li>Any device you got wrong will show what actually would have happened to it in a storm like this one — that's your damage report.</li>
+        <li>Use <strong>Show Rationale</strong> any time for the general reasoning behind each category.</li>
       </ol>
-      <h3>On Exam Day</h3>
-      <p>Device-classification PBQs expect one confident placement per item with no undo — reason from what each device needs (data protection vs. just clean power) rather than guessing.</p>
+      <h3>Why This Matters</h3>
+      <p>On the job, nobody hands you a labeled list. You look at what a device actually does — does it hold live data that outlasts a click, or does it just need clean, spike-free power — and protect it accordingly.</p>
     </div>
   </div>
 </div>
@@ -279,10 +282,10 @@
     <div class="card-hdr">Devices to Classify</div>
     <div class="card-bd">
       <div class="prompt">
-        <strong>Scenario:</strong> A small office experiences brief power flickers a few times per month. Drag each device into the appropriate protection category.
+        <strong>Incident Summary:</strong> Two nights ago a severe thunderstorm moved through the area and lightning struck a transformer near the building. The office lost power for about 40 minutes, and the grid surged twice as it came back online. The ISP modem's power adapter didn't survive the surge — it had been plugged straight into the wall with nothing protecting it, and now the whole office is waiting on a replacement. Everything else in the office happened to make it through, but only by luck. Before another storm rolls through, sort the full device inventory into the protection it actually needs.
       </div>
 
-      <h3>Available Devices</h3>
+      <h3>Device Inventory</h3>
       <div class="device-bank" id="deviceBank"></div>
 
       <div class="controls">
@@ -291,13 +294,13 @@
         <button class="btn" id="toggleRationaleBtn">Show Rationale</button>
       </div>
 
-      <div id="status" class="status">Drag all devices into their protection category → Click Evaluate.</div>
+      <div id="status" class="status">Drag every device in the inventory into a protection zone → Click Evaluate Classification.</div>
       <div id="rationale" class="rationale">
-        <strong>Classification Rationale:</strong>
+        <strong>General Reasoning:</strong>
         <ul style="margin: 8px 0 0 16px; padding: 0;">
-          <li><strong>UPS:</strong> Critical devices where power loss = data/session loss (PC, monitor, modem, router, switch)</li>
-          <li><strong>Surge Protector:</strong> Sensitive electronics that don't need battery runtime (scanner, chargers, lamps)</li>
-          <li><strong>Wall Outlet:</strong> High-draw/heating devices unsuitable for UPS (especially laser printers)</li>
+          <li><strong>UPS:</strong> Devices where a sudden power loss means lost data or a dropped connection — needs battery runtime to shut down clean or ride out a short outage.</li>
+          <li><strong>Surge Protector:</strong> Devices with nothing to lose on a power cut, but still worth protecting from voltage spikes.</li>
+          <li><strong>Wall Outlet:</strong> High-draw or heating devices whose load isn't suited to a UPS at all.</li>
         </ul>
       </div>
     </div>
@@ -327,21 +330,33 @@
 
 <script>
   const devices = [
-    { id: "pc", label: "Desktop computer" },
-    { id: "mon", label: "Primary monitor" },
-    { id: "modem", label: "Modem / ONT" },
-    { id: "router", label: "Wi-Fi router" },
-    { id: "switch", label: "8-port switch" },
-    { id: "laser", label: "Laser printer" },
-    { id: "scan", label: "Flatbed scanner" },
-    { id: "lamp", label: "Desk lamp" },
-    { id: "charger", label: "Phone charger" }
+    { id: "pc", label: "Front desk PC" },
+    { id: "mon", label: "Front desk monitor" },
+    { id: "modem", label: "ISP modem (replacement unit)" },
+    { id: "router", label: "Office Wi-Fi router" },
+    { id: "switch", label: "8-port switch (server closet)" },
+    { id: "laser", label: "Shared laser printer" },
+    { id: "scan", label: "Accounting flatbed scanner" },
+    { id: "lamp", label: "Reception desk lamp" },
+    { id: "charger", label: "Breakroom charging station" }
   ];
 
   const answerKey = {
     UPS:    ["pc", "mon", "modem", "router", "switch"],
     SURGE:  ["scan", "lamp", "charger"],
     WALL:   ["laser"]
+  };
+
+  const damageReport = {
+    pc:      "The front desk PC was mid-invoice when the power dropped. Without a UPS, an outage like this one means an unsaved file and whatever the receptionist was in the middle of, gone.",
+    mon:     "A monitor going dark isn't the real cost here — it's that the PC feeding it loses its display the instant power drops, right when someone needs to see what's on screen.",
+    modem:   "This is the device that actually failed. Plugged straight into the wall, its power adapter didn't survive the surge — and losing it took the whole office's internet and phone service down with it.",
+    router:  "When the modem lost power, the router dropped too, and the connection didn't come back cleanly on its own. A UPS keeps networking gear riding through a short outage instead of needing a manual reboot.",
+    switch:  "The switch feeds every wired desk in the office. If it drops during an outage, everyone loses their connection at once — even people whose own PCs stayed powered.",
+    laser:   "A laser printer's fuser draws far more power than a UPS is built to supply, so it doesn't belong on one — the load itself is the risk, not just the surge. It stays on its own dedicated circuit at the wall.",
+    scan:    "The scanner isn't holding onto live data, so it doesn't need battery runtime — but the same surge that took out the modem could just as easily fry an unprotected scanner.",
+    lamp:    "A lamp doesn't care about a clean shutdown, but a cheap transformer inside it is just as vulnerable to a voltage spike as anything else in the building.",
+    charger: "Chargers have the same story as the lamp: nothing to lose if power cuts out, but still exposed to the next surge if it's plugged straight into the wall."
   };
 
   const bank = document.getElementById("deviceBank");
@@ -424,6 +439,7 @@
       return;
     }
 
+    const zoneLabel = { UPS: "UPS", SURGE: "Surge Protector", WALL: "Wall Outlet" };
     let correct = 0;
     const feedback = [];
     for (const [zone, ids] of Object.entries(placements)) {
@@ -433,14 +449,16 @@
         } else {
           const correctZone = Object.keys(answerKey).find(z => answerKey[z].includes(id));
           const label = devices.find(d => d.id === id)?.label || id;
-          feedback.push(`${label} → ${correctZone}`);
+          const narrative = damageReport[id] || "";
+          feedback.push(`<strong>${label}</strong> — needed <em>${zoneLabel[correctZone]}</em>.<br>${narrative}`);
         }
       });
     }
 
-    status.innerHTML = `<strong>Score: ${correct}/${devices.length}</strong>` + 
-      (feedback.length ? `<br><br><strong>Corrections needed:</strong><br>• ${feedback.join("<br>• ")}` : 
-      "<br><br><strong>Perfect!</strong> Explain your UPS selection to reinforce learning.");
+    status.innerHTML = `<strong>Score: ${correct}/${devices.length}</strong>` +
+      (feedback.length
+        ? `<br><br><strong>Post-Storm Damage Report:</strong><br><br>${feedback.join("<br><br>")}`
+        : "<br><br><strong>Full inventory secured.</strong> Every device is matched to what it actually needs if this happens again.");
   });
 
   document.getElementById("resetBtn").addEventListener("click", reset);
