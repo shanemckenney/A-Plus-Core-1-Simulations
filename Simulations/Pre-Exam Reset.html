@@ -369,6 +369,81 @@
     letter-spacing:0.4px;
     line-height:1.8;
   }
+
+  /* desktop view: the card and clamp() sizes below are tuned for phones,
+     so on a large monitor everything caps out small and reads tiny */
+  .a11y-btn[aria-pressed="true"]{
+    color:var(--accent);
+    border-color:var(--accent-dim);
+    background:rgba(255,255,255,0.04);
+  }
+  body.desktop-mode .rig{
+    max-width:900px;
+  }
+  body.desktop-mode .topbar{
+    font-size:14px;
+  }
+  body.desktop-mode .topbar .clock{
+    font-size:17px;
+  }
+  body.desktop-mode .stage-label{
+    font-size:13px;
+  }
+  body.desktop-mode h1{
+    font-size:clamp(28px, 3.2vw, 44px);
+  }
+  body.desktop-mode .sub{
+    font-size:19px;
+    max-width:680px;
+  }
+  body.desktop-mode .big-count{
+    font-size:clamp(64px, 10vw, 110px);
+  }
+  body.desktop-mode .breath-word{
+    font-size:clamp(28px, 4vw, 44px);
+  }
+  body.desktop-mode .box-wrap{
+    width:260px;
+    height:260px;
+  }
+  body.desktop-mode .box-dot{
+    width:18px;
+    height:18px;
+    top:-9px;
+    left:-9px;
+  }
+  body.desktop-mode .ground-item{
+    font-size:24px;
+  }
+  body.desktop-mode .anchor-display{
+    font-size:clamp(26px, 3.5vw, 38px);
+    max-width:680px;
+  }
+  body.desktop-mode .cert-tag{
+    font-size:14px;
+    padding:6px 14px;
+  }
+  body.desktop-mode .go-flash{
+    font-size:clamp(44px, 8vw, 72px);
+  }
+  body.desktop-mode button{
+    font-size:16px;
+    padding:16px 26px;
+  }
+  body.desktop-mode .a11y-btn{
+    font-size:13px;
+    padding:8px 14px;
+  }
+  body.desktop-mode .a11y-switch{
+    font-size:13px;
+    padding:8px 16px;
+  }
+  body.desktop-mode .a11y-row{
+    font-size:15px;
+  }
+  body.desktop-mode .footer-controls{
+    font-size:14px;
+  }
 </style>
 </head>
 <body>
@@ -378,6 +453,7 @@
   <div class="topbar">
     <span>CWP // PRE-EXAM SYSTEMS CHECK</span>
     <div class="topbar-right">
+      <button class="a11y-btn" id="viewModeBtn" aria-pressed="false" onclick="toggleDesktopMode()">🖥 Desktop View</button>
       <button class="a11y-btn" id="a11yBtn" aria-expanded="false" aria-controls="a11yPanel" onclick="toggleA11yPanel()">⚙ Accessibility</button>
       <span class="clock" id="totalClock">5:00</span>
     </div>
@@ -575,6 +651,26 @@ function playBreathTone(label){
   if(!a11yState.audio) return;
   ensureAudioCtx();
   playTone(BREATH_TONES[label] || 440, 0.35);
+}
+
+// DESKTOP VIEW (bigger card + text for large monitors)
+let desktopMode = false;
+function initDesktopMode(){
+  desktopMode = localStorage.getItem('cwp_desktop_mode') === '1';
+  applyDesktopMode();
+}
+function toggleDesktopMode(){
+  desktopMode = !desktopMode;
+  localStorage.setItem('cwp_desktop_mode', desktopMode ? '1' : '0');
+  applyDesktopMode();
+}
+function applyDesktopMode(){
+  document.body.classList.toggle('desktop-mode', desktopMode);
+  const btn = document.getElementById('viewModeBtn');
+  if(btn){
+    btn.setAttribute('aria-pressed', desktopMode ? 'true' : 'false');
+    btn.textContent = desktopMode ? '📱 Mobile View' : '🖥 Desktop View';
+  }
 }
 
 function fmt(s){
@@ -787,6 +883,7 @@ function resetAll(){
 
 updateTotalClock();
 initA11y();
+initDesktopMode();
 </script>
 
 </body>
