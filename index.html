@@ -223,6 +223,23 @@
       background: linear-gradient(135deg, var(--accent-tertiary), #ec4899);
     }
 
+    .featured-banner.reset-variant {
+      background: linear-gradient(135deg, rgba(95, 224, 135, 0.15), rgba(95, 224, 135, 0.05));
+      border-color: rgba(95, 224, 135, 0.4);
+      box-shadow: 0 0 0 1px rgba(95, 224, 135, 0.08), 0 20px 40px rgba(95, 224, 135, 0.12);
+    }
+
+    .featured-banner.reset-variant .featured-badge {
+      background: rgba(224, 185, 95, 0.2);
+      color: #e0b95f;
+      border-color: rgba(224, 185, 95, 0.4);
+    }
+
+    .featured-banner.reset-variant .featured-launch-btn {
+      background: linear-gradient(135deg, #5fe087, #2f6b45);
+      color: #08120b;
+    }
+
     /* ═══════════════════════════════════════ TABS ═══════════════════════════════════════ */
     .tier-tabs {
       max-width: 1600px;
@@ -614,6 +631,16 @@
       </div>
     </div>
   </header>
+
+  <!-- ═════════════════════════════════════════ PRE-EXAM RESET ═════════════════════════════════════════ -->
+  <div class="featured-banner reset-variant">
+    <div class="featured-banner-text">
+      <div class="featured-badge">🧘 5-Minute Reset</div>
+      <h3>Pre-Exam Reset</h3>
+      <p>Sitting the proctored exam soon? Run this 5-minute systems check right beforehand — brain dump, box breathing, grounding, and a confidence anchor to get your head in the zone. Not a study tool — a mindset reset.</p>
+    </div>
+    <button class="featured-launch-btn" onclick="window.location.href='Simulations/Pre-Exam Reset.html'">Launch Reset</button>
+  </div>
 
   <!-- ═════════════════════════════════════════ FEATURED ═════════════════════════════════════════ -->
   <div class="featured-banner">

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Pre-Exam Reset :: 5 Minute Systems Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e0c;
+    --panel:#121814;
+    --line:#2a3b30;
+    --accent:#5fe087;
+    --accent-dim:#2f6b45;
+    --amber:#e0b95f;
+    --text:#d8e4dc;
+    --text-dim:#7d9284;
+    --danger:#e05f5f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+  html,body{height:100%; overscroll-behavior:none;}
+  body{
+    background:radial-gradient(ellipse at center, #10160f 0%, #05070500 60%, var(--bg) 100%), var(--bg);
+    color:var(--text);
+    font-family:'Courier New', 'SF Mono', Consolas, monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:16px;
+    padding-top:calc(16px + env(safe-area-inset-top));
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));
+    padding-left:calc(16px + env(safe-area-inset-left));
+    padding-right:calc(16px + env(safe-area-inset-right));
+    overflow-x:hidden;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  textarea, input[type=text]{
+    -webkit-user-select:text;
+    user-select:text;
+  }
+  .rig{
+    width:100%;
+    max-width:640px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 0 40px rgba(95,224,135,0.05), inset 0 0 60px rgba(0,0,0,0.4);
+    position:relative;
+    overflow:hidden;
+    max-height:calc(100dvh - 32px);
+    display:flex;
+    flex-direction:column;
+  }
+  @media (min-width:480px){
+    .rig{min-height:520px;}
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+  }
+  .topbar .clock{color:var(--accent); font-weight:bold; font-size:14px;}
+  .progress-track{
+    height:3px;
+    background:var(--line);
+    width:100%;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--accent);
+    width:0%;
+    transition:width 1s linear;
+  }
+  .stage{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px;
+    text-align:center;
+    position:relative;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .stage-label{
+    position:absolute;
+    top:14px;
+    left:16px;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--accent-dim);
+    text-transform:uppercase;
+  }
+  h1{
+    font-size:clamp(20px, 5vw, 28px);
+    letter-spacing:1px;
+    margin-bottom:8px;
+    color:var(--text);
+  }
+  .sub{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-bottom:24px;
+    line-height:1.5;
+    max-width:460px;
+  }
+  .big-count{
+    font-size:clamp(48px, 15vw, 80px);
+    font-weight:bold;
+    color:var(--accent);
+    line-height:1;
+    margin:12px 0;
+  }
+  .breath-word{
+    font-size:clamp(22px,6vw,32px);
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:20px;
+    min-height:40px;
+  }
+  .box-wrap{
+    width:180px;
+    height:180px;
+    position:relative;
+    margin:0 auto 24px;
+  }
+  .box-track{
+    position:absolute;
+    inset:0;
+    border:2px solid var(--line);
+    border-radius:8px;
+  }
+  .box-dot{
+    position:absolute;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 12px var(--accent);
+    top:-7px;
+    left:-7px;
+  }
+  textarea{
+    width:100%;
+    max-width:460px;
+    height:100px;
+    background:#0d130f;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:inherit;
+    font-size:16px;
+    padding:12px;
+    border-radius:4px;
+    resize:none;
+    margin-bottom:16px;
+  }
+  textarea:focus{outline:1px solid var(--accent-dim);}
+  input[type=text]{
+    width:100%;
+    max-width:460px;
+    background:#0d130f;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:inherit;
+    font-size:16px;
+    padding:12px;
+    border-radius:4px;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  input[type=text]:focus{outline:1px solid var(--accent-dim);}
+  .ground-item{
+    font-size:18px;
+    color:var(--text);
+    margin:6px 0;
+    opacity:0.3;
+    transition:opacity 0.4s ease, color 0.4s ease;
+  }
+  .ground-item.active{opacity:1; color:var(--accent);}
+  .ground-item.done{opacity:0.55; color:var(--text-dim); text-decoration:line-through;}
+  .btn-row{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  button{
+    background:transparent;
+    border:1px solid var(--accent-dim);
+    color:var(--accent);
+    font-family:inherit;
+    font-size:13px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:14px 20px;
+    min-height:48px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  button:hover{background:var(--accent-dim); color:#fff;}
+  button.primary{
+    background:var(--accent);
+    color:#08120b;
+    border-color:var(--accent);
+    font-weight:bold;
+  }
+  button.primary:hover{background:#7bf7a3;}
+  button.ghost{border-color:var(--line); color:var(--text-dim);}
+  .footer-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 10px;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .footer-controls a, .footer-controls span{
+    cursor:pointer;
+    padding:14px 12px;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+  }
+  .footer-controls span:hover, .footer-controls span:active{color:var(--accent);}
+  .anchor-display{
+    font-size:clamp(20px,5vw,28px);
+    color:var(--amber);
+    line-height:1.4;
+    padding:20px;
+    border:1px solid var(--accent-dim);
+    border-radius:6px;
+    background:#0d130f;
+    max-width:460px;
+    margin-bottom:20px;
+  }
+  .go-flash{
+    font-size:clamp(36px,10vw,56px);
+    color:var(--accent);
+    font-weight:bold;
+    letter-spacing:3px;
+  }
+  .pulse{
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.6;}
+  }
+  .start-screen, .end-screen{padding:32px 24px;}
+  .cert-tag{
+    display:inline-block;
+    font-size:11px;
+    color:var(--text-dim);
+    border:1px solid var(--line);
+    padding:4px 10px;
+    border-radius:12px;
+    margin-top:8px;
+  }
+  .worry-dissolve{
+    transition:opacity 1.2s ease, transform 1.2s ease;
+  }
+  .worry-dissolve.gone{opacity:0; transform:scale(0.9) translateY(-10px);}
+  @media (max-width:480px){
+    .box-wrap{width:150px; height:150px;}
+    .sub{font-size:13px;}
+  }
+
+  /* ═══════════════ ACCESSIBILITY ═══════════════ */
+  .topbar-right{display:flex; align-items:center; gap:10px;}
+  .a11y-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    font-family:inherit;
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:6px 10px;
+    min-height:auto;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .a11y-btn:hover, .a11y-btn[aria-expanded="true"]{
+    color:var(--accent);
+    border-color:var(--accent-dim);
+  }
+  .a11y-panel{
+    display:none;
+    flex-direction:column;
+    gap:2px;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+    background:#0d130f;
+  }
+  .a11y-panel.open{display:flex;}
+  .a11y-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    padding:8px 0;
+    font-size:13px;
+    color:var(--text);
+    text-align:left;
+  }
+  .a11y-switch{
+    background:var(--line);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    font-family:inherit;
+    font-size:11px;
+    padding:6px 14px;
+    min-height:32px;
+    border-radius:20px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .a11y-switch[aria-pressed="true"]{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#08120b;
+    font-weight:bold;
+  }
+
+  /* colorblind-safe palette: Okabe-Ito blue/orange pairing */
+  body.cb-safe{
+    --accent:#56b4e9;
+    --accent-dim:#1f5a73;
+    --amber:#e69f00;
+  }
+
+  /* non-color redundancy for grounding checklist state */
+  .ground-item.done::before{
+    content:"\2713  ";
+    display:inline-block;
+    text-decoration:none;
+  }
+
+  /* dyslexia-friendly text mode */
+  body.dyslexia-mode{
+    font-family:'Atkinson Hyperlegible', Verdana, Arial, sans-serif;
+  }
+  body.dyslexia-mode .sub,
+  body.dyslexia-mode .anchor-display,
+  body.dyslexia-mode .ground-item{
+    letter-spacing:0.4px;
+    line-height:1.8;
+  }
+</style>
+</head>
+<body>
+
+<div class="rig" id="rig">
+
+  <div class="topbar">
+    <span>CWP // PRE-EXAM SYSTEMS CHECK</span>
+    <div class="topbar-right">
+      <button class="a11y-btn" id="a11yBtn" aria-expanded="false" aria-controls="a11yPanel" onclick="toggleA11yPanel()">⚙ Accessibility</button>
+      <span class="clock" id="totalClock">5:00</span>
+    </div>
+  </div>
+  <div class="a11y-panel" id="a11yPanel">
+    <div class="a11y-row">
+      <span>Audio Breathing Cues</span>
+      <button class="a11y-switch" id="switchAudio" aria-pressed="false" onclick="toggleA11y('audio')">Off</button>
+    </div>
+    <div class="a11y-row">
+      <span>Colorblind-Safe Palette</span>
+      <button class="a11y-switch" id="switchCb" aria-pressed="false" onclick="toggleA11y('cb')">Off</button>
+    </div>
+    <div class="a11y-row">
+      <span>Dyslexia-Friendly Text</span>
+      <button class="a11y-switch" id="switchDyslexia" aria-pressed="false" onclick="toggleA11y('dyslexia')">Off</button>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- START SCREEN -->
+  <div class="stage start-screen" id="screen-start">
+    <h1>SYSTEMS CHECK</h1>
+    <p class="sub">
+      Five minutes. Five phases. Built to get you locked in right before you sit the proctored exam &mdash;
+      not to make you "relaxed," but to get your head in the zone.<br><br>
+      Eyes-open the whole way through. Nothing here requires you to close your eyes or picture anything.
+      If a step isn't landing for you, hit <b>SKIP</b> &mdash; no step is mandatory.
+    </p>
+    <div class="cert-tag" id="examTag">A+ CORE 1 &middot; 220-1201</div>
+    <div class="btn-row" style="margin-top:28px;">
+      <button class="primary" onclick="startSequence()">BEGIN CHECK</button>
+    </div>
+  </div>
+
+  <!-- PHASE 1: BRAIN DUMP -->
+  <div class="stage" id="screen-1" style="display:none;">
+    <div class="stage-label">Phase 1 / 5 &middot; Brain Dump</div>
+    <h1>DUMP THE STATIC</h1>
+    <p class="sub">Type the one thought that's loudest right now. "What if I forget everything." "What if I run out of time." Get it out of your head and onto the screen.</p>
+    <textarea id="worryBox" placeholder="Type it here..." class="worry-dissolve"></textarea>
+    <div class="btn-row">
+      <button class="ghost" onclick="skipPhase()">Skip</button>
+      <button class="primary" onclick="dissolveWorry()">Clear It</button>
+    </div>
+  </div>
+
+  <!-- PHASE 2: BOX BREATHING -->
+  <div class="stage" id="screen-2" style="display:none;">
+    <div class="stage-label">Phase 2 / 5 &middot; Box Breathing</div>
+    <h1>BOX BREATHING</h1>
+    <p class="sub">Same technique combat controllers use before a mission. Follow the dot. Breathe with it.</p>
+    <div class="box-wrap">
+      <div class="box-track"></div>
+      <div class="box-dot" id="boxDot"></div>
+    </div>
+    <div class="breath-word" id="breathWord">IN</div>
+    <div class="big-count" id="breathCount">4</div>
+    <div class="btn-row"><button class="ghost" onclick="skipPhase()">Skip</button></div>
+  </div>
+
+  <!-- PHASE 3: GROUNDING -->
+  <div class="stage" id="screen-3" style="display:none;">
+    <div class="stage-label">Phase 3 / 5 &middot; Grounding</div>
+    <h1>SITUATIONAL AWARENESS</h1>
+    <div id="groundList" style="margin-top:10px;">
+      <div class="ground-item" data-n="5">5 things you can SEE</div>
+      <div class="ground-item" data-n="4">4 things you can FEEL (chair, feet, hands)</div>
+      <div class="ground-item" data-n="3">3 things you can HEAR</div>
+      <div class="ground-item" data-n="2">2 things you can SMELL</div>
+      <div class="ground-item" data-n="1">1 thing you're SURE OF right now</div>
+    </div>
+    <div class="btn-row" style="margin-top:20px;"><button class="ghost" onclick="skipPhase()">Skip</button></div>
+  </div>
+
+  <!-- PHASE 4: CONFIDENCE ANCHOR -->
+  <div class="stage" id="screen-4" style="display:none;">
+    <div class="stage-label">Phase 4 / 5 &middot; Confidence Anchor</div>
+    <div id="anchorSetup">
+      <h1>SET YOUR ANCHOR</h1>
+      <p class="sub">One line. Something you know cold. You'll see this again right before every future exam.</p>
+      <input type="text" id="anchorInput" placeholder='e.g. "I know my subnetting cold."' maxlength="90">
+      <div class="btn-row"><button class="primary" onclick="saveAnchor()">Lock It In</button></div>
+    </div>
+    <div id="anchorShow" style="display:none;">
+      <h1>REMEMBER THIS</h1>
+      <div class="anchor-display" id="anchorText"></div>
+      <div class="btn-row">
+        <button class="ghost" onclick="editAnchor()">Edit</button>
+        <button class="primary" onclick="advanceFromAnchor()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 5: GO TIME -->
+  <div class="stage" id="screen-5" style="display:none;">
+    <div class="stage-label">Phase 5 / 5 &middot; Go Time</div>
+    <h1>SYSTEMS GREEN</h1>
+    <div class="big-count pulse" id="goCount">30</div>
+    <p class="sub" id="goText">Stand up. Roll your shoulders. Walk in like you've already passed this before &mdash; because you have, a hundred times, in every practice run.</p>
+  </div>
+
+  <!-- END SCREEN -->
+  <div class="stage end-screen" id="screen-end" style="display:none;">
+    <div class="go-flash">GO TIME</div>
+    <p class="sub" style="margin-top:16px;">Execute the mission. You've drilled for this.</p>
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="ghost" onclick="resetAll()">Run It Again</button>
+    </div>
+  </div>
+
+  <div class="footer-controls">
+    <span onclick="togglePause()" id="pauseBtn">⏸ Pause</span>
+    <span onclick="skipPhase()" id="skipBtn" style="display:none;">Skip Phase ⏭</span>
+  </div>
+
+</div>
+
+<script>
+const TOTAL_SECONDS = 300; // 5 minutes
+let totalRemaining = TOTAL_SECONDS;
+let mainTimer = null;
+let paused = false;
+let currentPhase = 0;
+
+const phaseDurations = {1:60, 2:90, 3:60, 4:60, 5:30};
+let phaseTimer = null;
+let phaseRemaining = 0;
+
+// ACCESSIBILITY
+const A11Y_KEYS = {audio:'cwp_a11y_audio', cb:'cwp_a11y_cb', dyslexia:'cwp_a11y_dyslexia'};
+const A11Y_SWITCH_IDS = {audio:'switchAudio', cb:'switchCb', dyslexia:'switchDyslexia'};
+let a11yState = {audio:false, cb:false, dyslexia:false};
+let audioCtx = null;
+
+function initA11y(){
+  Object.keys(A11Y_KEYS).forEach(key=>{
+    const on = localStorage.getItem(A11Y_KEYS[key]) === '1';
+    a11yState[key] = on;
+    applyA11y(key, on);
+  });
+}
+
+function toggleA11yPanel(){
+  const panel = document.getElementById('a11yPanel');
+  const btn = document.getElementById('a11yBtn');
+  const open = !panel.classList.contains('open');
+  panel.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function toggleA11y(key){
+  const on = !a11yState[key];
+  a11yState[key] = on;
+  localStorage.setItem(A11Y_KEYS[key], on ? '1' : '0');
+  applyA11y(key, on);
+  if(key==='audio' && on){
+    ensureAudioCtx();
+    playTone(440, 0.15);
+  }
+}
+
+function applyA11y(key, on){
+  if(key==='cb') document.body.classList.toggle('cb-safe', on);
+  if(key==='dyslexia') document.body.classList.toggle('dyslexia-mode', on);
+  const btn = document.getElementById(A11Y_SWITCH_IDS[key]);
+  if(btn){
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.textContent = on ? 'On' : 'Off';
+  }
+}
+
+function ensureAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, duration){
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration + 0.02);
+}
+
+const BREATH_TONES = {IN:440, HOLD:330, OUT:523};
+function playBreathTone(label){
+  if(!a11yState.audio) return;
+  ensureAudioCtx();
+  playTone(BREATH_TONES[label] || 440, 0.35);
+}
+
+function fmt(s){
+  const m = Math.floor(s/60);
+  const sec = s%60;
+  return m + ':' + (sec<10?'0':'') + sec;
+}
+
+function updateTotalClock(){
+  document.getElementById('totalClock').textContent = fmt(totalRemaining);
+  const pct = 100 - (totalRemaining/TOTAL_SECONDS*100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function startSequence(){
+  if(a11yState.audio) ensureAudioCtx();
+  document.getElementById('screen-start').style.display='none';
+  document.getElementById('skipBtn').style.display='inline';
+  mainTimer = setInterval(()=>{
+    if(!paused){
+      totalRemaining--;
+      updateTotalClock();
+      if(totalRemaining<=0){
+        clearInterval(mainTimer);
+      }
+    }
+  },1000);
+  goToPhase(1);
+}
+
+function goToPhase(n){
+  if(phaseTimer) clearInterval(phaseTimer);
+  for(let i=1;i<=5;i++){
+    document.getElementById('screen-'+i).style.display = (i===n)?'flex':'none';
+  }
+  currentPhase = n;
+  phaseRemaining = phaseDurations[n];
+
+  if(n===1) runPhase1();
+  if(n===2) runPhase2();
+  if(n===3) runPhase3();
+  if(n===4) runPhase4();
+  if(n===5) runPhase5();
+}
+
+function autoAdvanceTimer(n, onTick){
+  phaseTimer = setInterval(()=>{
+    if(paused) return;
+    phaseRemaining--;
+    if(onTick) onTick(phaseRemaining);
+    if(phaseRemaining<=0){
+      clearInterval(phaseTimer);
+      goToPhase(n+1<=5?n+1:5);
+      if(n===5) finishSequence();
+    }
+  },1000);
+}
+
+// PHASE 1
+function runPhase1(){
+  document.getElementById('worryBox').value='';
+  document.getElementById('worryBox').classList.remove('gone');
+  autoAdvanceTimer(1);
+}
+function dissolveWorry(){
+  if(phaseTimer) clearInterval(phaseTimer);
+  const box = document.getElementById('worryBox');
+  box.classList.add('gone');
+  setTimeout(()=>{ goToPhase(2); }, 900);
+}
+
+// PHASE 2 - box breathing, 4-4-4-4 = 16s cycle
+function runPhase2(){
+  const seq = [
+    {label:'IN', dur:4},
+    {label:'HOLD', dur:4},
+    {label:'OUT', dur:4},
+    {label:'HOLD', dur:4}
+  ];
+  let cycleIndex = 0;
+  let stepTime = seq[0].dur;
+  document.getElementById('breathWord').textContent = seq[0].label;
+  document.getElementById('breathCount').textContent = stepTime;
+  moveDot(0);
+  playBreathTone(seq[0].label);
+
+  autoAdvanceTimer(2, ()=>{
+    stepTime--;
+    if(stepTime<=0){
+      cycleIndex = (cycleIndex+1)%4;
+      stepTime = seq[cycleIndex].dur;
+      document.getElementById('breathWord').textContent = seq[cycleIndex].label;
+      moveDot(cycleIndex);
+      playBreathTone(seq[cycleIndex].label);
+    }
+    document.getElementById('breathCount').textContent = stepTime>0?stepTime:seq[cycleIndex].dur;
+  });
+}
+function moveDot(idx){
+  const dot = document.getElementById('boxDot');
+  const positions = [
+    {top:'-7px', left:'-7px'},
+    {top:'-7px', left:'calc(100% - 7px)'},
+    {top:'calc(100% - 7px)', left:'calc(100% - 7px)'},
+    {top:'calc(100% - 7px)', left:'-7px'}
+  ];
+  const target = positions[(idx+1)%4];
+  dot.style.transition = 'top 4s linear, left 4s linear';
+  dot.style.top = target.top;
+  dot.style.left = target.left;
+}
+
+// PHASE 3 - grounding, 5 items over 60s = 12s each
+function runPhase3(){
+  const items = document.querySelectorAll('#groundList .ground-item');
+  items.forEach(i=>{i.classList.remove('active','done');});
+  let idx = 0;
+  items[0].classList.add('active');
+  let stepTime = 12;
+
+  autoAdvanceTimer(3, ()=>{
+    stepTime--;
+    if(stepTime<=0 && idx<items.length-1){
+      items[idx].classList.remove('active');
+      items[idx].classList.add('done');
+      idx++;
+      items[idx].classList.add('active');
+      stepTime = 12;
+    }
+  });
+}
+
+// PHASE 4 - confidence anchor
+function runPhase4(){
+  const saved = localStorage.getItem('cwp_reset_anchor');
+  if(phaseTimer) clearInterval(phaseTimer);
+  if(saved){
+    document.getElementById('anchorSetup').style.display='none';
+    document.getElementById('anchorShow').style.display='block';
+    document.getElementById('anchorText').textContent = saved;
+    autoAdvanceTimer(4);
+  } else {
+    document.getElementById('anchorSetup').style.display='block';
+    document.getElementById('anchorShow').style.display='none';
+    // no auto-advance timer until they save, but still count down total phase time in background
+    autoAdvanceTimer(4);
+  }
+}
+function saveAnchor(){
+  const val = document.getElementById('anchorInput').value.trim();
+  if(!val) return;
+  localStorage.setItem('cwp_reset_anchor', val);
+  document.getElementById('anchorSetup').style.display='none';
+  document.getElementById('anchorShow').style.display='block';
+  document.getElementById('anchorText').textContent = val;
+}
+function editAnchor(){
+  document.getElementById('anchorSetup').style.display='block';
+  document.getElementById('anchorShow').style.display='none';
+  document.getElementById('anchorInput').value = localStorage.getItem('cwp_reset_anchor') || '';
+}
+function advanceFromAnchor(){
+  clearInterval(phaseTimer);
+  goToPhase(5);
+}
+
+// PHASE 5 - go time countdown
+function runPhase5(){
+  let t = 30;
+  document.getElementById('goCount').textContent = t;
+  autoAdvanceTimer(5, (remaining)=>{
+    document.getElementById('goCount').textContent = remaining>0?remaining:0;
+  });
+}
+
+function finishSequence(){
+  document.getElementById('screen-5').style.display='none';
+  document.getElementById('screen-end').style.display='flex';
+  document.getElementById('skipBtn').style.display='none';
+  document.getElementById('pauseBtn').style.display='none';
+}
+
+function skipPhase(){
+  if(phaseTimer) clearInterval(phaseTimer);
+  if(currentPhase>=5){
+    finishSequence();
+  } else {
+    goToPhase(currentPhase+1);
+  }
+}
+
+function togglePause(){
+  paused = !paused;
+  document.getElementById('pauseBtn').textContent = paused? '⏵ Resume' : '⏸ Pause';
+}
+
+function resetAll(){
+  clearInterval(mainTimer);
+  if(phaseTimer) clearInterval(phaseTimer);
+  totalRemaining = TOTAL_SECONDS;
+  updateTotalClock();
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('screen-end').style.display='none';
+  document.getElementById('screen-start').style.display='flex';
+  document.getElementById('pauseBtn').style.display='inline';
+  document.getElementById('pauseBtn').textContent='⏸ Pause';
+  document.getElementById('skipBtn').style.display='none';
+  paused = false;
+}
+
+updateTotalClock();
+initA11y();
+</script>
+
+</body>
+</html>
