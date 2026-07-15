@@ -1,24 +1,59 @@
 <!doctype html>
+<!--
+  CWP Simulation — Workstation Build & Compatibility Check (v2)
+  Exam-integrity revision, see notes below.
+
+  WHY THIS VERSION EXISTS
+  Students reported that the prior version ("Gaming PC" build with no budget,
+  then unlock a "Family PC" build on a tight budget) tracked too closely with
+  what they were seeing on the live exam. That two-build, gaming-vs-budget-family
+  shape, the exact CPU/RAM/GPU/storage/audio/peripheral field set, and the
+  manager-review phrasing are the parts that were changed. The underlying
+  A+ knowledge being tested (CPU architecture compatibility, dedicated vs
+  integrated graphics, SSD vs HDD, right-sizing RAM, wired vs wireless
+  reliability, matching hardware to a stated use case) is public domain
+  Domain 3.1 material and is untouched.
+
+  WHAT CHANGED, SPECIFICALLY
+  1. Six distinct personas instead of two, drawn from a pool and shuffled
+     per session — no fixed "gaming rig" / "budget family PC" pairing.
+  2. Field set changed from {CPU, RAM, GPU, Storage, Audio, Peripherals}
+     to {CPU, RAM, GPU, Storage, Network, Peripherals}. Audio was dropped
+     entirely; a networking (wired vs. wireless) decision was added, since
+     that's core Domain 3 hardware content anyway.
+  3. Component value sets were widened/renumbered (added a mid CPU tier,
+     added a mid GPU tier, changed storage capacities) so nothing lines up
+     option-for-option with the old build.
+  4. All scenario briefs and all feedback copy were rewritten from scratch
+     in an instructor-debrief voice, rather than the prior "Manager Review"
+     script.
+  5. Two personas are drawn at random each page load, so no two students
+     necessarily see the same pairing, and the "answer key" can't be
+     memorized and passed around.
+
+  Tier 2 (Deeper Learning) build per Shane's SSDLC workflow. No backend,
+  no external calls, no persistence — everything resets on reload by design
+  so this can be re-run with a fresh persona pair as many times as needed.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>A+ Core 1 – Dual Workstation Build</title>
+<title>Workstation Build & Compatibility Check</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-  /* --- Template Root Variables --- */
   :root {
-    --bg: #090d1a;                          /* Page background */
-    --panel: #111827;                       /* Card background */
-    --panel-hdr: #1f2937;                   /* Card header */
-    --text: #f3f4f6;                        /* Primary text */
-    --muted: #9ca3af;                       /* Secondary text */
-    --accent: #3b82f6;                      /* Tier 2 (Deeper Learning) */
+    --bg: #090d1a;
+    --panel: #111827;
+    --panel-hdr: #1f2937;
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --accent: #3b82f6;
     --accent-hover: #2563eb;
-    --good: #10b981;                        /* Success feedback */
-    --bad: #ef4444;                         /* Error feedback */
-    --warn: #f59e0b;                        /* Warning feedback */
-    --border: rgba(255, 255, 255, 0.1);     /* Subtle borders */
+    --good: #10b981;
+    --bad: #ef4444;
+    --warn: #f59e0b;
+    --border: rgba(255, 255, 255, 0.1);
     --radius: 12px;
     --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -35,7 +70,6 @@
     min-height: 100vh;
   }
 
-  /* --- Template Header --- */
   header {
     max-width: 1200px;
     margin: 0 auto 20px;
@@ -49,9 +83,9 @@
   }
 
   h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
-  
+
   .mode-ctrl { display: flex; align-items: center; gap: 10px; }
-  
+
   .badge {
     padding: 4px 10px;
     border-radius: 999px;
@@ -63,7 +97,7 @@
   }
   .badge.info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
   .badge.danger { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
-  
+
   .btn {
     padding: 8px 16px;
     border-radius: 8px;
@@ -79,7 +113,6 @@
   .btn.primary { background: var(--accent); border-color: var(--accent); }
   .btn.primary:hover { background: var(--accent-hover); }
 
-  /* --- Template Layout & Cards --- */
   .workspace {
     max-width: 1200px;
     margin: 0 auto;
@@ -110,7 +143,6 @@
 
   .card-bd { padding: 24px; flex: 1; overflow-y: auto; }
 
-  /* --- Simulation Specifics --- */
   .req-block {
     background: rgba(0, 0, 0, 0.2);
     border-left: 4px solid var(--accent);
@@ -122,7 +154,7 @@
   }
   .req-block h3 { margin: 0 0 10px 0; font-size: 16px; color: var(--text); }
   .req-block ul { margin: 0; padding-left: 20px; color: var(--muted); }
-  
+
   .build-section {
     margin-bottom: 40px;
     padding-bottom: 30px;
@@ -159,7 +191,7 @@
     background: rgba(245, 158, 11, 0.15); border-left: 4px solid var(--warn);
     padding: 12px 16px; border-radius: 4px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; display: none;
   }
-  
+
   .manager-review {
     background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 16px;
     border-radius: 8px; margin-top: 16px; display: none;
@@ -168,7 +200,6 @@
   .manager-review p { margin: 0 0 10px 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
   .manager-review ul { margin: 0; padding-left: 20px; font-size: 13px; color: var(--muted); line-height: 1.6; }
 
-  /* Responsive Breakpoints */
   @media (max-width: 900px) {
     .workspace { grid-template-columns: 1fr; }
   }
@@ -188,6 +219,7 @@
   .instr-modal-bd h3:first-child{ margin-top:0; }
   .instr-modal-bd ol, .instr-modal-bd ul{ margin:0 0 8px; padding-left:20px; }
   .instr-modal-bd p{ margin:0 0 10px; }
+  .reroll-note{ font-size:11px; color:var(--muted); margin-top:10px; }
 </style>
 </head>
 <body>
@@ -198,12 +230,13 @@
 
 <header>
   <div>
-    <h1>Workstation Build Simulation</h1>
+    <h1>Workstation Build & Compatibility Check</h1>
   </div>
   <div class="mode-ctrl">
     <button class="btn" id="instructions-btn" type="button">📘 Instructions</button>
     <span class="badge info" id="mode-indicator">Mentor: ON</span>
     <button class="btn" id="toggle-mode-btn">Toggle Mentor</button>
+    <button class="btn" id="reroll-btn">🎲 New Ticket Pair</button>
   </div>
 </header>
 
@@ -215,110 +248,100 @@
     </div>
     <div class="instr-modal-bd">
       <h3>Objective</h3>
-      <p>You're building two PCs to spec — a Gaming PC first, then a Family PC — each with its own budget and performance requirements.</p>
+      <p>You've got two work orders today, each for a different end user with different needs. Read the requirements for each build carefully — nothing here is interchangeable between tickets.</p>
       <h3>How to Use This Simulator</h3>
       <ol>
-        <li>Start with the Gaming PC build: choose every component (CPU, RAM, GPU, Storage, Audio, Peripherals) from the dropdowns.</li>
-        <li>Watch the Performance and Budget meters update live as you pick parts — they reflect the impact of your choices before you submit.</li>
-        <li>Click <strong>Submit Build to Manager</strong> for a review verdict.</li>
-        <li>The Family PC section stays locked (grayed out) until your Gaming PC build passes review — that's expected, not a bug.</li>
-        <li>Use the <strong>Mentor: ON/OFF</strong> toggle in the header to show or hide live tips as you shop for parts; turn it off if you want to test yourself without hints.</li>
+        <li>Work Order 1 is active first. Choose every component (CPU, RAM, GPU, Storage, Network, Peripherals) from the dropdowns.</li>
+        <li>Watch the meter update live — it reflects your choices before you submit anything.</li>
+        <li>Click <strong>Submit Build for Debrief</strong> for a pass/fail verdict with reasoning.</li>
+        <li>Work Order 2 stays locked until Work Order 1 passes.</li>
+        <li>Use <strong>Mentor: ON/OFF</strong> to show or hide live hints while you shop for parts. Turn it off to test yourself cold.</li>
+        <li><strong>New Ticket Pair</strong> draws two different work orders at random from a larger pool — run it again and you likely won't see the same pairing twice.</li>
       </ol>
-      <h3>On Exam Day</h3>
-      <p>Build/compatibility PBQs present the requirements once and expect a complete, justified answer — there's no mentor catching your mistakes in real time on exam day, so try a pass with Mentor off before you submit.</p>
+      <h3>Why the requirements matter</h3>
+      <p>Every "wrong" choice below maps to a real compatibility or right-sizing concept: CPU architecture and OS support, integrated vs. dedicated graphics, SSD vs. HDD, matching RAM to workload, and wired vs. wireless reliability. Focus on <em>why</em> a choice fails, not just which one does.</p>
     </div>
   </div>
 </div>
 
 <main class="workspace">
-  
+
   <section class="card">
     <div class="card-hdr">
-      <span>Scenario & Requirements</span>
+      <span id="req-badge-label">Scenario & Requirements</span>
       <span class="badge danger">Domain 3.1</span>
     </div>
     <div class="card-bd">
-      
       <div class="req-block">
-        <h3>Primary Objective</h3>
-        <p style="margin-top:0;">You are tasked with building two Windows desktops for a client. You must balance hardware capabilities with the specific needs and budgets of each user.</p>
+        <h3>Shift Overview</h3>
+        <p style="margin-top:0;">You're the bench tech today. Two build tickets came in — read each one before you touch a dropdown, because the "right" parts for one ticket are frequently the wrong parts for the other.</p>
       </div>
 
-      <div class="req-block">
-        <h3>Build 1: Gaming PC</h3>
-        <ul>
-          <li>Play the newest games at a <strong>high frame rate</strong></li>
-          <li><strong>Fast</strong> game load times</li>
-          <li>Enough storage for <strong>several massive games</strong></li>
-          <li><strong>High-end audio</strong> output</li>
-          <li><strong>No concern about cost</strong></li>
-          <li>Must run current Windows OS natively</li>
-        </ul>
+      <div class="req-block" id="req-block-1">
+        <h3 id="req-title-1">Work Order 1</h3>
+        <p id="req-narrative-1" style="margin-top:0;"></p>
+        <ul id="req-list-1"></ul>
       </div>
 
-      <div class="req-block">
-        <h3>Build 2: Family PC</h3>
-        <ul>
-          <li>Word processing & basic web surfing</li>
-          <li>Remote work <strong>videoconferencing</strong></li>
-          <li><strong>Minimal cost</strong> (do not over-spec)</li>
-          <li>Must run current Windows OS natively</li>
-        </ul>
+      <div class="req-block" id="req-block-2">
+        <h3 id="req-title-2">Work Order 2</h3>
+        <p id="req-narrative-2" style="margin-top:0;"></p>
+        <ul id="req-list-2"></ul>
       </div>
-
+      <p class="reroll-note">Ticket pair drawn from a rotating pool of six — reroll for a fresh combination any time.</p>
     </div>
   </section>
 
   <section class="card">
     <div class="card-hdr">Hardware Configuration</div>
     <div class="card-bd" id="simulation-board">
-      
-      <div class="build-section" id="sect-gaming">
+
+      <div class="build-section" id="sect-1">
         <div class="build-header">
-          <h2>Build 1: Gaming PC</h2>
+          <h2 id="build-title-1">Work Order 1</h2>
           <div class="meters">
-            <div class="meter-label">Performance <span id="g-perf-val">0%</span></div>
-            <div class="meter-track"><div class="meter-fill" id="g-perf-bar"></div></div>
+            <div class="meter-label"><span id="meter-label-1">Fit</span> <span id="b1-meter-val">0%</span></div>
+            <div class="meter-track"><div class="meter-fill" id="b1-meter-bar"></div></div>
           </div>
         </div>
 
-        <div class="mentor-toast" id="g-mentor"></div>
+        <div class="mentor-toast" id="b1-mentor"></div>
 
         <div class="form-grid">
-          <div class="field"><label>Microprocessor (CPU)</label><select id="g_cpu"></select></div>
-          <div class="field"><label>Memory (RAM)</label><select id="g_ram"></select></div>
-          <div class="field"><label>Video Card (GPU)</label><select id="g_gpu"></select></div>
-          <div class="field"><label>Storage Drive</label><select id="g_storage"></select></div>
-          <div class="field"><label>Audio Processing</label><select id="g_audio"></select></div>
-          <div class="field"><label>Peripherals</label><select id="g_peripherals"></select></div>
+          <div class="field"><label>Processor (CPU)</label><select id="b1_cpu"></select></div>
+          <div class="field"><label>Memory (RAM)</label><select id="b1_ram"></select></div>
+          <div class="field"><label>Graphics (GPU)</label><select id="b1_gpu"></select></div>
+          <div class="field"><label>Storage Drive</label><select id="b1_storage"></select></div>
+          <div class="field"><label>Network Connection</label><select id="b1_nic"></select></div>
+          <div class="field"><label>Peripherals</label><select id="b1_peripherals"></select></div>
         </div>
 
-        <button class="btn primary" id="btn-eval-gaming">Submit Build to Manager</button>
-        <div class="manager-review" id="g-review"></div>
+        <button class="btn primary" id="btn-eval-1">Submit Build for Debrief</button>
+        <div class="manager-review" id="b1-review"></div>
       </div>
 
-      <div class="build-section locked" id="sect-family">
+      <div class="build-section locked" id="sect-2">
         <div class="build-header">
-          <h2>Build 2: Family PC</h2>
+          <h2 id="build-title-2">Work Order 2</h2>
           <div class="meters">
-            <div class="meter-label">Budget Used <span id="f-cost-val">0%</span></div>
-            <div class="meter-track"><div class="meter-fill" id="f-cost-bar"></div></div>
+            <div class="meter-label"><span id="meter-label-2">Fit</span> <span id="b2-meter-val">0%</span></div>
+            <div class="meter-track"><div class="meter-fill" id="b2-meter-bar"></div></div>
           </div>
         </div>
 
-        <div class="mentor-toast" id="f-mentor"></div>
+        <div class="mentor-toast" id="b2-mentor"></div>
 
         <div class="form-grid">
-          <div class="field"><label>Microprocessor (CPU)</label><select id="f_cpu"></select></div>
-          <div class="field"><label>Memory (RAM)</label><select id="f_ram"></select></div>
-          <div class="field"><label>Video Card (GPU)</label><select id="f_gpu"></select></div>
-          <div class="field"><label>Storage Drive</label><select id="f_storage"></select></div>
-          <div class="field"><label>Audio Processing</label><select id="f_audio"></select></div>
-          <div class="field"><label>Peripherals</label><select id="f_peripherals"></select></div>
+          <div class="field"><label>Processor (CPU)</label><select id="b2_cpu"></select></div>
+          <div class="field"><label>Memory (RAM)</label><select id="b2_ram"></select></div>
+          <div class="field"><label>Graphics (GPU)</label><select id="b2_gpu"></select></div>
+          <div class="field"><label>Storage Drive</label><select id="b2_storage"></select></div>
+          <div class="field"><label>Network Connection</label><select id="b2_nic"></select></div>
+          <div class="field"><label>Peripherals</label><select id="b2_peripherals"></select></div>
         </div>
 
-        <button class="btn primary" id="btn-eval-family">Submit Build to Manager</button>
-        <div class="manager-review" id="f-review"></div>
+        <button class="btn primary" id="btn-eval-2">Submit Build for Debrief</button>
+        <div class="manager-review" id="b2-review"></div>
       </div>
 
     </div>
@@ -329,52 +352,240 @@
 <script>
 let mentorMode = true;
 
-// --- Options Data ---
+/* ---------------- Shared component pools ---------------- */
 const cpuOptions = [
-  { val: "", label: "-- Select CPU --", perf: 0, cost: 0, winOk: true },
-  { val: "i3", label: "Intel® Core™ i3", perf: 2, cost: 1, winOk: true },
-  { val: "i7", label: "Intel® Core™ i7", perf: 5, cost: 3, winOk: true },
-  { val: "xeon", label: "Intel® Xeon® Server CPU", perf: 4, cost: 5, winOk: true },
-  { val: "arm", label: "ARM Cortex (Mobile/Tablet)", perf: 3, cost: 2, winOk: false }
+  { val: "", label: "-- Select CPU --", tier: "", perf: 0, cost: 0, winOk: true },
+  { val: "i3", label: "Intel® Core™ i3 (entry)", tier: "entry", perf: 1, cost: 1, winOk: true },
+  { val: "i5", label: "Intel® Core™ i5 (mid-range)", tier: "mid", perf: 3, cost: 2, winOk: true },
+  { val: "i7", label: "Intel® Core™ i7 (high performance)", tier: "high", perf: 5, cost: 3, winOk: true },
+  { val: "xeon", label: "Intel® Xeon® (workstation/server)", tier: "workstation", perf: 4, cost: 5, winOk: true },
+  { val: "arm", label: "ARM Cortex (mobile/tablet)", tier: "mobile", perf: 2, cost: 1, winOk: false }
 ];
 const ramOptions = [
-  { val: "", label: "-- Select RAM --", perf: 0, cost: 0 },
-  { val: "4", label: "4GB DDR4", perf: 1, cost: 1 },
-  { val: "8", label: "8GB DDR4", perf: 2, cost: 2 },
-  { val: "16", label: "16GB DDR4", perf: 4, cost: 3 },
-  { val: "32", label: "32GB DDR5", perf: 5, cost: 5 }
+  { val: "", label: "-- Select RAM --", gb: 0, perf: 0, cost: 0 },
+  { val: "8", label: "8GB", gb: 8, perf: 1, cost: 1 },
+  { val: "16", label: "16GB", gb: 16, perf: 2, cost: 2 },
+  { val: "32", label: "32GB", gb: 32, perf: 4, cost: 3 },
+  { val: "64", label: "64GB", gb: 64, perf: 5, cost: 5 }
 ];
 const gpuOptions = [
-  { val: "", label: "-- Select GPU --", perf: 0, cost: 0, dedicated: false },
-  { val: "onboard", label: "Integrated / Onboard Video", perf: 1, cost: 1, dedicated: false },
-  { val: "discrete", label: "Discrete / Dedicated GPU", perf: 5, cost: 5, dedicated: true }
+  { val: "", label: "-- Select GPU --", tier: "", perf: 0, cost: 0 },
+  { val: "onboard", label: "Integrated / Onboard Graphics", tier: "onboard", perf: 1, cost: 1 },
+  { val: "entry", label: "Entry Discrete Card", tier: "entry", perf: 3, cost: 2 },
+  { val: "highend", label: "High-End Discrete Card", tier: "high", perf: 5, cost: 4 }
 ];
 const storageOptions = [
-  { val: "", label: "-- Select Storage --", perf: 0, cost: 0, type: "" },
-  { val: "500hdd", label: "500GB HDD", perf: 1, cost: 1, type: "HDD" },
-  { val: "500ssd", label: "500GB NVMe SSD", perf: 4, cost: 3, type: "SSD" },
-  { val: "1tbssd", label: "1TB NVMe SSD", perf: 5, cost: 4, type: "SSD" },
-  { val: "4tbhdd", label: "4TB HDD", perf: 2, cost: 3, type: "HDD" }
+  { val: "", label: "-- Select Storage --", type: "", cap: 0, perf: 0, cost: 0 },
+  { val: "256ssd", label: "256GB NVMe SSD", type: "SSD", cap: 256, perf: 3, cost: 2 },
+  { val: "1tbssd", label: "1TB NVMe SSD", type: "SSD", cap: 1000, perf: 5, cost: 4 },
+  { val: "2tbhdd", label: "2TB HDD", type: "HDD", cap: 2000, perf: 2, cost: 2 },
+  { val: "8tbhdd", label: "8TB HDD", type: "HDD", cap: 8000, perf: 1, cost: 3 }
 ];
-const audioOptions = [
-  { val: "", label: "-- Select Audio --", perf: 0, cost: 0, highEnd: false },
-  { val: "onboard", label: "Motherboard Onboard Sound", perf: 1, cost: 1, highEnd: false },
-  { val: "7.1", label: "Dedicated 7.1 Surround Card", perf: 4, cost: 3, highEnd: true }
+const nicOptions = [
+  { val: "", label: "-- Select Network --", type: "", perf: 0, cost: 0 },
+  { val: "wifi", label: "Wi-Fi Only", type: "wireless", perf: 1, cost: 1 },
+  { val: "wifi_bt", label: "Wi-Fi + Bluetooth Combo", type: "wireless", perf: 1, cost: 2 },
+  { val: "gbe", label: "Gigabit Ethernet (wired)", type: "wired", perf: 3, cost: 1 }
 ];
 const peripheralOptions = [
   { val: "", label: "-- Select Peripherals --", perf: 0, cost: 0, flags: {} },
-  { val: "mic", label: "Basic External Microphone", perf: 1, cost: 1, flags: {mic: true, cam: false} },
-  { val: "headset", label: "Gaming Headset w/ Mic", perf: 2, cost: 2, flags: {mic: true, cam: false} },
-  { val: "webcam", label: "Web Camera (No Mic)", perf: 1, cost: 1, flags: {mic: false, cam: true} },
-  { val: "bundle", label: "HD Webcam + Desktop Mic Bundle", perf: 2, cost: 3, flags: {mic: true, cam: true} }
+  { val: "none", label: "None Needed", perf: 0, cost: 0, flags: { mic: false, cam: false } },
+  { val: "mic", label: "Microphone Only", perf: 1, cost: 1, flags: { mic: true, cam: false } },
+  { val: "webcam", label: "Webcam Only", perf: 1, cost: 1, flags: { mic: false, cam: true } },
+  { val: "bundle", label: "Webcam + Microphone Bundle", perf: 2, cost: 2, flags: { mic: true, cam: true } }
 ];
 
-const MAX_PERF = 26; 
-const MAX_COST = 21; 
+function getObj(options, val) { return options.find(o => o.val === val) || options[0]; }
 
-// --- Initialization ---
+/* ---------------- Persona pool (6) ---------------- */
+const PERSONAS = [
+  {
+    id: "creator",
+    title: "Independent Streamer Rig",
+    meterType: "perf",
+    narrative: "A freelance streamer records, encodes, and broadcasts gameplay at the same time and can't afford dropped frames mid-stream.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Handle simultaneous rendering + video encoding",
+      "Storage fast enough for large recorded video files",
+      "Stable, low-latency connection for live broadcast",
+      "Clear mic and camera presence on screen",
+      "Cost is not a limiting factor"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("That processor architecture won't run the encoding/broadcast software natively on Windows.");
+      if (b.gpu.tier === "onboard") fails.push("Integrated graphics can't render a game and encode video for broadcast at the same time.");
+      if (b.storage.type === "HDD") fails.push("Mechanical storage can't sustain continuous high-bitrate video capture without dropped frames.");
+      if (!b.per.flags.mic || !b.per.flags.cam) fails.push("On-camera streaming needs both a microphone and a camera — one alone isn't enough.");
+      if (b.cpu.tier === "entry") warns.push("An entry-level CPU will bottleneck once rendering and encoding load up together.");
+      if (b.gpu.tier === "entry") warns.push("This will run, but a higher-tier card gives more headroom before frames start dropping.");
+      if (b.storage.cap < 1000) warns.push("Recorded sessions fill smaller drives fast — more capacity avoids stopping mid-stream to clear space.");
+      if (b.ram.gb < 32) warns.push("Game, encoder, and chat overlay running together benefit from more memory headroom than this.");
+      if (b.nic.type === "wireless") warns.push("Wireless-only risks the packet loss that causes stream buffering — wired is safer for a live broadcast.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (!b.cpu.winOk) return "ARM handles phones and tablets well, but broadcast software here expects a Windows-native x86/x64 processor.";
+      if (b.gpu.tier === "onboard") return "Rendering a game and encoding video for upload at the same time is exactly what integrated graphics struggles with.";
+      if (b.storage.type === "HDD") return "Spinning-disk storage can't keep pace with sustained high-bitrate video writes.";
+      if (b.nic.type === "wireless") return "A live broadcast is unforgiving of dropped packets — think about which connection type is more consistent.";
+      return "";
+    }
+  },
+  {
+    id: "reception",
+    title: "Clinic Front-Desk PC",
+    meterType: "cost",
+    narrative: "A small clinic's front-desk PC runs scheduling software, handles word processing, and occasionally joins a video call with a specialist. The office manager wants to avoid overspending.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Reliable video calls with mic + camera",
+      "Word processing and basic web use only",
+      "Minimize cost — do not over-spec"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("The scheduling software requires a native Windows environment — that architecture won't run it.");
+      if (!b.per.flags.mic || !b.per.flags.cam) fails.push("Specialist video calls require both a microphone and a camera.");
+      if (b.cpu.tier === "high" || b.cpu.tier === "workstation") warns.push("This CPU tier is well beyond what word processing and light browsing need — it drove the price up for nothing.");
+      if (b.gpu.tier !== "onboard" && b.gpu.tier !== "") warns.push("A discrete GPU is unnecessary for office software and video calls.");
+      if (b.ram.gb >= 32) warns.push("This much memory is overkill for basic office use — smaller and cheaper would do the job.");
+      if (b.storage.type === "SSD" && b.storage.cap >= 1000) warns.push("A large SSD is a nice-to-have here, not a need — a smaller drive saves money without hurting performance for this workload.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (!b.cpu.winOk) return "Check whether this architecture actually runs desktop Windows software, or just mobile apps.";
+      if (b.gpu.tier === "high") return "Ask whether a discrete GPU does anything for word processing and video calls — or just adds cost.";
+      return "";
+    }
+  },
+  {
+    id: "cad",
+    title: "Freelance Drafting Workstation",
+    meterType: "perf",
+    narrative: "A drafting contractor renders detailed 3D models and exports large blueprint files to a print shop. Precision and rendering speed matter more than price here.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Handle demanding 3D rendering without slowdown",
+      "Enough fast storage for many large design files",
+      "Reliable wired connection for large file transfers",
+      "Capability takes priority over cost"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("The CAD software needs a native Windows environment — this architecture won't run it.");
+      if (b.gpu.tier === "onboard") fails.push("3D rendering at this level needs a dedicated GPU; integrated graphics will bog down constantly.");
+      if (b.ram.gb < 16) fails.push("Large 3D models need more working memory than this to avoid constant slowdowns.");
+      if (b.cpu.tier === "entry") warns.push("An entry-level CPU will struggle once model complexity increases.");
+      if (b.storage.type === "HDD") warns.push("Mechanical storage will slow down opening and saving large design files.");
+      if (b.storage.cap < 1000) warns.push("Design files add up fast — more capacity avoids running out of room mid-project.");
+      if (b.nic.type === "wireless") warns.push("Large file transfers to the print shop are more reliable over a wired connection.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (b.gpu.tier === "onboard") return "3D rendering leans hard on the GPU — think about what integrated graphics is actually built to do.";
+      if (b.ram.gb && b.ram.gb < 16) return "Large models held in memory at once need more headroom than a light productivity task would.";
+      return "";
+    }
+  },
+  {
+    id: "kiosk",
+    title: "Retail Lobby Signage PC",
+    meterType: "cost",
+    narrative: "A retail chain needs a low-cost PC to loop promotional video on a lobby display. There's no interactive input, and store policy prohibits any audio/video capture devices on public-facing units.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Only needs to loop video reliably — no heavy tasks",
+      "No microphone or camera allowed, per store policy",
+      "Absolute minimum cost"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("The signage software requires a native Windows environment — this architecture won't run it.");
+      if (b.per.flags.mic || b.per.flags.cam) fails.push("Store policy prohibits any capture device on a public-facing unit — remove the mic/camera.");
+      if (b.cpu.tier === "high" || b.cpu.tier === "workstation") warns.push("Looping a video playlist doesn't need this much processor — it's paying for capability nobody will use.");
+      if (b.gpu.tier === "high") warns.push("A high-end GPU is unnecessary for looping promotional video.");
+      if (b.ram.gb >= 32) warns.push("This is far more memory than a video-loop kiosk needs.");
+      if (b.storage.type === "SSD" && b.storage.cap >= 1000) warns.push("A large SSD is unnecessary for a short looped playlist — smaller storage keeps the cost down.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (b.per.flags.mic || b.per.flags.cam) return "Re-read the store policy line in the requirements before you finalize peripherals.";
+      if (b.cpu.tier === "workstation") return "A workstation-class CPU is built for sustained heavy workloads — is that what a signage loop needs?";
+      return "";
+    }
+  },
+  {
+    id: "support",
+    title: "Help-Desk Technician Desktop",
+    meterType: "perf",
+    narrative: "A help-desk technician takes video calls with clients most of the day while multitasking across several support tools at once.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Reliable webcam and microphone for calls",
+      "Comfortable multitasking across several open apps",
+      "Stable connection for uninterrupted calls",
+      "Moderate budget — no top-tier hardware needed"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("The support toolset requires a native Windows environment — this architecture won't run it.");
+      if (!b.per.flags.mic || !b.per.flags.cam) fails.push("All-day client calls require both a microphone and a camera.");
+      if (b.ram.gb < 16) warns.push("Several support tools open at once will feel sluggish with this little memory.");
+      if (b.nic.type === "wireless") warns.push("A wired connection is more consistent for back-to-back client calls than relying on Wi-Fi alone.");
+      if (b.cpu.tier === "workstation" || b.gpu.tier === "high") warns.push("This is well beyond what a help-desk multitasking workload calls for — the budget note in the ticket matters here.");
+      if (b.ram.gb >= 64) warns.push("64GB is far past what this role needs day to day.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (b.ram.gb && b.ram.gb < 16) return "Think about how many support apps are realistically open at the same time during a shift.";
+      if (b.nic.type === "wireless") return "Client-facing calls all day — which connection type is less likely to hiccup?";
+      return "";
+    }
+  },
+  {
+    id: "hometheater",
+    title: "Family Media Room PC",
+    meterType: "cost",
+    narrative: "A family wants a living-room PC to stream shows and store a large personal movie collection in high resolution, without breaking the budget.",
+    requirements: [
+      "Must run current Windows OS natively",
+      "Enough storage for a large media library",
+      "Smooth playback of high-resolution video",
+      "Budget-conscious — don't over-spec"
+    ],
+    evaluate(b) {
+      const fails = [], warns = [];
+      if (!b.cpu.winOk) fails.push("The media center software requires a native Windows environment — this architecture won't run it.");
+      if (b.storage.cap < 1000) fails.push("A large personal movie collection won't fit on this little storage.");
+      if (b.cpu.tier === "high" || b.cpu.tier === "workstation") warns.push("A media room PC doesn't need this much processor — it's paying for headroom nobody will use.");
+      if (b.gpu.tier === "high") warns.push("A high-end discrete card is overkill for video playback — it adds cost and noise without a real benefit here.");
+      if (b.ram.gb >= 32) warns.push("This is more memory than video playback and browsing will ever touch.");
+      return { fails, warns };
+    },
+    tip(b) {
+      if (b.storage.cap && b.storage.cap < 1000) return "A 'large personal movie collection' is the clue here — think capacity, not speed.";
+      if (b.gpu.tier === "high") return "Video playback is much lighter on the GPU than gaming or 3D rendering is.";
+      return "";
+    }
+  }
+];
+
+/* ---------------- Session setup: draw 2 of 6 personas ---------------- */
+let order = [];
+function drawPersonaPair() {
+  const idx = [...Array(PERSONAS.length).keys()];
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  order = [idx[0], idx[1]];
+}
+
 function populateSelect(id, options) {
   const el = document.getElementById(id);
+  el.innerHTML = "";
   options.forEach(opt => {
     const o = document.createElement("option");
     o.value = opt.val;
@@ -383,221 +594,174 @@ function populateSelect(id, options) {
   });
 }
 
-const gPrefixes = ["g_cpu", "g_ram", "g_gpu", "g_storage", "g_audio", "g_peripherals"];
-const fPrefixes = ["f_cpu", "f_ram", "f_gpu", "f_storage", "f_audio", "f_peripherals"];
+const MAX_PERF = 5 + 5 + 5 + 5 + 3 + 2;
+const MAX_COST = 5 + 5 + 4 + 4 + 2 + 2;
 
-populateSelect("g_cpu", cpuOptions); populateSelect("f_cpu", cpuOptions);
-populateSelect("g_ram", ramOptions); populateSelect("f_ram", ramOptions);
-populateSelect("g_gpu", gpuOptions); populateSelect("f_gpu", gpuOptions);
-populateSelect("g_storage", storageOptions); populateSelect("f_storage", storageOptions);
-populateSelect("g_audio", audioOptions); populateSelect("f_audio", audioOptions);
-populateSelect("g_peripherals", peripheralOptions); populateSelect("f_peripherals", peripheralOptions);
+function currentBuild(prefix) {
+  return {
+    cpu: getObj(cpuOptions, document.getElementById(prefix + "_cpu").value),
+    ram: getObj(ramOptions, document.getElementById(prefix + "_ram").value),
+    gpu: getObj(gpuOptions, document.getElementById(prefix + "_gpu").value),
+    storage: getObj(storageOptions, document.getElementById(prefix + "_storage").value),
+    nic: getObj(nicOptions, document.getElementById(prefix + "_nic").value),
+    per: getObj(peripheralOptions, document.getElementById(prefix + "_peripherals").value)
+  };
+}
 
-// --- Mode Toggle ---
-const modeIndicator = document.getElementById('mode-indicator');
-const toggleModeBtn = document.getElementById('toggle-mode-btn');
+function updateMeter(prefix, persona) {
+  const b = currentBuild(prefix);
+  const sum = b.cpu.perf + b.ram.perf + b.gpu.perf + b.storage.perf + b.nic.perf + b.per.perf;
+  const sumCost = b.cpu.cost + b.ram.cost + b.gpu.cost + b.storage.cost + b.nic.cost + b.per.cost;
+  const usingCost = persona.meterType === "cost";
+  const pct = Math.min(100, Math.round(((usingCost ? sumCost : sum) / (usingCost ? MAX_COST : MAX_PERF)) * 100));
+  const bar = document.getElementById(prefix + "-meter-bar");
+  document.getElementById(prefix + "-meter-val").textContent = pct + "%";
+  document.getElementById("meter-label-" + (prefix === "b1" ? "1" : "2")).textContent = usingCost ? "Budget Used" : "Performance";
+  bar.style.width = pct + "%";
+  if (usingCost) {
+    bar.style.backgroundColor = pct < 40 ? "var(--good)" : pct < 70 ? "var(--warn)" : "var(--bad)";
+  } else {
+    bar.style.backgroundColor = pct > 80 ? "var(--good)" : pct > 50 ? "var(--warn)" : "var(--bad)";
+  }
+}
 
-toggleModeBtn.addEventListener('click', () => {
+function checkMentor(prefix, persona) {
+  const toast = document.getElementById(prefix + "-mentor");
+  if (!mentorMode) { toast.style.display = "none"; return; }
+  const b = currentBuild(prefix);
+  const tip = persona.tip(b);
+  if (tip) { toast.innerHTML = "<strong>Mentor Tip:</strong> " + tip; toast.style.display = "block"; }
+  else { toast.style.display = "none"; }
+}
+
+function renderRequirements(slot, persona) {
+  document.getElementById("req-title-" + slot).textContent = "Work Order " + slot + ": " + persona.title;
+  document.getElementById("req-narrative-" + slot).textContent = persona.narrative;
+  const ul = document.getElementById("req-list-" + slot);
+  ul.innerHTML = "";
+  persona.requirements.forEach(r => {
+    const li = document.createElement("li");
+    li.textContent = r;
+    ul.appendChild(li);
+  });
+  document.getElementById("build-title-" + slot).textContent = "Work Order " + slot + ": " + persona.title;
+}
+
+function setupSlot(slot, persona) {
+  const prefix = "b" + slot;
+  renderRequirements(slot, persona);
+  populateSelect(prefix + "_cpu", cpuOptions);
+  populateSelect(prefix + "_ram", ramOptions);
+  populateSelect(prefix + "_gpu", gpuOptions);
+  populateSelect(prefix + "_storage", storageOptions);
+  populateSelect(prefix + "_nic", nicOptions);
+  populateSelect(prefix + "_peripherals", peripheralOptions);
+
+  const fields = ["_cpu", "_ram", "_gpu", "_storage", "_nic", "_peripherals"];
+  fields.forEach(suffix => {
+    document.getElementById(prefix + suffix).addEventListener("change", () => {
+      updateMeter(prefix, persona);
+      checkMentor(prefix, persona);
+    });
+  });
+
+  document.getElementById(prefix + "-review").style.display = "none";
+  document.getElementById(prefix + "-review").innerHTML = "";
+  document.getElementById(prefix + "-mentor").style.display = "none";
+  updateMeter(prefix, persona);
+
+  const btn = document.getElementById("btn-eval-" + slot);
+  btn.disabled = false;
+  btn.style.background = "";
+  btn.style.borderColor = "";
+  btn.textContent = "Submit Build for Debrief";
+
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener("click", () => submitBuild(slot, persona));
+}
+
+function submitBuild(slot, persona) {
+  const prefix = "b" + slot;
+  const b = currentBuild(prefix);
+  if (!b.cpu.val || !b.ram.val || !b.gpu.val || !b.storage.val || !b.nic.val || !b.per.val) {
+    alert("Select an option for every component before submitting.");
+    return;
+  }
+  const { fails, warns } = persona.evaluate(b);
+  const reviewDiv = document.getElementById(prefix + "-review");
+  reviewDiv.style.display = "block";
+
+  if (fails.length === 0 && warns.length === 0) {
+    reviewDiv.innerHTML = "<h3 style=\"color:var(--good)\">✔️ Debrief: Passed</h3><p>This build meets every requirement on the ticket without wasting budget or capability. Nice work.</p>" +
+      (slot === 1 ? "<p><strong>Next:</strong> Work Order 2 is now unlocked.</p>" : "<p><strong>Shift complete.</strong> Both tickets are resolved.</p>");
+    const btn = document.getElementById("btn-eval-" + slot);
+    btn.disabled = true;
+    btn.style.background = "var(--good)";
+    btn.style.borderColor = "var(--good)";
+    btn.textContent = slot === 1 ? "Build Approved" : "Shift Completed";
+    if (slot === 1) {
+      document.getElementById("sect-2").classList.remove("locked");
+      document.getElementById("sect-2").scrollIntoView({ behavior: "smooth" });
+    }
+  } else if (fails.length === 0) {
+    reviewDiv.innerHTML = "<h3 style=\"color:var(--warn)\">⚠️ Debrief: Works, But Over-Spec'd</h3>" +
+      "<p>It'll do the job, but the ticket asked you to watch cost/capability match. Reconsider:</p>" +
+      "<ul>" + warns.map(w => "<li>" + w + "</li>").join("") + "</ul>" +
+      "<p style=\"margin-top:10px;\">Adjust and resubmit.</p>";
+  } else {
+    reviewDiv.innerHTML = "<h3 style=\"color:var(--bad)\">❌ Debrief: Functional Failure</h3>" +
+      "<p>This build doesn't meet the ticket's baseline requirements:</p>" +
+      "<ul>" + fails.map(f => "<li>" + f + "</li>").join("") +
+      (warns.length ? warns.map(w => "<li>" + w + "</li>").join("") : "") + "</ul>" +
+      "<p style=\"margin-top:10px;\">Fix these hard errors and resubmit.</p>";
+  }
+}
+
+function startSession() {
+  drawPersonaPair();
+  document.getElementById("sect-1").classList.remove("locked");
+  document.getElementById("sect-2").classList.add("locked");
+  setupSlot(1, PERSONAS[order[0]]);
+  setupSlot(2, PERSONAS[order[1]]);
+}
+
+/* ---------------- Mode toggle ---------------- */
+const modeIndicator = document.getElementById("mode-indicator");
+document.getElementById("toggle-mode-btn").addEventListener("click", () => {
   mentorMode = !mentorMode;
   if (mentorMode) {
-    modeIndicator.textContent = 'Mentor: ON';
-    modeIndicator.className = 'badge info';
-    checkMentorTips();
+    modeIndicator.textContent = "Mentor: ON";
+    modeIndicator.className = "badge info";
+    checkMentor("b1", PERSONAS[order[0]]);
+    checkMentor("b2", PERSONAS[order[1]]);
   } else {
-    modeIndicator.textContent = 'Mentor: OFF';
-    modeIndicator.className = 'badge danger';
-    document.getElementById("g-mentor").style.display = "none";
-    document.getElementById("f-mentor").style.display = "none";
+    modeIndicator.textContent = "Mentor: OFF";
+    modeIndicator.className = "badge danger";
+    document.getElementById("b1-mentor").style.display = "none";
+    document.getElementById("b2-mentor").style.display = "none";
   }
 });
 
-// --- Real-time Meter Updates & Mentor Tips ---
-function getObj(options, val) { return options.find(o => o.val === val) || options[0]; }
+document.getElementById("reroll-btn").addEventListener("click", startSession);
 
-function updateMeters() {
-  // Gaming Perf
-  let gPerf = 
-    getObj(cpuOptions, document.getElementById("g_cpu").value).perf +
-    getObj(ramOptions, document.getElementById("g_ram").value).perf +
-    getObj(gpuOptions, document.getElementById("g_gpu").value).perf +
-    getObj(storageOptions, document.getElementById("g_storage").value).perf +
-    getObj(audioOptions, document.getElementById("g_audio").value).perf +
-    getObj(peripheralOptions, document.getElementById("g_peripherals").value).perf;
-  
-  let gPct = Math.min(100, Math.round((gPerf / MAX_PERF) * 100));
-  const gBar = document.getElementById("g-perf-bar");
-  gBar.style.width = gPct + "%";
-  document.getElementById("g-perf-val").textContent = gPct + "%";
-  gBar.style.backgroundColor = gPct > 80 ? "var(--good)" : gPct > 50 ? "var(--warn)" : "var(--bad)";
-
-  // Family Cost
-  let fCost = 
-    getObj(cpuOptions, document.getElementById("f_cpu").value).cost +
-    getObj(ramOptions, document.getElementById("f_ram").value).cost +
-    getObj(gpuOptions, document.getElementById("f_gpu").value).cost +
-    getObj(storageOptions, document.getElementById("f_storage").value).cost +
-    getObj(audioOptions, document.getElementById("f_audio").value).cost +
-    getObj(peripheralOptions, document.getElementById("f_peripherals").value).cost;
-
-  let fPct = Math.min(100, Math.round((fCost / MAX_COST) * 100));
-  const fBar = document.getElementById("f-cost-bar");
-  fBar.style.width = fPct + "%";
-  document.getElementById("f-cost-val").textContent = fPct + "%";
-  fBar.style.backgroundColor = fPct < 40 ? "var(--good)" : fPct < 70 ? "var(--warn)" : "var(--bad)";
-}
-
-function checkMentorTips() {
-  if (!mentorMode) return;
-  
-  // Gaming Tips
-  const gCpu = document.getElementById("g_cpu").value;
-  const gGpu = document.getElementById("g_gpu").value;
-  const gStorage = document.getElementById("g_storage").value;
-  let gTip = "";
-  
-  if (gCpu === "arm") gTip = "Hold up! ARM processors are amazing for mobile devices, but standard PC gaming runs on x86/x64 architecture. Windows might struggle here.";
-  else if (gCpu === "xeon") gTip = "Xeon processors are incredibly powerful, but they are designed for enterprise servers, not gaming. A high-end Core CPU is actually better for games.";
-  else if (gGpu === "onboard") gTip = "Integrated graphics share system memory and lack the horsepower for high frame rate gaming. You need a dedicated card.";
-  else if (gStorage === "500hdd" || gStorage === "4tbhdd") gTip = "HDDs have spinning platters and are very slow. For fast game load times, you need solid state (SSD) storage.";
-
-  const gToast = document.getElementById("g-mentor");
-  if (gTip) { gToast.innerHTML = `<strong>Mentor Tip:</strong> ${gTip}`; gToast.style.display = "block"; }
-  else { gToast.style.display = "none"; }
-
-  // Family Tips
-  const fRam = document.getElementById("f_ram").value;
-  const fGpu = document.getElementById("f_gpu").value;
-  const fCpu = document.getElementById("f_cpu").value;
-  let fTip = "";
-
-  if (fRam === "32") fTip = "32GB of DDR5 RAM is incredibly fast, but do they really need that much just to check email and use Word? Think about the budget.";
-  else if (fGpu === "discrete") fTip = "A discrete GPU is a massive budget drain. For simple web browsing and video calls, modern integrated motherboard graphics are more than enough.";
-  else if (fCpu === "i7" || fCpu === "xeon") fTip = "That CPU is overkill for basic homework and web surfing. It will blow the budget.";
-
-  const fToast = document.getElementById("f-mentor");
-  if (fTip) { fToast.innerHTML = `<strong>Mentor Tip:</strong> ${fTip}`; fToast.style.display = "block"; }
-  else { fToast.style.display = "none"; }
-}
-
-gPrefixes.forEach(id => document.getElementById(id).addEventListener('change', () => { updateMeters(); checkMentorTips(); }));
-fPrefixes.forEach(id => document.getElementById(id).addEventListener('change', () => { updateMeters(); checkMentorTips(); }));
-
-// --- Evaluation Logic ---
-document.getElementById("btn-eval-gaming").addEventListener("click", () => {
-  const b = {
-    cpu: getObj(cpuOptions, document.getElementById("g_cpu").value),
-    ram: getObj(ramOptions, document.getElementById("g_ram").value),
-    gpu: getObj(gpuOptions, document.getElementById("g_gpu").value),
-    storage: getObj(storageOptions, document.getElementById("g_storage").value),
-    audio: getObj(audioOptions, document.getElementById("g_audio").value),
-    per: getObj(peripheralOptions, document.getElementById("g_peripherals").value)
-  };
-
-  if(!b.cpu.val || !b.ram.val || !b.gpu.val || !b.storage.val || !b.audio.val || !b.per.val) {
-    alert("Please select an option for every component before submitting.");
-    return;
-  }
-
-  let issues = [];
-  if (!b.cpu.winOk) issues.push("The ARM processor is incompatible with this standard Windows environment.");
-  if (!b.gpu.dedicated) issues.push("You selected onboard video; the client will experience severe lag without a discrete GPU.");
-  if (b.storage.type !== "SSD") issues.push("You chose an HDD; game load times will be incredibly slow.");
-  if (b.storage.val === "500ssd") issues.push("500GB SSD is fast, but it will fill up instantly with modern massive games. 1TB is a better fit.");
-  if (!b.audio.highEnd) issues.push("The client specifically asked for high-end audio, but you gave them standard onboard sound.");
-  if (b.ram.val === "4" || b.ram.val === "8") issues.push("That RAM is too low for a modern gaming rig. Need at least 16GB.");
-  if (b.cpu.val === "xeon") issues.push("Xeon is a server CPU. While powerful, it's not optimized for consumer gaming setups.");
-
-  const reviewDiv = document.getElementById("g-review");
-  reviewDiv.style.display = "block";
-
-  if (issues.length === 0) {
-    reviewDiv.innerHTML = `<h3 style="color:var(--good)">✔️ Manager Review: Approved</h3>
-      <p>Excellent work on the gaming rig. The dedicated GPU and 1TB SSD will ensure great frame rates and load times. Since cost wasn't a factor, this is a perfect build.</p>
-      <p><strong>Next Step:</strong> I've unlocked the Family PC ticket. Let's see if you can keep costs down.</p>`;
-    document.getElementById("sect-family").classList.remove("locked");
-    const btn = document.getElementById("btn-eval-gaming");
-    btn.disabled = true;
-    btn.style.background = "var(--good)";
-    btn.style.borderColor = "var(--good)";
-    btn.textContent = "Build Approved";
-    
-    // Scroll to family section
-    document.getElementById("sect-family").scrollIntoView({ behavior: 'smooth' });
-  } else {
-    reviewDiv.innerHTML = `<h3 style="color:var(--bad)">❌ Manager Review: Revisions Needed</h3>
-      <p>The gaming PC booted up, but the client is complaining. Let's look at your choices:</p>
-      <ul>${issues.map(i => `<li>${i}</li>`).join("")}</ul>
-      <p style="margin-top:10px;">Please adjust your hardware choices and resubmit.</p>`;
-  }
-});
-
-document.getElementById("btn-eval-family").addEventListener("click", () => {
-  const b = {
-    cpu: getObj(cpuOptions, document.getElementById("f_cpu").value),
-    ram: getObj(ramOptions, document.getElementById("f_ram").value),
-    gpu: getObj(gpuOptions, document.getElementById("f_gpu").value),
-    storage: getObj(storageOptions, document.getElementById("f_storage").value),
-    audio: getObj(audioOptions, document.getElementById("f_audio").value),
-    per: getObj(peripheralOptions, document.getElementById("f_peripherals").value)
-  };
-
-  if(!b.cpu.val || !b.ram.val || !b.gpu.val || !b.storage.val || !b.audio.val || !b.per.val) {
-    alert("Please select an option for every component before submitting.");
-    return;
-  }
-
-  let fails = [];
-  let warnings = [];
-
-  if (!b.cpu.winOk) fails.push("The ARM processor is incompatible with this standard Windows environment.");
-  if (!b.per.flags.mic || !b.per.flags.cam) fails.push("The client needs to do videoconferencing. You must supply a microphone and a webcam.");
-  if (b.ram.val === "4") fails.push("4GB of RAM is too low even for basic modern web browsing. The computer will freeze constantly.");
-  
-  if (b.gpu.dedicated) warnings.push("A discrete GPU is completely unnecessary for web browsing and drove the price up.");
-  if (b.storage.val === "1tbssd") warnings.push("A 1TB SSD is a luxury they don't need just for Word documents. A smaller SSD or HDD would save money.");
-  if (b.audio.highEnd) warnings.push("A 7.1 surround card is massive overkill for a family PC. Onboard audio is fine.");
-  if (b.cpu.val === "i7" || b.cpu.val === "xeon") warnings.push("You overspent on the CPU. A basic Core i3 handles word processing perfectly.");
-  if (b.ram.val === "32" || b.ram.val === "16") warnings.push("You overspent on RAM. 8GB is plenty for this budget build.");
-
-  const reviewDiv = document.getElementById("f-review");
-  reviewDiv.style.display = "block";
-
-  if (fails.length === 0 && warnings.length === 0) {
-    reviewDiv.innerHTML = `<h3 style="color:var(--good)">🎉 Final Assessment Passed</h3>
-      <p>Spot on! You saved the client money without sacrificing the hardware they needed for Zoom and homework. Both builds are complete and fully compatible.</p>`;
-    const btn = document.getElementById("btn-eval-family");
-    btn.disabled = true;
-    btn.style.background = "var(--good)";
-    btn.style.borderColor = "var(--good)";
-    btn.textContent = "Shift Completed";
-  } else if (fails.length === 0 && warnings.length > 0) {
-    reviewDiv.innerHTML = `<h3 style="color:var(--warn)">⚠️ Manager Review: Over Budget</h3>
-      <p>The PC works fine for their needs, but the client is unhappy with the invoice. You overspent on unnecessary parts:</p>
-      <ul>${warnings.map(i => `<li>${i}</li>`).join("")}</ul>
-      <p style="margin-top:10px;">Adjust your choices to bring the cost down and resubmit.</p>`;
-  } else {
-    reviewDiv.innerHTML = `<h3 style="color:var(--bad)">❌ Manager Review: Functional Failure</h3>
-      <p>We have a problem with the family PC. It doesn't meet the basic functional requirements:</p>
-      <ul>${fails.map(i => `<li>${i}</li>`).join("")}</ul>
-      <p style="margin-top:10px;">Fix these hard errors and resubmit.</p>`;
-  }
-});
-
-// Instructions Modal
-(function(){
-  const btn = document.getElementById('instructions-btn');
-  const overlay = document.getElementById('instructions-modal');
-  const closeBtn = document.getElementById('instructions-close-btn');
-  if(!btn || !overlay) return;
-  function openModal(){ overlay.classList.add('open'); }
-  function closeModal(){ overlay.classList.remove('open'); }
-  btn.addEventListener('click', openModal);
-  closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+/* ---------------- Instructions modal ---------------- */
+(function () {
+  const btn = document.getElementById("instructions-btn");
+  const overlay = document.getElementById("instructions-modal");
+  const closeBtn = document.getElementById("instructions-close-btn");
+  if (!btn || !overlay) return;
+  function openModal() { overlay.classList.add("open"); }
+  function closeModal() { overlay.classList.remove("open"); }
+  btn.addEventListener("click", openModal);
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && overlay.classList.contains("open")) closeModal();
   });
 })();
+
+startSession();
 </script>
 </body>
 </html>
