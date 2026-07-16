@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompTIA A+ Core 1 (220-1201): Master Multi-Case Simulator</title>
+    <style>
+        :root {
+            --bg: #090d1a;
+            --panel: #111827;
+            --panel-hdr: #1f2937;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --good: #10b981;
+            --bad: #ef4444;
+            --warn: #f59e0b;
+            --border: rgba(255, 255, 255, 0.1);
+            --radius: 12px;
+            --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            --bios-blue: #0000aa;
+            --bios-text: #ffffff;
+            --terminal-bg: #0c0c0c;
+            --terminal-text: #00ff00;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            background: radial-gradient(1000px 600px at 10% 10%, rgba(59, 130, 246, 0.15), transparent 50%), var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--panel);
+            border-bottom: 2px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-family: var(--mono);
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .badge.info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.3); }
+
+        .ticket-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .ticket-btn {
+            background-color: var(--panel-hdr);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .ticket-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .ticket-btn.active {
+            background-color: var(--accent);
+            border-color: var(--accent-hover);
+            color: white;
+        }
+
+        main {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        #left-panel {
+            width: 35%;
+            background-color: var(--panel);
+            border-right: 2px solid var(--border);
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #right-panel {
+            width: 65%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .ticket-desc-box {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--warn);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Dynamic View Modes (Tabs) */
+        .tab-bar {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            color: var(--text);
+            border-bottom: 3px solid var(--accent);
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Spec Table UI */
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .spec-table th, .spec-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .spec-table th {
+            background-color: var(--panel-hdr);
+        }
+
+        /* BIOS Simulation Style (intentionally styled like a real BIOS screen) */
+        .bios-screen {
+            background-color: var(--bios-blue);
+            color: var(--bios-text);
+            font-family: var(--mono);
+            padding: 20px;
+            border-radius: 4px;
+            border: 4px solid #aaaaaa;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .bios-header {
+            text-align: center;
+            border-bottom: 1px solid var(--bios-text);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .bios-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        /* Terminal Style UI for Network Mode (intentionally styled like a real terminal) */
+        #terminal-container {
+            background-color: var(--terminal-bg);
+            font-family: var(--mono);
+            padding: 15px;
+            border-radius: var(--radius);
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #terminal-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            color: var(--terminal-text);
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            color: var(--terminal-text);
+        }
+
+        #cmd-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--terminal-text);
+            font-family: inherit;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        /* Forms Configuration */
+        .diagnostic-form {
+            background-color: var(--panel-hdr);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--muted);
+        }
+
+        select {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #submit-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #submit-btn:hover { background-color: var(--accent-hover); }
+
+        #feedback-box {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .correct { background-color: rgba(16, 185, 129, 0.15); border: 1px solid var(--good); color: #6ee7b7; }
+        .incorrect { background-color: rgba(239, 68, 68, 0.15); border: 1px solid var(--bad); color: #fca5a5; }
+        .error-text { color: var(--bad); }
+        .system-text { color: var(--text); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="../index.html" class="btn">← Back to Simulations</a>
+            <h1>CompTIA A+ Core 1 Master Troubleshooting Lab</h1>
+            <span class="badge info">Multi-Case</span>
+        </div>
+        <div class="ticket-selector">
+            <button class="ticket-btn active" onclick="loadCase(1)">Case 1 (Power)</button>
+            <button class="ticket-btn" onclick="loadCase(2)">Case 2 (Paste)</button>
+            <button class="ticket-btn" onclick="loadCase(3)">Case 3 (Overclock)</button>
+            <button class="ticket-btn" onclick="loadCase(4)">Case 4 (VoIP Net)</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="left-panel">
+            <h2 id="case-title">Case Ticket 1</h2>
+            <div class="ticket-desc-box" id="ticket-description"></div>
+
+            <p style="font-size: 0.85rem; color: var(--muted);">Review available systems data using diagnostics tabs on the right side to determine structural errors.</p>
+
+            <div class="diagnostic-form">
+                <h3>Submit Final Analysis</h3>
+
+                <div class="form-group">
+                    <label for="root-cause">1. Identify Root Cause:</label>
+                    <select id="root-cause">
+                        <option value="">-- Choose Option --</option>
+                        <option value="underpowered-psu">Underpowered PSU (Exceeded System Power Budget)</option>
+                        <option value="missing-paste">Missing Thermal Compound / Improper Cooler Seating</option>
+                        <option value="overclock">Unstable CPU Overclocking Settings</option>
+                        <option value="cable">Damaged/Faulty Ethernet Patch Cable (Physical Layer)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="remediation">2. Select Resolution Action:</label>
+                    <select id="remediation">
+                        <option value="">-- Choose Option --</option>
+                        <option value="replace-psu">Upgrade power supply to high-capacity 750W+ PSU</option>
+                        <option value="apply-paste">Apply thermal paste and secure the heatsink latch</option>
+                        <option value="reset-bios">Reset UEFI/BIOS settings to factory defaults</option>
+                        <option value="fix-cable">Replace the bad Cat6 patch cable connecting the phone</option>
+                    </select>
+                </div>
+
+                <button id="submit-btn" onclick="checkAnswer()">Submit Answers</button>
+                <div id="feedback-box"></div>
+            </div>
+        </div>
+
+        <div id="right-panel">
+            <div class="tab-bar" id="hardware-tabs">
+                <button class="tab-btn active" id="tab-specs" onclick="switchTab('specs')">System Spec / Inventory</button>
+                <button class="tab-btn" id="tab-bios" onclick="switchTab('bios')">BIOS / UEFI System Monitor</button>
+            </div>
+
+            <div class="tab-bar" id="network-tabs" style="display: none;">
+                <button class="tab-btn active" id="tab-net-map" onclick="switchTab('net-map')">Network Inventory Map</button>
+                <button class="tab-btn" id="tab-terminal" onclick="switchTab('terminal')">Interactive Command Line</button>
+            </div>
+
+            <div class="tab-content active" id="content-specs">
+                <h3>Hardware Component Spec Sheet</h3>
+                <table class="spec-table" id="specs-table-body"></table>
+                <div class="ticket-box" style="background-color: rgba(0,0,0,0.2); border-left: 4px solid var(--accent); padding: 12px; border-radius: 0 8px 8px 0;">
+                    <strong>Power Supply Unit (PSU) Capacity:</strong> <span id="psu-rating-display"></span>
+                </div>
+            </div>
+
+            <div class="tab-content" id="content-bios">
+                <div class="bios-screen">
+                    <div class="bios-header">APTIO SETUP UTILITY - AMERICAN MEGATRENDS, INC.<br>Main | Advanced | H/W Monitor | Exit</div>
+                    <div class="bios-row"><span>CPU Type:</span><span id="bios-cpu"></span></div>
+                    <div class="bios-row"><span>Active Clock Speed:</span><span id="bios-speed" style="font-weight:bold;"></span></div>
+                    <div class="bios-row"><span>VCCIN Voltage:</span><span id="bios-voltage"></span></div>
+                    <div class="bios-row" style="border-top: 1px dashed #aaa; padding-top:4px;"><span>CPU Core Temperature:</span><span id="bios-temp" style="font-weight:bold;"></span></div>
+                    <div class="bios-row"><span>Cooling Fan Speed:</span><span id="bios-fan"></span></div>
+                    <div class="bios-row"><span>AI Overclock Profile:</span><span id="bios-overclock"></span></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="content-net-map">
+                <h3>Local Subnet Inventory Details</h3>
+                <div class="ticket-box" style="border-left: 4px solid var(--accent); background-color: rgba(59,130,246,0.1); padding: 12px; border-radius: 0 8px 8px 0;">
+                    • Executive VoIP Phone Endpoint IP: <code>192.168.10.26</code><br>
+                    • Baseline Staff VoIP Phone IP: <code>192.168.10.25</code><br>
+                    • Local Layer 3 Gateway Router IP: <code>192.168.10.1</code>
+                </div>
+                <p><strong>Switch Port Configuration Audit Logs:</strong> All endpoints on this switch stack are verified running matching 10/100/1000 Auto-Negotiation settings. No logical mismatches detected.</p>
+            </div>
+
+            <div class="tab-content" id="content-terminal">
+                <div id="terminal-container">
+                    <div id="terminal-history">Microsoft Windows [Version 10.0.22631]&#10;Type "help" to view diagnostic commands.&#10;&#10;</div>
+                    <div class="input-line">
+                        <span style="color:var(--terminal-text); margin-right:5px;">C:\Users\Technician&gt;</span>
+                        <input type="text" id="cmd-input" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentCase = 1;
+
+        const cases = {
+            1: {
+                type: "hardware", title: "Case 1: Sudden Power Failures During Load Processing",
+                description: `<strong>User Report:</strong> "I recently upgraded my system GPU for CAD design modeling processing. The operating system boots up smoothly, but whenever I execute complex render actions, the entire hardware box turns off instantly as if it lost wall power."`,
+                specs: [["Processor", "Intel Core i9-13900K (Max peak)", "253W"], ["Graphics Card", "NVIDIA RTX 4080 (Max peak)", "320W"], ["System Bus & DDR5 RAM", "Z790 Architecture Configuration", "60W"], ["Cooling Blocks & Chassis Fans", "240mm Liquid Pump Assembly", "35W"], ["Storage Array Modules", "2x NVMe PCIe Solid State Drives", "20W"]],
+                psu: "550W Power Supply Unit (80+ Bronze)",
+                bios: { cpu:"Intel Core i9-13900K", speed:"3.00 GHz [Stock]", voltage:"1.20 V [Auto]", temp:"38°C (Normal)", fan:"1850 RPM", overclock:"Disabled [Auto]" },
+                correctCause: "underpowered-psu", correctRemediation: "replace-psu",
+                explanation: "Calculating total hardware peaks demonstrates system load limits around 688W. The active 550W PSU fails safety limits under heavy strain, triggering its Over-Current Protection logic to preserve circuitry. Upgrading to a 750W+ modular PSU balances this system run."
+            },
+            2: {
+                type: "hardware", title: "Case 2: Sluggish Systems Followed by Swift Thermal Cutoffs",
+                description: `<strong>User Report:</strong> "I uninstalled and cleaned out my high-performance fan heatsink setup over the weekend. Now when I turn the PC on, it lags out terribly inside two minutes, the system fans scream at full tilt, and it blacks out cleanly without any screen alerts."`,
+                specs: [["Processor", "Intel Core i9-13900K (Max peak)", "253W"], ["Graphics Card", "NVIDIA RTX 4080 (Max peak)", "320W"], ["System Bus & DDR5 RAM", "Z790 Architecture Configuration", "60W"], ["Cooling Blocks & Chassis Fans", "240mm Liquid Pump Assembly", "35W"]],
+                psu: "850W Power Supply Unit (80+ Gold Premium)",
+                bios: { cpu:"Intel Core i9-13900K", speed:"3.00 GHz [Stock]", voltage:"1.20 V [Auto]", temp:"98°C (CRITICAL OVERHEAT FAILURE PROTECTION REACHED!)", fan:"2800 RPM [MAXIMUM RUN]", overclock:"Disabled [Auto]" },
+                correctCause: "missing-paste", correctRemediation: "apply-paste",
+                explanation: "The 850W rating satisfies all capacity safety benchmarks. However, the system environment log confirms immediate threshold saturation at 98°C. Because structural brackets were dismantled, checking for missing heat transfer paste or poor physical block alignment isolates why thermal energy cannot leave the CPU matrix."
+            },
+            3: {
+                type: "hardware", title: "Case 3: Intermittent Blue Screen Errors & Computing Variances",
+                description: `<strong>User Report:</strong> "My computer holds stable processing standard operations, but crashes with alternating BSOD system errors when handling heavy data pipelines. A peer altered specialized clock configurations inside my settings array to maximize computing throughput."`,
+                specs: [["Processor", "Intel Core i9-13900K (Max peak)", "253W"], ["Graphics Card", "NVIDIA RTX 4080 (Max peak)", "320W"], ["System Bus & DDR5 RAM", "Z790 Architecture Configuration", "60W"]],
+                psu: "850W Power Supply Unit (80+ Gold Premium)",
+                bios: { cpu:"Intel Core i9-13900K", speed:"5.40 GHz [OVERCLOCKED RUN]", voltage:"1.46 V [MANUAL OVERRIDE HIGH]", temp:"79°C (Elevated Idle)", fan:"2400 RPM", overclock:"Manual [Extreme Tuning Profile Activated]" },
+                correctCause: "overclock", correctRemediation: "reset-bios",
+                explanation: "A custom 5.40GHz operational speed forced at 1.46V introduces calculations degradation and timing slips across volatile memory boundaries. Reverting current parameters to safe stock values removes stability failures and drops execution temperatures back down safely."
+            },
+            4: {
+                type: "network", title: "Case 4: Packet Loss & Garbled Voice Signals on Executive Terminal",
+                description: `<strong>User Report:</strong> "Our newly added executive desk station (IP: 192.168.10.26) cannot hold structured voice traffic. Conversations break into digital static or lines drop entirely. Other devices on the same floor run voice configurations perfectly."`,
+                correctCause: "cable", correctRemediation: "fix-cable",
+                explanation: "The tracert diagnostic isolates routing efficiency directly to the default gateway while displaying heavy timeout trends localized at the endpoint hardware link. Running netstat -e proves incoming frames are corrupted with significant local Interface Errors. This identifies an unshielded, physically degraded, or structurally damaged patch cable. Swapping the wire resolves it completely."
+            }
+        };
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`content-${tabName}`).classList.add('active');
+        }
+
+        function loadCase(caseNum) {
+            currentCase = caseNum;
+            const data = cases[caseNum];
+
+            document.querySelectorAll('.ticket-btn').forEach((b, i) => b.classList.toggle('active', i+1 === caseNum));
+            document.getElementById('case-title').innerText = `Support Ticket: Case ${caseNum}`;
+            document.getElementById('ticket-description').innerHTML = data.description;
+            document.getElementById('root-cause').value = "";
+            document.getElementById('remediation').value = "";
+            document.getElementById('feedback-box').style.display = 'none';
+
+            if (data.type === "hardware") {
+                document.getElementById('hardware-tabs').style.display = 'flex';
+                document.getElementById('network-tabs').style.display = 'none';
+                switchTab('specs');
+
+                // Specs loader
+                let tbody = "";
+                data.specs.forEach(s => tbody += `<tr><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td></tr>`);
+                document.getElementById('specs-table-body').innerHTML = tbody;
+                document.getElementById('psu-rating-display').innerText = data.psu;
+
+                // BIOS loader
+                document.getElementById('bios-cpu').innerText = data.bios.cpu;
+                document.getElementById('bios-speed').innerText = data.bios.speed;
+                document.getElementById('bios-voltage').innerText = data.bios.voltage;
+                document.getElementById('bios-fan').innerText = data.bios.fan;
+                document.getElementById('bios-overclock').innerText = data.bios.overclock;
+
+                const tEl = document.getElementById('bios-temp');
+                tEl.innerText = data.bios.temp;
+                tEl.style.color = caseNum === 2 ? "red" : (caseNum === 3 ? "orange" : "lightgreen");
+            } else {
+                document.getElementById('hardware-tabs').style.display = 'none';
+                document.getElementById('network-tabs').style.display = 'flex';
+                switchTab('net-map');
+            }
+        }
+
+        // --- Terminal Sub-logic ---
+        const cmdInput = document.getElementById('cmd-input');
+        const history = document.getElementById('terminal-history');
+
+        document.getElementById('content-terminal').addEventListener('click', () => cmdInput.focus());
+
+        cmdInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const text = this.value.trim();
+                if (text) {
+                    history.textContent += `C:\\Users\\Technician> ${text}\n`;
+                    parseNetCmd(text.toLowerCase());
+                }
+                this.value = '';
+                history.scrollTop = history.scrollHeight;
+            }
+        });
+
+        function parseNetCmd(cmd) {
+            const parts = cmd.split(' ');
+            if (parts[0] === 'help') {
+                history.textContent += "Available Diagnostics Commands:\n  help        - Displays support commands index.\n  ping [IP]   - Verifies system link connections.\n  tracert [IP]- Traces path tracking parameters across local interfaces.\n  netstat -e  - Audits interface packet transmission error sets.\n  clear       - Clears shell history output.\n\n";
+            } else if (parts[0] === 'clear') {
+                history.textContent = '';
+            } else if (parts[0] === 'ping' && parts[1] === '192.168.10.26') {
+                history.textContent += "Pinging 192.168.10.26 with 32 bytes of data:\nReply from 192.168.10.26: bytes=32 time=4ms TTL=64\nRequest timed out.\nReply from 192.168.10.26: bytes=32 time=12ms TTL=64\nRequest timed out.\n\nPing statistics for 192.168.10.26:\n    Packets: Sent = 4, Received = 2, Lost = 2 (50% loss)\n\n";
+            } else if (parts[0] === 'tracert' && parts[1] === '192.168.10.26') {
+                history.textContent += "Tracing route to 192.168.10.26 over a maximum of 30 hops:\n\n  1    <1 ms    <1 ms    <1 ms  192.168.10.1 (Default_Gateway)\n  2     4 ms       * * 192.168.10.26 (Exec_VoIP_Phone)\n\nTrace complete.\n\n";
+            } else if (parts[0] === 'netstat' && parts[1] === '-e') {
+                history.textContent += "Interface Statistics\n                           Received            Sent\nBytes                     410948122        24104951\nUnicast packets              314052          184012\nErrors                         9412               0\n\n* WARNING: High local hardware Interface Errors flag transmission alignment disruptions.\n\n";
+            } else if (parts[0] === 'ping' && parts[1] === '192.168.10.25') {
+                history.textContent += "Pinging 192.168.10.25 with 32 bytes of data:\nReply from 192.168.10.25: bytes=32 time=1ms TTL=64\nReply from 192.168.10.25: bytes=32 time=1ms TTL=64\n\nPing statistics for 192.168.10.25:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)\n\n";
+            } else {
+                history.textContent += `'${parts[0]}' is not recognized as an internal or external diagnostic tool command.\n\n`;
+            }
+        }
+
+        function checkAnswer() {
+            const cause = document.getElementById('root-cause').value;
+            const remediation = document.getElementById('remediation').value;
+            const fBox = document.getElementById('feedback-box');
+
+            if (!cause || !remediation) {
+                fBox.style.display = 'block';
+                fBox.className = 'incorrect';
+                fBox.innerHTML = '<strong>Incomplete Submission:</strong> Please input options for both core menus.';
+                return;
+            }
+
+            fBox.style.display = 'block';
+            const data = cases[currentCase];
+
+            if (cause === data.correctCause && remediation === data.correctRemediation) {
+                fBox.className = 'correct';
+                fBox.innerHTML = `<strong>Correct Diagnosis!</strong><br><br>${data.explanation}`;
+            } else {
+                fBox.className = 'incorrect';
+                fBox.innerHTML = `<strong>Incorrect Setup Analysis.</strong> Check structural indicators carefully. Assess constraints like power demands, thermal ranges, voltage profiles, or network path error spikes before confirming validation steps.`;
+            }
+        }
+
+        loadCase(1);
+    </script>
+</body>
+</html>
