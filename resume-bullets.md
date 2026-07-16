@@ -50,6 +50,10 @@ Pick the bullet that best matches the role you're applying for (IT Support/Help 
 - Diagnosed mobile device audio hardware failures, correctly distinguishing software from hardware causes by isolating the responsible pathway — microphone, speaker, Bluetooth stack, or physical connector.
 - Resolved Bluetooth connectivity and audio jack issues on smartphones and tablets with a 100% correct-resolution rate, using a layered troubleshooting approach (pairing, OS settings, hardware).
 
+### Diagnostic Bench: Multi-Case Simulator (Multi-Domain)
+- Diagnosed and resolved four independent hardware/network trouble tickets — power budgeting, thermal failure, CPU overclock instability, and cable-level network faults — achieving correct root-cause and remediation on every case by calculating system power draw against PSU capacity and cross-referencing BIOS/UEFI telemetry.
+- Ran a live command-line diagnostic workflow (ping, tracert, netstat -e) to isolate a VoIP packet-loss issue to a damaged physical patch cable, ruling out routing and software causes before recommending remediation.
+
 ---
 
 ## Tier 3: Specialized
